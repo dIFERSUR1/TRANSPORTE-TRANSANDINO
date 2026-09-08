@@ -1,6 +1,4 @@
-/* ==========================================================================
-   VARIABLES CSS NATIVAS
-   ========================================================================== */
+
 :root {
     --primary: #003366;       /* Azul Institucional */
     --secondary: #e65100;     /* Naranja Transporte */
@@ -9,7 +7,6 @@
     --white: #ffffff;
     --border-color: #cbd5e1;
 }
-
 /* Reset básico */
 * {
     box-sizing: border-box;
@@ -23,10 +20,6 @@ body {
     color: var(--dark-text);
     background-color: var(--white);
 }
-
-/* ==========================================================================
-   HEADER Y NAVEGACIÓN
-   ========================================================================== */
 .main-header {
     background-color: var(--primary);
     position: sticky;
@@ -69,10 +62,6 @@ body {
 .nav-menu a:hover {
     color: var(--secondary);
 }
-
-/* ==========================================================================
-   SECCIÓN HERO (PRESENTACIÓN CON IMAGEN)
-   ========================================================================== */
 .hero {
     background-color: var(--primary);
     color: var(--white);
@@ -133,10 +122,6 @@ body {
     background-color: #bf360c;
     transform: translateY(-2px);
 }
-
-/* ==========================================================================
-   CONTENEDORES GENERALES Y SECCIONES
-   ========================================================================== */
 .section-container {
     max-width: 1100px;
     margin: 0 auto;
@@ -186,10 +171,6 @@ body {
     font-weight: bold;
     margin-bottom: 10px;
 }
-
-/* ==========================================================================
-   TABLA DE HORARIOS
-   ========================================================================== */
 .schedule-table {
     width: 100%;
     border-collapse: collapse;
@@ -210,10 +191,6 @@ body {
 .schedule-table tr:nth-child(even) {
     background-color: var(--light-bg);
 }
-
-/* ==========================================================================
-   FORMULARIO Y SELECTORES DE ATRIBUTO
-   ========================================================================== */
 .form-intro {
     text-align: center;
     margin-bottom: 20px;
@@ -286,7 +263,6 @@ select:focus {
     margin-right: 20px;
     font-weight: normal;
 }
-
 .submit-button {
     background-color: var(--primary);
     color: var(--white);
@@ -299,14 +275,9 @@ select:focus {
     width: 100%;
     transition: background-color 0.3s ease;
 }
-
 .submit-button:hover {
     background-color: var(--secondary);
 }
-
-/* ==========================================================================
-   FOOTER
-   ========================================================================== */
 .main-footer {
     background-color: var(--primary);
     color: var(--white);
