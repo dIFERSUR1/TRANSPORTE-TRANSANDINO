@@ -1,0 +1,316 @@
+/* ==========================================================================
+   VARIABLES CSS NATIVAS
+   ========================================================================== */
+:root {
+    --primary: #003366;       /* Azul Institucional */
+    --secondary: #e65100;     /* Naranja Transporte */
+    --light-bg: #f4f6f9;      /* Fondo Claro Alt */
+    --dark-text: #1f2937;     /* Texto Principal */
+    --white: #ffffff;
+    --border-color: #cbd5e1;
+}
+
+/* Reset básico */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-text);
+    background-color: var(--white);
+}
+
+/* ==========================================================================
+   HEADER Y NAVEGACIÓN
+   ========================================================================== */
+.main-header {
+    background-color: var(--primary);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+}
+
+.logo h1 {
+    color: var(--white);
+    font-size: 1.5rem;
+}
+
+.logo span {
+    color: var(--secondary);
+}
+
+.nav-menu ul {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+}
+
+.nav-menu a {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 5px 10px;
+    transition: color 0.3s ease;
+}
+
+.nav-menu a:hover {
+    color: var(--secondary);
+}
+
+/* ==========================================================================
+   SECCIÓN HERO (PRESENTACIÓN CON IMAGEN)
+   ========================================================================== */
+.hero {
+    background-color: var(--primary);
+    color: var(--white);
+    padding: 60px 20px;
+}
+
+.hero-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.hero-content {
+    flex: 1 1 400px;
+}
+
+.hero-content h2 {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.hero-content p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.hero-image {
+    flex: 1 1 400px;
+    text-align: center;
+}
+
+.hero-image img {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: var(--secondary);
+    color: var(--white);
+    padding: 12px 25px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #bf360c;
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   CONTENEDORES GENERALES Y SECCIONES
+   ========================================================================== */
+.section-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.bg-alt {
+    background-color: var(--light-bg);
+}
+
+.section-title {
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+.sub-title {
+    color: var(--primary);
+    margin: 40px 0 15px 0;
+}
+
+/* Grid layout nativo */
+.services-grid, .steps-grid, .contact-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.service-card, .step-card, .branch-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    flex: 1 1 250px;
+    border-radius: 6px;
+}
+
+.step-num {
+    display: inline-block;
+    background-color: var(--secondary);
+    color: var(--white);
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   TABLA DE HORARIOS
+   ========================================================================== */
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.schedule-table th, .schedule-table td {
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: left;
+}
+
+.schedule-table th {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.schedule-table tr:nth-child(even) {
+    background-color: var(--light-bg);
+}
+
+/* ==========================================================================
+   FORMULARIO Y SELECTORES DE ATRIBUTO
+   ========================================================================== */
+.form-intro {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.booking-form {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    border: 1px solid var(--border-color);
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.form-group legend {
+    font-weight: bold;
+    color: var(--primary);
+    padding: 0 5px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.input-field {
+    flex: 1 1 200px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.input-field label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Selectores de atributo */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+select:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.radio-group label {
+    margin-right: 20px;
+    font-weight: normal;
+}
+
+.submit-button {
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 15px 30px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: var(--secondary);
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.main-footer {
+    background-color: var(--primary);
+    color: var(--white);
+    text-align: center;
+    padding: 20px;
+    font-size: 0.9rem;
+}
