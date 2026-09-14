@@ -14,10 +14,11 @@
             </div>
             <nav class="nav-menu">
                 <ul>
-                    <li><a href="#inicio">Inicio</a></li>
-                    <li><a href="#servicios">Servicios y Rutas</a></li>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="#servicios">Servicios</a></li>
                     <li><a href="#como-funciona">Requisitos</a></li>
-                    <li><a href="#formulario">Reserva / Encomienda</a></li>
+                    <li><a href="pages/compra-pasajes.html">Reserva / Horarios</a></li>
+                    <li><a href="pages/compra-pasajes.html#seguimiento">Encomiendas</a></li>
                     <li><a href="#contacto">Ubicación y Sedes</a></li>
                 </ul>
             </nav>
@@ -30,13 +31,14 @@
                 <div class="hero-content">
                     <h2>Conectando Ica con todo el Perú</h2>
                     <p>Viaja con seguridad, puntualidad y la máxima comodidad en nuestra flota moderna interprovincial.</p>
-                    <a href="#formulario" class="cta-button">Comprar Pasajes Ahora</a>
+                    <a href="pages/compra-pasajes.html" class="cta-button">Comprar Pasajes Ahora</a>
                 </div>
                 <div class="hero-image">
                     <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800&auto=format&fit=crop" alt="Bus interprovincial de TransAndino Perú">
                 </div>
             </div>
         </section>
+
         <section id="servicios" class="section-container">
             <h2 class="section-title">Nuestros Servicios Interprovinciales</h2>
             
@@ -89,6 +91,7 @@
                 </tbody>
             </table>
         </section>
+
         <section id="como-funciona" class="section-container bg-alt">
             <h2 class="section-title">Cómo Viajar y Enviar Encomiendas</h2>
             <div class="steps-grid">
@@ -109,90 +112,7 @@
                 </article>
             </div>
         </section>
-        <section id="formulario" class="section-container">
-            <h2 class="section-title">Gestiona tu Pasaje o Encomienda</h2>
-            <p class="form-intro">Completa el siguiente formulario para cotizar y solicitar tu pasaje o hacer seguimiento a un envío.</p>
 
-            <form action="#" method="post" class="booking-form">
-                
-                <fieldset class="form-group">
-                    <legend>Tipo de Trámite</legend>
-                    <div class="radio-group">
-                        <label>
-                            <input type="radio" name="tipo_tramite" value="pasaje" checked> Compra / Reserva de Pasaje
-                        </label>
-                        <label>
-                            <input type="radio" name="tipo_tramite" value="encomienda"> Rastreo de Encomienda
-                        </label>
-                    </div>
-                </fieldset>
-
-                <fieldset class="form-group">
-                    <legend>Datos Personales del Cliente</legend>
-                    <div class="form-row">
-                        <div class="input-field">
-                            <label for="nombres">Nombres y Apellidos *</label>
-                            <input type="text" id="nombres" name="nombres" placeholder="Ej. Juan Pérez" required>
-                        </div>
-                        <div class="input-field">
-                            <label for="dni">Número de DNI / C.E. *</label>
-                            <input type="text" id="dni" name="dni" maxlength="12" placeholder="8 dígitos" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="input-field">
-                            <label for="correo">Correo Electrónico *</label>
-                            <input type="email" id="correo" name="correo" placeholder="correo@ejemplo.com" required>
-                        </div>
-                        <div class="input-field">
-                            <label for="telefono">Teléfono de Contacto</label>
-                            <input type="tel" id="telefono" name="telefono" placeholder="987654321">
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset class="form-group">
-                    <legend>Detalles de Solicitud</legend>
-                    <div class="form-row">
-                        <div class="input-field">
-                            <label for="origen">Origen</label>
-                            <select id="origen" name="origen">
-                                <option value="ica" selected>Ica (Terminal Principal)</option>
-                                <option value="lima">Lima</option>
-                                <option value="arequipa">Arequipa</option>
-                            </select>
-                        </div>
-                        <div class="input-field">
-                            <label for="destino">Destino</label>
-                            <select id="destino" name="destino">
-                                <option value="lima">Lima</option>
-                                <option value="arequipa">Arequipa</option>
-                                <option value="nasca">Nasca</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="input-field">
-                            <label for="fecha">Fecha de Viaje / Envío</label>
-                            <input type="date" id="fecha" name="fecha">
-                        </div>
-                        <div class="input-field">
-                            <label for="codigo_rastreo">Código de Rastreo (Si es Encomienda)</label>
-                            <input type="text" id="codigo_rastreo" name="codigo_rastreo" placeholder="Ej. TR-10293">
-                        </div>
-                    </div>
-
-                    <div class="input-field">
-                        <label for="comentarios">Observaciones o Requerimientos Especiales</label>
-                        <textarea id="comentarios" name="comentarios" rows="4" placeholder="Indique si requiere asiento especial o especificaciones del paquete..."></textarea>
-                    </div>
-                </fieldset>
-
-                <button type="submit" class="submit-button">Enviar Solicitud</button>
-            </form>
-        </section>
         <section id="contacto" class="section-container bg-alt">
             <h2 class="section-title">Ubicación y Sedes</h2>
             <div class="contact-grid">
