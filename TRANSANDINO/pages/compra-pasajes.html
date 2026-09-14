@@ -17,7 +17,6 @@
                 </svg>
                 <h1>TransAndino <span>Perú</span></h1>
             </div>
-            <!-- Menú con enlaces a cada página independiente -->
             <nav class="nav-menu navbar">
                 <ul>
                     <li><a href="../index.html">Inicio</a></li>
@@ -32,9 +31,9 @@
     </header>
 
     <main class="section-container">
-        <!-- RF-22.1: Formulario Compra de Pasaje -->
+        <!-- Formulario "Compra de pasaje" con origen, destino y fecha -->
         <div class="shadow-box">
-            <h2 class="section-title">RF-22.1: Compra de Pasaje</h2>
+            <h2 class="section-title">Compra de Pasaje</h2>
             <form id="ticket-form" class="booking-form">
                 <div class="form-row">
                     <div class="input-field">
@@ -46,6 +45,7 @@
                             <option value="arequipa">Arequipa</option>
                         </select>
                     </div>
+
                     <div class="input-field">
                         <label for="destino">Destino *</label>
                         <select id="destino" name="destino" required>
@@ -55,57 +55,58 @@
                             <option value="nasca">Nasca</option>
                         </select>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="input-field">
                         <label for="fecha">Fecha de Viaje *</label>
                         <input type="date" id="fecha" name="fecha" required>
                     </div>
+                </div>
+
+                <div class="form-row" style="margin-top: 1rem;">
                     <div class="input-field">
                         <label for="dni">DNI / Pasaporte *</label>
-                        <input type="text" id="dni" name="dni" placeholder="8 dígitos" required>
+                        <input type="text" id="dni" name="dni" placeholder="Ingrese 8 dígitos" required>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-compra submit-button">Comprar Pasaje</button>
+                <button type="submit" class="btn-compra submit-button" style="margin-top: 1.5rem;">Comprar Pasaje</button>
             </form>
         </div>
 
-        <!-- RF-22.2: Tabla de Horarios -->
+        <!-- Tabla de horarios por ruta -->
         <div class="tabla-section fade-in-up" style="margin-top: 3rem;">
-            <h3 class="sub-title">RF-22.2: Horarios Disponibles por Ruta</h3>
+            <h3 class="sub-title">Horarios Disponibles por Ruta</h3>
             <table class="schedule-table tabla-horarios">
                 <thead>
                     <tr>
-                        <th>Origen - Destino</th>
-                        <th>Salida</th>
-                        <th>Llegada Est.</th>
-                        <th>Servicio</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Salidas Diarias</th>
+                        <th>Tipo de Servicio</th>
                         <th>Precio</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Ica - Lima</td>
-                        <td>06:00 AM</td>
-                        <td>11:00 AM</td>
+                        <td>Ica</td>
+                        <td>Lima (Javier Prado)</td>
+                        <td>06:00 AM / 10:00 AM / 04:00 PM</td>
                         <td>Ejecutivo Cama</td>
                         <td>S/ 50.00</td>
                     </tr>
                     <tr>
-                        <td>Ica - Lima</td>
-                        <td>10:00 AM</td>
-                        <td>03:00 PM</td>
-                        <td>Ejecutivo Cama</td>
-                        <td>S/ 50.00</td>
-                    </tr>
-                    <tr>
-                        <td>Ica - Arequipa</td>
-                        <td>08:00 PM</td>
-                        <td>08:00 AM</td>
+                        <td>Ica</td>
+                        <td>Arequipa</td>
+                        <td>08:00 PM / 10:00 PM</td>
                         <td>Suite 180°</td>
                         <td>S/ 90.00</td>
+                    </tr>
+                    <tr>
+                        <td>Ica</td>
+                        <td>Nasca</td>
+                        <td>07:00 AM / 01:00 PM / 06:00 PM</td>
+                        <td>Económico Semicama</td>
+                        <td>S/ 25.00</td>
                     </tr>
                 </tbody>
             </table>
