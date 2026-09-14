@@ -1,14 +1,7 @@
-/* ===================================================
-   1. EFECTOS (Degradado, Sombras y SVG Animado)
-   =================================================== */
-
-/* Efecto 1: Degradado en el encabezado */
 .header-degradado {
     background: linear-gradient(135deg, #002b49 0%, #005691 100%) !important;
     color: white;
 }
-
-/* Efecto 2: Sombra en el formulario de compra y contenedores */
 .shadow-box {
     background-color: #ffffff;
     padding: 2rem;
@@ -16,8 +9,6 @@
     box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.12);
     margin-bottom: 2rem;
 }
-
-/* Efecto 3: Ícono SVG de bus animado (Movimiento continuo) */
 .bus-icon-animated {
     animation: busDrive 2.5s infinite linear;
     vertical-align: middle;
@@ -29,12 +20,6 @@
     50% { transform: translateX(5px); }
     100% { transform: translateX(-5px); }
 }
-
-/* ===================================================
-   2. TRANSICIONES Y HOVER
-   =================================================== */
-
-/* Transición 1: Transición suave en el botón de compra */
 .btn-compra, .cta-button, .submit-button {
     background-color: #003366;
     color: white;
@@ -75,12 +60,6 @@
     color: #ffb74d;
     border-bottom: 2px solid #ffb74d;
 }
-
-/* ===================================================
-   3. ANIMACIONES KEYFRAMES
-   =================================================== */
-
-/* Animación 1: Barra de Progreso con el Bus en Encomiendas */
 .progress-container {
     margin-top: 20px;
 }
@@ -114,8 +93,6 @@
     color: #666;
     margin-top: 8px;
 }
-
-/* Animación 2: Parpadeo en estado "En Tránsito" */
 .status-badge {
     animation: parpadeo 1.5s infinite alternate;
 }
@@ -124,8 +101,6 @@
     0% { opacity: 1; }
     100% { opacity: 0.4; }
 }
-
-/* Animación 3: Aparición progresiva de la Tabla */
 .fade-in-up {
     animation: fadeInUp 1s ease-out forwards;
 }
