@@ -1,13 +1,11 @@
-
 :root {
-    --primary: #003366;       /* Azul Institucional */
-    --secondary: #e65100;     /* Naranja Transporte */
-    --light-bg: #f4f6f9;      /* Fondo Claro Alt */
-    --dark-text: #1f2937;     /* Texto Principal */
+    --primary: #003366;        / Azul /
+    --secondary: #e65100;      /Naranja /
+    --light-bg: #f4f6f9;       /Fondo Claro Alt /
+    --dark-text: #1f2937;      /Texto Principal /
     --white: #ffffff;
     --border-color: #cbd5e1;
 }
-/* Reset básico */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -20,11 +18,12 @@ body {
     color: var(--dark-text);
     background-color: var(--white);
 }
-.main-header {
-    background-color: var(--primary);
+.header-degradado, .main-header {
+    background: linear-gradient(135deg, #002b49 0%, var(--primary) 100%);
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 .header-container {
@@ -36,6 +35,12 @@ body {
     padding: 15px 20px;
 }
 
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .logo h1 {
     color: var(--white);
     font-size: 1.5rem;
@@ -44,7 +49,18 @@ body {
 .logo span {
     color: var(--secondary);
 }
+.bus-icon-animated {
+    animation: busDrive 3s infinite ease-in-out;
+}
 
+@keyframes busDrive {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(6px);
+    }
+}
 .nav-menu ul {
     display: flex;
     list-style: none;
@@ -56,12 +72,16 @@ body {
     text-decoration: none;
     font-weight: bold;
     padding: 5px 10px;
-    transition: color 0.3s ease;
+    border-radius: 4px;
+    transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-.nav-menu a:hover {
-    color: var(--secondary);
+.nav-menu a:hover, .nav-menu a.active {
+    color: var(--white);
+    background-color: var(--secondary);
 }
+
+/* Hero Section */
 .hero {
     background-color: var(--primary);
     color: var(--white);
@@ -107,21 +127,28 @@ body {
     object-fit: cover;
 }
 
-.cta-button {
+/* TRANSICIÓN 1: Color en el Botón de Compra */
+.cta-button, .btn-compra, .submit-button {
     display: inline-block;
     background-color: var(--secondary);
     color: var(--white);
     padding: 12px 25px;
     text-decoration: none;
     font-weight: bold;
+    border: none;
     border-radius: 5px;
-    transition: transform 0.2s ease, background-color 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.cta-button:hover {
+.cta-button:hover, .btn-compra:hover, .submit-button:hover {
     background-color: #bf360c;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(191, 54, 12, 0.4);
 }
+
+/* Contenedores y Secciones */
 .section-container {
     max-width: 1100px;
     margin: 0 auto;
@@ -144,7 +171,16 @@ body {
     margin: 40px 0 15px 0;
 }
 
-/* Grid layout nativo */
+/* EFECTO 2: Sombra en el Formulario / Tarjetas */
+.shadow-box, .booking-form {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Grids */
 .services-grid, .steps-grid, .contact-grid {
     display: flex;
     gap: 20px;
@@ -157,6 +193,11 @@ body {
     padding: 20px;
     flex: 1 1 250px;
     border-radius: 6px;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover, .step-card:hover {
+    transform: translateY(-4px);
 }
 
 .step-num {
@@ -175,6 +216,24 @@ body {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .schedule-table th, .schedule-table td {
@@ -188,36 +247,19 @@ body {
     color: var(--white);
 }
 
+.schedule-table tr {
+    transition: background-color 0.3s ease;
+}
+
 .schedule-table tr:nth-child(even) {
     background-color: var(--light-bg);
 }
-.form-intro {
-    text-align: center;
-    margin-bottom: 20px;
+.schedule-table tbody tr:hover {
+    background-color: #ffe0b2;
+    cursor: pointer;
 }
 
-.booking-form {
-    background-color: var(--white);
-    border: 1px solid var(--border-color);
-    padding: 30px;
-    border-radius: 8px;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.form-group {
-    border: 1px solid var(--border-color);
-    padding: 15px 20px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-}
-
-.form-group legend {
-    font-weight: bold;
-    color: var(--primary);
-    padding: 0 5px;
-}
-
+/* Formularios */
 .form-row {
     display: flex;
     gap: 20px;
@@ -238,7 +280,6 @@ body {
     font-size: 0.9rem;
 }
 
-/* Selectores de atributo */
 input[type="text"],
 input[type="email"],
 input[type="tel"],
@@ -254,29 +295,48 @@ textarea {
 
 input[type="text"]:focus,
 input[type="email"]:focus,
+input[type="date"]:focus,
 select:focus {
     border-color: var(--primary);
     outline: none;
+    box-shadow: 0 0 5px rgba(0, 51, 102, 0.3);
+}
+.progress-container {
+    background-color: var(--light-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+.progress-bar {
+    position: relative;
+    height: 14px;
+    background-color: #e2e8f0;
+    border-radius: 7px;
+    margin: 25px 0 15px 0;
 }
 
-.radio-group label {
-    margin-right: 20px;
-    font-weight: normal;
+.bus-tracker {
+    position: absolute;
+    top: -12px;
+    font-size: 1.6rem;
+    animation: moverBus 4s ease-in-out infinite alternate;
 }
-.submit-button {
-    background-color: var(--primary);
-    color: var(--white);
-    border: none;
-    padding: 15px 30px;
-    font-size: 1rem;
+
+@keyframes moverBus {
+    0% {
+        left: 0%;
+    }
+    100% {
+        left: 85%;
+    }
+}
+
+.tracking-labels {
+    display: flex;
+    justify-content: space-between;
     font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color 0.3s ease;
-}
-.submit-button:hover {
-    background-color: var(--secondary);
+    font-size: 0.85rem;
+    color: var(--dark-text);
 }
 .main-footer {
     background-color: var(--primary);
@@ -284,4 +344,5 @@ select:focus {
     text-align: center;
     padding: 20px;
     font-size: 0.9rem;
+    margin-top: 40px;
 }
