@@ -1,130 +1,120 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TransAndino - Compra de Pasajes y Rastreo</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/animaciones.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva y Horarios - TransAndino Perú</title>
+    <link rel="stylesheet" href="../Practica.css">
+    <link rel="stylesheet" href="../css/animaciones.css">
 </head>
 <body>
 
-  <!-- 1. Encabezado con Degradado (Efecto 1) y Transición de Menú (Transición 3) -->
-  <header class="header-degradado">
-    <div class="logo">
-      <!-- Ícono SVG de bus animado (Efecto 3) -->
-      <svg class="bus-icon-animated" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
-        <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
-      </svg>
-      <h2>TransAndino <span>Perú</span></h2>
-    </div>
-    <nav class="navbar">
-      <a href="../index.html">Inicio</a>
-      <a href="compra-pasajes.html" class="active">Compra / Horarios</a>
-      <a href="#seguimiento">Seguimiento Encomienda</a>
-    </nav>
-  </header>
+    <header class="main-header header-degradado">
+        <div class="header-container">
+            <div class="logo">
+                <svg class="bus-icon-animated" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
+                    <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+                </svg>
+                <h1>TransAndino <span>Perú</span></h1>
+            </div>
+            <!-- Menú con enlaces a cada página independiente -->
+            <nav class="nav-menu navbar">
+                <ul>
+                    <li><a href="../index.html">Inicio</a></li>
+                    <li><a href="servicios.html">Servicios</a></li>
+                    <li><a href="requisitos.html">Requisitos</a></li>
+                    <li><a href="compra-pasajes.html" class="active">Reserva / Horarios</a></li>
+                    <li><a href="seguimiento.html">Encomiendas</a></li>
+                    <li><a href="ubicacion.html">Ubicación y Sedes</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-  <main class="container">
+    <main class="section-container">
+        <!-- RF-22.1: Formulario Compra de Pasaje -->
+        <div class="shadow-box">
+            <h2 class="section-title">RF-22.1: Compra de Pasaje</h2>
+            <form id="ticket-form" class="booking-form">
+                <div class="form-row">
+                    <div class="input-field">
+                        <label for="origen">Origen *</label>
+                        <select id="origen" name="origen" required>
+                            <option value="">Seleccione Origen</option>
+                            <option value="ica" selected>Ica</option>
+                            <option value="lima">Lima</option>
+                            <option value="arequipa">Arequipa</option>
+                        </select>
+                    </div>
+                    <div class="input-field">
+                        <label for="destino">Destino *</label>
+                        <select id="destino" name="destino" required>
+                            <option value="">Seleccione Destino</option>
+                            <option value="lima">Lima</option>
+                            <option value="arequipa">Arequipa</option>
+                            <option value="nasca">Nasca</option>
+                        </select>
+                    </div>
+                </div>
 
-    <!-- RF-22.1: Formulario "Compra de pasaje" con Sombra (Efecto 2) -->
-    <section class="form-section shadow-box">
-      <h2>RF-22.1: Compra de Pasaje</h2>
-      <form id="ticket-form" class="ticket-form">
-        <div class="form-group">
-          <label for="origen">Origen:</label>
-          <select id="origen" required>
-            <option value="">Seleccione Origen</option>
-            <option value="lima">Lima</option>
-            <option value="huancayo">Huancayo</option>
-          </select>
+                <div class="form-row">
+                    <div class="input-field">
+                        <label for="fecha">Fecha de Viaje *</label>
+                        <input type="date" id="fecha" name="fecha" required>
+                    </div>
+                    <div class="input-field">
+                        <label for="dni">DNI / Pasaporte *</label>
+                        <input type="text" id="dni" name="dni" placeholder="8 dígitos" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-compra submit-button">Comprar Pasaje</button>
+            </form>
         </div>
 
-        <div class="form-group">
-          <label for="destino">Destino:</label>
-          <select id="destino" required>
-            <option value="">Seleccione Destino</option>
-            <option value="huancayo">Huancayo</option>
-            <option value="lima">Lima</option>
-          </select>
+        <!-- RF-22.2: Tabla de Horarios -->
+        <div class="tabla-section fade-in-up" style="margin-top: 3rem;">
+            <h3 class="sub-title">RF-22.2: Horarios Disponibles por Ruta</h3>
+            <table class="schedule-table tabla-horarios">
+                <thead>
+                    <tr>
+                        <th>Origen - Destino</th>
+                        <th>Salida</th>
+                        <th>Llegada Est.</th>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ica - Lima</td>
+                        <td>06:00 AM</td>
+                        <td>11:00 AM</td>
+                        <td>Ejecutivo Cama</td>
+                        <td>S/ 50.00</td>
+                    </tr>
+                    <tr>
+                        <td>Ica - Lima</td>
+                        <td>10:00 AM</td>
+                        <td>03:00 PM</td>
+                        <td>Ejecutivo Cama</td>
+                        <td>S/ 50.00</td>
+                    </tr>
+                    <tr>
+                        <td>Ica - Arequipa</td>
+                        <td>08:00 PM</td>
+                        <td>08:00 AM</td>
+                        <td>Suite 180°</td>
+                        <td>S/ 90.00</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+    </main>
 
-        <div class="form-group">
-          <label for="fecha">Fecha:</label>
-          <input type="date" id="fecha" required>
-        </div>
+    <footer class="main-footer">
+        <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+    </footer>
 
-        <!-- Transición 1: Botón con transición de color -->
-        <button type="submit" class="btn-compra">Buscar / Comprar Pasaje</button>
-      </form>
-
-      <!-- Animación 2: Mensaje de confirmación animado al comprar -->
-      <div id="modal-confirmacion" class="confirmacion-pop">
-        <div class="checkmark-icon">✓</div>
-        <p>¡Pasaje reservado con éxito!</p>
-      </div>
-    </section>
-
-    <!-- RF-22.2: Tabla de horarios por ruta -->
-    <!-- Animación 3: Aparición progresiva de la tabla -->
-    <section class="tabla-section fade-in-up">
-      <h2>RF-22.2: Horarios Disponibles por Ruta</h2>
-      <table class="tabla-horarios">
-        <thead>
-          <tr>
-            <th>Ruta</th>
-            <th>Salida</th>
-            <th>Llegada Est.</th>
-            <th>Servicio</th>
-            <th>Precio</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Transición 2: Resaltado de filas al pasar cursor (hover) -->
-          <tr>
-            <td>Lima - Huancayo</td>
-            <td>08:00 AM</td>
-            <td>03:00 PM</td>
-            <td>Bus Cama</td>
-            <td>S/ 60.00</td>
-          </tr>
-          <tr>
-            <td>Lima - Huancayo</td>
-            <td>01:00 PM</td>
-            <td>08:00 PM</td>
-            <td>Ejecutivo</td>
-            <td>S/ 80.00</td>
-          </tr>
-          <tr>
-            <td>Huancayo - Lima</td>
-            <td>10:00 PM</td>
-            <td>05:00 AM</td>
-            <td>VIP Transandino</td>
-            <td>S/ 100.00</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- Animación 1: Bus recorriendo barra de progreso (Seguimiento Encomienda) -->
-    <section id="seguimiento" class="tracking-section shadow-box">
-      <h2>Seguimiento de Encomienda</h2>
-      <p>Estado del envío: <strong>En Tránsito</strong></p>
-
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div class="bus-tracker">
-            🚌
-          </div>
-        </div>
-        <div class="tracking-labels">
-          <span>Origen (Agencia)</span>
-          <span>En Ruta</span>
-          <span>Destino (Llegada)</span>
-        </div>
-      </div>
-    </section>
-
-  </main>
 </body>
 </html>
