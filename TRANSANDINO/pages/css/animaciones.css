@@ -1,1 +1,169 @@
+/* ==========================================================
+   1. EFECTOS
+   ========================================================== */
 
+/* Efecto 1: Degradado en el encabezado */
+.header-degradado {
+  background: linear-gradient(135deg, #002b49 0%, #005691 100%);
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Efecto 2: Sombra en el formulario de compra */
+.shadow-box {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.12);
+  margin-bottom: 2rem;
+}
+
+/* Efecto 3: Ícono SVG de bus animado (Movimiento lateral continuo) */
+.bus-icon-animated {
+  animation: busDrive 2.5s infinite linear;
+}
+
+@keyframes busDrive {
+  0% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  100% { transform: translateX(-5px); }
+}
+
+/* ==========================================================
+   2. TRANSICIONES
+   ========================================================== */
+
+/* Transición 1: Color en el botón de compra */
+.btn-compra {
+  background-color: #005691;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.4s ease, transform 0.2s ease;
+}
+
+.btn-compra:hover {
+  background-color: #ff6b00; /* Cambia a naranja al pasar mouse */
+  transform: translateY(-2px);
+}
+
+/* Transición 2: Resaltado de filas en la tabla */
+.tabla-horarios tr {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tabla-horarios tbody tr:hover {
+  background-color: #e6f0fa;
+  cursor: pointer;
+}
+
+/* Transición 3: Color en el menú */
+.navbar a {
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  transition: color 0.3s ease, border-bottom 0.3s ease;
+  padding-bottom: 4px;
+}
+
+.navbar a:hover {
+  color: #ff6b00;
+  border-bottom: 2px solid #ff6b00;
+}
+
+/* ==========================================================
+   3. ANIMACIONES
+   ========================================================== */
+
+/* Animación 1: Bus recorriendo la barra de progreso (Rastreo) */
+.progress-container {
+  margin-top: 2rem;
+  position: relative;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bus-tracker {
+  position: absolute;
+  top: -10px;
+  font-size: 20px;
+  animation: moveBus 5s infinite ease-in-out;
+}
+
+@keyframes moveBus {
+  0% { left: 0%; }
+  50% { left: 60%; }
+  100% { left: 92%; }
+}
+
+.tracking-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Animación 2: Confirmación animada al comprar pasaje */
+.confirmacion-pop {
+  display: none; /* Se activa con JS o clase .show */
+  text-align: center;
+  margin-top: 1rem;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.confirmacion-pop.show {
+  display: block;
+}
+
+.checkmark-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #28a745;
+  color: white;
+  font-size: 30px;
+  line-height: 50px;
+  margin: 0 auto 10px auto;
+  animation: scaleUp 0.4s ease-in-out;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes scaleUp {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+/* Animación 3: Aparición progresiva de la tabla de horarios */
+.fade-in-up {
+  animation: fadeInUp 1.2s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
