@@ -5,17 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TransAndino Perú - Transporte Interprovincial e Ica</title>
     <link rel="stylesheet" href="Practica.css">
+    <link rel="stylesheet" href="css/animaciones.css">
 </head>
 <body>
-    <header class="main-header">
+    <header class="main-header header-degradado">
         <div class="header-container">
             <div class="logo">
+                <svg class="bus-icon-animated" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
+                    <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+                </svg>
                 <h1>TransAndino <span>Perú</span></h1>
             </div>
-            <!-- Rutas actualizadas a las páginas independientes dentro de la carpeta pages/ -->
-            <nav class="nav-menu">
+            <nav class="nav-menu navbar">
                 <ul>
-                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="index.html" class="active">Inicio</a></li>
                     <li><a href="pages/servicios.html">Servicios</a></li>
                     <li><a href="pages/requisitos.html">Requisitos</a></li>
                     <li><a href="pages/compra-pasajes.html">Reserva / Horarios</a></li>
@@ -27,6 +30,7 @@
     </header>
 
     <main>
+        <!-- Seccion Principal (Hero) -->
         <section id="inicio" class="hero">
             <div class="hero-container">
                 <div class="hero-content">
@@ -40,97 +44,26 @@
             </div>
         </section>
 
-        <section id="servicios" class="section-container">
-            <h2 class="section-title">Nuestros Servicios Interprovinciales</h2>
-            
+        <!-- Accesos Directos a las Páginas de la Web -->
+        <section class="section-container">
+            <h2 class="section-title">Bienvenido a TransAndino Perú</h2>
             <div class="services-grid">
                 <article class="service-card">
-                    <h3>Venta de Pasajes</h3>
-                    <p>Rutas directas conectando Ica con Lima, Arequipa, Cusco y Nasca en buses cama y semicama de última generación.</p>
+                    <h3>¿Planeas viajar?</h3>
+                    <p>Consulta nuestros horarios diarios y reserva tus pasajes de forma rápida y sencilla.</p>
+                    <a href="pages/compra-pasajes.html" class="link-card" style="display:inline-block; margin-top:10px; color:#003366; font-weight:bold;">Ver Horarios →</a>
                 </article>
 
                 <article class="service-card">
-                    <h3>Seguimiento de Encomiendas</h3>
-                    <p>Envío rápido y seguro de paquetes y cargas con monitoreo en tiempo real mediante código de rastreo.</p>
+                    <h3>¿Tienes un envío?</h3>
+                    <p>Rastrea el estado de tu encomienda en tiempo real con tu código de seguimiento.</p>
+                    <a href="pages/seguimiento.html" class="link-card" style="display:inline-block; margin-top:10px; color:#003366; font-weight:bold;">Rastrear Encomienda →</a>
                 </article>
 
                 <article class="service-card">
-                    <h3>Servicio VIP Ejecutivo</h3>
-                    <p>Asientos reclinables de 160°, conexión Wi-Fi gratuita, puertos USB y servicio de refrigerio a bordo.</p>
-                </article>
-            </div>
-
-            <h3 class="sub-title">Horarios Frecuentes desde Sede Ica</h3>
-            <table class="schedule-table">
-                <thead>
-                    <tr>
-                        <th>Origen</th>
-                        <th>Destino</th>
-                        <th>Salidas Diarias</th>
-                        <th>Tipo de Servicio</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Ica</td>
-                        <td>Lima (Javier Prado)</td>
-                        <td>06:00 AM / 10:00 AM / 04:00 PM</td>
-                        <td>Ejecutivo Cama</td>
-                    </tr>
-                    <tr>
-                        <td>Ica</td>
-                        <td>Arequipa</td>
-                        <td>08:00 PM / 10:00 PM</td>
-                        <td>Suite 180°</td>
-                    </tr>
-                    <tr>
-                        <td>Ica</td>
-                        <td>Nasca</td>
-                        <td>07:00 AM / 01:00 PM / 06:00 PM</td>
-                        <td>Económico Semicama</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <section id="como-funciona" class="section-container bg-alt">
-            <h2 class="section-title">Cómo Viajar y Enviar Encomiendas</h2>
-            <div class="steps-grid">
-                <article class="step-card">
-                    <span class="step-num">1</span>
-                    <h3>Paso 1: Elige tu Servicio</h3>
-                    <p>Selecciona la ruta de tu viaje o el tamaño de tu encomienda desde nuestro formulario en línea.</p>
-                </article>
-                <article class="step-card">
-                    <span class="step-num">2</span>
-                    <h3>Paso 2: Documentación</h3>
-                    <p>Presenta DNI vigente obligatoriamente. Menores de edad requieren autorización notarial si viajan sin sus padres.</p>
-                </article>
-                <article class="step-card">
-                    <span class="step-num">3</span>
-                    <h3>Paso 3: Abordaje o Entrega</h3>
-                    <p>Llega a la agencia de Ica 30 minutos antes de la partida o para la entrega de tu encomienda en ventanilla.</p>
-                </article>
-            </div>
-        </section>
-
-        <section id="contacto" class="section-container bg-alt">
-            <h2 class="section-title">Ubicación y Sedes</h2>
-            <div class="contact-grid">
-                <article class="branch-card">
-                    <h3>Terminal Principal Ica</h3>
-                    <p><strong>Dirección:</strong> Av. San Martín 450, Centro de Ica</p>
-                    <p><strong>Teléfono:</strong> (056) 23-4567</p>
-                    <p><strong>Celular:</strong> (51) 987456123</p>
-                    <p><strong>Horario de atención:</strong> Lunes a Domingo de 05:00 AM a 11:30 PM</p>
-                </article>
-
-                <article class="branch-card">
-                    <h3>Agencia de Encomiendas Ica</h3>
-                    <p><strong>Dirección:</strong> Calle Ayacucho 120, Ica</p>
-                    <p><strong>Teléfono:</strong> (056) 21-8901</p>
-                    <p><strong>Celular:</strong> (51) 987456123</p>
-                    <p><strong>Horario de atención:</strong> Lunes a Sábado de 08:00 AM a 08:00 PM</p>
+                    <h3>¿Nuestras Agencias?</h3>
+                    <p>Encuentra la ubicación y teléfonos de contacto de nuestros terminales en Ica y provincias.</p>
+                    <a href="pages/ubicacion.html" class="link-card" style="display:inline-block; margin-top:10px; color:#003366; font-weight:bold;">Ver Agencias →</a>
                 </article>
             </div>
         </section>
