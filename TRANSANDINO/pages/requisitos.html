@@ -3,55 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Requisitos de Viaje - TransAndino Perú</title>
+    <title>Requisitos - TransAndino Perú</title>
     <link rel="stylesheet" href="../Practica.css">
-    <link rel="stylesheet" href="css/animaciones.css">
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .section-title {
+            text-align: center;
+            color: #003366;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .steps-wrapper {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .step-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-left: 5px solid #e65100;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+        .step-card:hover {
+            transform: translateX(5px);
+            background: #f1f5f9;
+        }
+        .step-badge {
+            background: #003366;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .step-content h3 {
+            margin: 0 0 8px 0;
+            color: #003366;
+            font-size: 1.2rem;
+        }
+        .step-content p {
+            margin: 0;
+            color: #4b5563;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
-<body>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color: #f4f6f9;">
 
-    <header class="main-header header-degradado">
-        <div class="header-container">
+    <header style="background: linear-gradient(135deg, #002b49 0%, #003366 100%); padding: 15px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+        <div style="max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <div class="logo">
-                <svg class="bus-icon-animated" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
-                    <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
-                </svg>
-                <h1>TransAndino <span>Perú</span></h1>
+                <a href="../index.html" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
+                        <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+                    </svg>
+                    <h1 style="color: #ffffff; margin: 0; font-size: 1.5rem;">TransAndino <span style="color: #ff9e00;">Perú</span></h1>
+                </a>
             </div>
-            <nav class="nav-menu navbar">
-                <ul>
-                    <li><a href="../index.html">Inicio</a></li>
-                    <li><a href="servicios.html">Servicios</a></li>
-                    <li><a href="requisitos.html" class="active">Requisitos</a></li>
-                    <li><a href="compra-pasajes.html">Reserva / Horarios</a></li>
-                    <li><a href="seguimiento.html">Encomiendas</a></li>
-                    <li><a href="ubicacion.html">Ubicación y Sedes</a></li>
+            <nav>
+                <ul style="display: flex; list-style: none; gap: 15px; margin: 0; padding: 0;">
+                    <li><a href="../index.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Inicio</a></li>
+                    <li><a href="servicios.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Servicios</a></li>
+                    <li><a href="requisitos.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px; background-color: #e65100; border-radius: 4px;">Requisitos</a></li>
+                    <li><a href="compra-pasajes.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Reserva / Horarios</a></li>
+                    <li><a href="seguimiento.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Encomiendas</a></li>
+                    <li><a href="ubicacion.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Ubicación y Sedes</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main class="section-container">
+    <main class="container">
         <h2 class="section-title">Requisitos para Viajar y Enviar Encomiendas</h2>
-        <div class="steps-grid shadow-box">
-            <article class="step-card">
-                <span class="step-num">1</span>
-                <h3>Paso 1: Elige tu Servicio</h3>
-                <p>Selecciona la ruta de tu viaje o el tamaño de tu encomienda desde nuestro formulario en línea.</p>
-            </article>
-            <article class="step-card">
-                <span class="step-num">2</span>
-                <h3>Paso 2: Documentación</h3>
-                <p>Presenta DNI vigente obligatoriamente. Menores de edad requieren autorización notarial si viajan sin sus padres.</p>
-            </article>
-            <article class="step-card">
-                <span class="step-num">3</span>
-                <h3>Paso 3: Abordaje o Entrega</h3>
-                <p>Llega a la agencia de Ica 30 minutos antes de la partida o para la entrega de tu encomienda en ventanilla.</p>
-            </article>
+
+        <div class="steps-wrapper">
+            
+            <div class="step-card">
+                <div class="step-badge">1</div>
+                <div class="step-content">
+                    <h3>Paso 1: Elige tu Servicio</h3>
+                    <p>Selecciona la ruta de tu viaje o el tamaño de tu encomienda desde nuestro formulario en línea.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-badge">2</div>
+                <div class="step-content">
+                    <h3>Paso 2: Documentación</h3>
+                    <p>Presenta DNI vigente obligatoriamente. Menores de edad requieren autorización notarial si viajan sin sus padres.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-badge">3</div>
+                <div class="step-content">
+                    <h3>Paso 3: Abordaje o Entrega</h3>
+                    <p>Llega a la agencia 30 minutos antes de la partida o para la entrega de tu encomienda en ventanilla.</p>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <footer class="main-footer">
+    <footer style="background-color: #003366; color: white; text-align: center; padding: 20px; font-size: 0.9rem; margin-top: 60px;">
         <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
     </footer>
 
