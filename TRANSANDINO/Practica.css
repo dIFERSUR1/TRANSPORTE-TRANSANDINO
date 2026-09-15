@@ -1,8 +1,8 @@
 :root {
     --primary: #003366;        
-    --secondary: #e65100;     
+    --secondary: #e65100;      
     --light-bg: #f4f6f9;       
-    --dark-text: #1f2937;      
+    --dark-text: #1f2937;     
     --white: #ffffff;
     --border-color: #cbd5e1;
 }
@@ -11,12 +11,17 @@
     margin: 0;
     padding: 0;
 }
-
 body {
     font-family: Arial, Helvetica, sans-serif;
     line-height: 1.6;
     color: var(--dark-text);
     background-color: var(--white);
+}
+.logo-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 .main-header, .header-degradado {
     background: linear-gradient(135deg, #002b49 0%, var(--primary) 100%) !important;
@@ -25,7 +30,6 @@ body {
     z-index: 100;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
-
 .header-container {
     max-width: 1100px;
     margin: 0 auto;
@@ -35,43 +39,33 @@ body {
     padding: 15px 20px;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
 .logo h1 {
     color: #ffffff !important;
     font-size: 1.5rem;
     font-weight: bold;
+    margin: 0;
 }
 
 .logo span {
-    color: #ff9e00 !important; /* Dorado/Naranja brillante */
+    color: #ff9e00 !important;
 }
+
+/* Bus SVG animado */
 .bus-icon-animated {
     animation: busDrive 3s infinite ease-in-out;
 }
 
 @keyframes busDrive {
-    0%, 100% {
-        transform: translateX(0);
-    }
-    50% {
-        transform: translateX(6px);
-    }
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(6px); }
 }
-
-/* TRANSICIÓN 3: Texto del Menú en Blanco Garantizado */
 .nav-menu ul {
     display: flex;
     list-style: none;
     gap: 15px;
 }
-
-.nav-menu ul li a,
-.navbar a {
-    color: #ffffff !important; /* Texto totalmente blanco en el menú */
+.nav-menu ul li a {
+    color: #ffffff !important;
     text-decoration: none;
     font-weight: bold;
     font-size: 0.95rem;
@@ -79,268 +73,63 @@ body {
     border-radius: 4px;
     transition: color 0.3s ease, background-color 0.3s ease;
 }
-
 .nav-menu ul li a:hover, 
-.nav-menu ul li a.active,
-.navbar a:hover, 
-.navbar a.active {
+.nav-menu ul li a.active {
     color: #ffffff !important;
-    background-color: var(--secondary) !important; /* Fondo naranja al pasar el cursor o activo */
-}
-
-/* Hero Section */
-.hero {
-    background-color: var(--primary);
-    color: var(--white);
-    padding: 60px 20px;
-}
-
-.hero-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
-    flex-wrap: wrap;
-}
-
-.hero-content {
-    flex: 1 1 400px;
-}
-
-.hero-content h2 {
-    font-size: 2.2rem;
-    margin-bottom: 15px;
-    line-height: 1.2;
-}
-
-.hero-content p {
-    font-size: 1.1rem;
-    margin-bottom: 20px;
-}
-
-.hero-image {
-    flex: 1 1 400px;
-    text-align: center;
-}
-
-.hero-image img {
-    width: 100%;
-    max-width: 500px;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    object-fit: cover;
-}
-
-/* TRANSICIÓN 1: Botones de Acción */
-.cta-button, .btn-compra, .submit-button {
-    display: inline-block;
-    background-color: var(--secondary);
-    color: #ffffff !important;
-    padding: 12px 25px;
-    text-decoration: none;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.cta-button:hover, .btn-compra:hover, .submit-button:hover {
-    background-color: #bf360c;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(191, 54, 12, 0.4);
+    background-color: var(--secondary) !important;
 }
 .section-container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 60px 20px;
-}
-
-.bg-alt {
-    background-color: var(--light-bg);
+    padding: 50px 20px;
 }
 
 .section-title {
     text-align: center;
     color: var(--primary);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     font-size: 1.8rem;
 }
-
-.sub-title {
-    color: var(--primary);
-    margin: 40px 0 15px 0;
-}
-.shadow-box, .booking-form {
-    background-color: var(--white);
-    border: 1px solid var(--border-color);
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-.services-grid, .steps-grid, .contact-grid {
-    display: flex;
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 20px;
-    flex-wrap: wrap;
+    margin-top: 30px;
 }
 
-.service-card, .step-card, .branch-card {
+.gallery-card {
     background-color: var(--white);
-    border: 1px solid var(--border-color);
-    padding: 20px;
-    flex: 1 1 250px;
-    border-radius: 6px;
-    transition: transform 0.3s ease;
-}
-
-.service-card:hover, .step-card:hover {
-    transform: translateY(-4px);
-}
-
-.step-num {
-    display: inline-block;
-    background-color: var(--secondary);
-    color: var(--white);
-    width: 35px;
-    height: 35px;
-    line-height: 35px;
-    text-align: center;
-    border-radius: 50%;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-.schedule-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+    border: 2px solid var(--border-color); 
+    border-radius: 8px;
     overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.fade-in-up {
-    animation: fadeInUp 0.8s ease-out forwards;
+.gallery-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 10px 22px rgba(0, 51, 102, 0.25);
+    border-color: var(--secondary);
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.schedule-table th, .schedule-table td {
-    border: 1px solid var(--border-color);
-    padding: 12px;
-    text-align: left;
-}
-
-.schedule-table th {
-    background-color: var(--primary);
-    color: var(--white);
-}
-
-.schedule-table tr {
-    transition: background-color 0.3s ease;
-}
-
-.schedule-table tr:nth-child(even) {
-    background-color: var(--light-bg);
-}
-.schedule-table tbody tr:hover {
-    background-color: #ffe0b2;
-    cursor: pointer;
-}
-
-/* Formularios */
-.form-row {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-}
-
-.input-field {
-    flex: 1 1 200px;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-}
-
-.input-field label {
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-select,
-textarea {
+.gallery-card img {
     width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 1rem;
+    height: 160px;
+    object-fit: cover;
+    display: block;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="date"]:focus,
-select:focus {
-    border-color: var(--primary);
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 51, 102, 0.3);
-}
-.progress-container {
-    background-color: var(--light-bg);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-.progress-bar {
-    position: relative;
-    height: 14px;
-    background-color: #e2e8f0;
-    border-radius: 7px;
-    margin: 25px 0 15px 0;
-}
-
-.bus-tracker {
-    position: absolute;
-    top: -12px;
-    font-size: 1.6rem;
-    animation: moverBus 4s ease-in-out infinite alternate;
-}
-
-@keyframes moverBus {
-    0% {
-        left: 0%;
-    }
-    100% {
-        left: 85%;
-    }
-}
-
-.tracking-labels {
-    display: flex;
-    justify-content: space-between;
+.gallery-card figcaption {
+    padding: 12px;
+    text-align: center;
     font-weight: bold;
-    font-size: 0.85rem;
-    color: var(--dark-text);
+    font-size: 0.88rem;
+    color: var(--primary);
+    background-color: var(--light-bg);
+    border-top: 1px solid var(--border-color);
 }
 
+/* Footer */
 .main-footer {
     background-color: var(--primary);
     color: #ffffff !important;
