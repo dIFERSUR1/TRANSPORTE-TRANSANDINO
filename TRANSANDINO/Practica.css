@@ -1,8 +1,8 @@
 :root {
-    --primary: #003366;        /* Azul Institucional */
-    --secondary: #e65100;      /* Naranja Transporte */
-    --light-bg: #f4f6f9;       /* Fondo Claro Alt */
-    --dark-text: #1f2937;      /* Texto Principal */
+    --primary: #003366;        
+    --secondary: #e65100;     
+    --light-bg: #f4f6f9;       
+    --dark-text: #1f2937;      
     --white: #ffffff;
     --border-color: #cbd5e1;
 }
