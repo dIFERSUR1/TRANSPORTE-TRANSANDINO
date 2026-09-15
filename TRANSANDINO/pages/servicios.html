@@ -1,67 +1,106 @@
-<main class="section-container">
-        <h2 class="section-title">Nuestra Flota y Servicios en el Perú</h2>
-        <p style="text-align: center; color: #4b5563;">Conoce nuestras unidades equipadas, servicios a bordo y los mejores destinos nacionales.</p>
-
-        <!-- Galería de 12 imágenes del Perú con figure y figcaption -->
-        <div class="gallery-grid">
-            <figure class="gallery-card">
-                <img src="https://images.pexels.com/photos/66100/pexels-photo-66100.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Bus Cama Ejecutivo">
-                <figcaption>1. Bus Cama VIP Interprovincial</figcaption>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios y Flota - TransAndino Perú</title>
+    <link rel="stylesheet" href="../Practica.css">
+</head>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color: #f4f6f9;">
+    <header style="background: linear-gradient(135deg, #002b49 0%, #003366 100%); padding: 15px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+        <div style="max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div class="logo">
+                <a href="../index.html" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <svg class="bus-icon-animated" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
+                        <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+                    </svg>
+                    <h1 style="color: #ffffff; margin: 0; font-size: 1.5rem;">TransAndino <span style="color: #ff9e00;">Perú</span></h1>
+                </a>
+            </div>
+            <nav>
+                <ul style="display: flex; list-style: none; gap: 15px; margin: 0; padding: 0;">
+                    <li><a href="../index.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Inicio</a></li>
+                    <li><a href="servicios.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px; background-color: #e65100; border-radius: 4px;">Servicios</a></li>
+                    <li><a href="requisitos.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Requisitos</a></li>
+                    <li><a href="compra-pasajes.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Reserva / Horarios</a></li>
+                    <li><a href="seguimiento.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Encomiendas</a></li>
+                    <li><a href="ubicacion.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Ubicación y Sedes</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main style="max-width: 1100px; margin: 0 auto; padding: 40px 20px;">
+        <h2 style="text-align: center; color: #003366; font-size: 2rem; margin-bottom: 10px;">Nuestra Flota y Servicios en el Perú</h2>
+        <p style="text-align: center; color: #4b5563; margin-bottom: 30px;">Conoce nuestras unidades equipadas, servicios a bordo y los mejores destinos nacionales.</p>
+            
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;">
+            
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/LT_439_%2815152227181%29.jpg/640px-LT_439_%2815152227181%29.jpg" alt="Bus VIP" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">1. Bus Cama VIP Interprovincial</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://images.pexels.com/photos/386009/pexels-photo-386009.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Asientos de Primera Clase">
-                <figcaption>2. Interior con Reclinación 160°</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Interi%C3%B3r_autobusu_Mercedes-Benz_Irizar_i6x.jpg/640px-Interi%C3%B3r_autobusu_Mercedes-Benz_Irizar_i6x.jpg" alt="Asientos" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">2. Interior Reclinable 160°</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Carretera Panamericana Sur Perú">
-                <figcaption>3. Ruta Panamericana Sur (Ica - Lima)</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Panamericana_Sur_Ica.jpg/640px-Panamericana_Sur_Ica.jpg" alt="Ruta Ica" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">3. Ruta Panamericana Sur (Ica)</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://images.pexels.com/photos/4391470/pexels-photo-4391470.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Envío de Encomiendas Perú">
-                <figcaption>4. Despacho Directo de Encomiendas</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://images.pexels.com/photos/4391470/pexels-photo-4391470.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Encomiendas" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">4. Despacho de Encomiendas</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Lima_-_Peru_-_panoramio_%2839%29.jpg/640px-Lima_-_Peru_-_panoramio_%2839%29.jpg" alt="Terminal Terrestre Lima">
-                <figcaption>5. Agencia y Terminal Lima Sur</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Lima_-_Peru_-_panoramio_%2839%29.jpg/640px-Lima_-_Peru_-_panoramio_%2839%29.jpg" alt="Terminal Lima" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">5. Agencia y Terminal Lima</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://images.pexels.com/photos/726484/pexels-photo-726484.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Atención de Pasajeros">
-                <figcaption>6. Abordaje Prioritario y Seguro</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://images.pexels.com/photos/726484/pexels-photo-726484.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Abordaje" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">6. Embarque Prioritario</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Arequipa_Misti.jpg/640px-Arequipa_Misti.jpg" alt="Arequipa Ciudad Blanca">
-                <figcaption>7. Ruta Turística Arequipa</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Arequipa_Misti.jpg/640px-Arequipa_Misti.jpg" alt="Arequipa" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">7. Ruta Turística Arequipa</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://images.pexels.com/photos/2422588/pexels-photo-2422588.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Viaje Nocturno Perú">
-                <figcaption>8. Salidas Nocturnas Directas</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://images.pexels.com/photos/2422588/pexels-photo-2422588.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Nocturno" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">8. Salidas Nocturnas VIP</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://images.pexels.com/photos/3568520/pexels-photo-3568520.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Wi-Fi y Entretenimiento">
-                <figcaption>9. Wifi y Conectividad a Bordo</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://images.pexels.com/photos/3568520/pexels-photo-3568520.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Wifi" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">9. Wifi y Entretenimiento</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Lines_and_Geoglyphs_of_Nasca_and_Palpa-110865.jpg/640px-Lines_and_Geoglyphs_of_Nasca_and_Palpa-110865.jpg" alt="Líneas de Nasca Ica">
-                <figcaption>10. Conexión Directa a Nasca</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Lines_and_Geoglyphs_of_Nasca_and_Palpa-110865.jpg/640px-Lines_and_Geoglyphs_of_Nasca_and_Palpa-110865.jpg" alt="Nasca" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">10. Conexión Directa a Nasca</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Huacachina_Oasis_Ica_Peru.jpg/640px-Huacachina_Oasis_Ica_Peru.jpg" alt="Oasis de la Huacachina Ica">
-                <figcaption>11. Destino Turístico Huacachina - Ica</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Huacachina_Oasis_Ica_Peru.jpg/640px-Huacachina_Oasis_Ica_Peru.jpg" alt="Huacachina" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">11. Destino Huacachina - Ica</figcaption>
             </figure>
 
-            <figure class="gallery-card">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Machu_Picchu%2C_Peru.jpg/640px-Machu_Picchu%2C_Peru.jpg" alt="Machu Picchu Cuzco Perú">
-                <figcaption>12. Conexiones al Sur del Perú</figcaption>
+            <figure class="gallery-card" style="background: white; border: 2px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Machu_Picchu%2C_Peru.jpg/640px-Machu_Picchu%2C_Peru.jpg" alt="Cuzco" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                <figcaption style="padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; color: #003366; background: #f4f6f9; border-top: 1px solid #cbd5e1;">12. Conexiones al Sur del Perú</figcaption>
             </figure>
+
         </div>
     </main>
+
+    <footer style="background-color: #003366; color: white; text-align: center; padding: 20px; font-size: 0.9rem; margin-top: 40px;">
+        <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+    </footer>
+
+</body>
+</html>
