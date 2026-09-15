@@ -5,78 +5,234 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reserva y Horarios - TransAndino Perú</title>
     <link rel="stylesheet" href="../Practica.css">
-    <link rel="stylesheet" href="css/animaciones.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(230, 81, 0, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(230, 81, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(230, 81, 0, 0);
+            }
+        }
+
+        .nav-active-animated {
+            color: white !important;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #ff6f00, #e65100);
+            border-radius: 6px;
+            display: inline-block;
+            transition: transform 0.3s ease, background 0.3s ease;
+            animation: pulseGlow 2s infinite;
+        }
+
+        .nav-active-animated:hover {
+            transform: translateY(-2px) scale(1.05);
+            background: linear-gradient(135deg, #ff8f00, #ff6f00);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .booking-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 35px;
+            max-width: 550px;
+            margin: 40px auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            animation: fadeInUp 0.6s ease-out forwards;
+            border: 1px solid #e2e8f0;
+        }
+
+        .booking-card h2 {
+            color: #003366;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #334155;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #003366;
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: #003366;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #002244;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 51, 102, 0.3);
+        }
+
+        .schedule-section {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .schedule-section h3 {
+            color: #003366;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .styled-table th {
+            background-color: #f1f5f9;
+            color: #003366;
+            padding: 12px 15px;
+            font-weight: bold;
+            border-bottom: 2px solid #cbd5e1;
+        }
+
+        .styled-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        .styled-table tbody tr {
+            transition: background-color 0.25s ease, transform 0.2s ease;
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+    </style>
 </head>
 <body>
 
-    <header class="main-header header-degradado">
-        <div class="header-container">
+    <header style="background: linear-gradient(135deg, #002b49 0%, #003366 100%); padding: 15px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+        <div style="max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <div class="logo">
-                <svg class="bus-icon-animated" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
-                    <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
-                </svg>
-                <h1>TransAndino <span>Perú</span></h1>
+                <a href="../index.html" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
+                        <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+                    </svg>
+                    <h1 style="color: #ffffff; margin: 0; font-size: 1.5rem;">TransAndino <span style="color: #ff9e00;">Perú</span></h1>
+                </a>
             </div>
-            <nav class="nav-menu navbar">
-                <ul>
-                    <li><a href="../index.html">Inicio</a></li>
-                    <li><a href="servicios.html">Servicios</a></li>
-                    <li><a href="requisitos.html">Requisitos</a></li>
-                    <li><a href="compra-pasajes.html" class="active">Reserva / Horarios</a></li>
-                    <li><a href="seguimiento.html">Encomiendas</a></li>
-                    <li><a href="ubicacion.html">Ubicación y Sedes</a></li>
+            <nav>
+                <ul style="display: flex; list-style: none; gap: 15px; margin: 0; padding: 0; align-items: center;">
+                    <li><a href="../index.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Inicio</a></li>
+                    <li><a href="servicios.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Servicios</a></li>
+                    <li><a href="requisitos.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Requisitos</a></li>
+                    <li><a href="compra-pasajes.html" class="nav-active-animated">Reserva / Horarios</a></li>
+                    <li><a href="seguimiento.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Encomiendas</a></li>
+                    <li><a href="ubicacion.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Ubicación y Sedes</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main class="section-container">
-        <!-- Formulario "Compra de pasaje" con origen, destino y fecha -->
-        <div class="shadow-box">
-            <h2 class="section-title">Compra de Pasaje</h2>
-            <form id="ticket-form" class="booking-form">
-                <div class="form-row">
-                    <div class="input-field">
-                        <label for="origen">Origen *</label>
-                        <select id="origen" name="origen" required>
-                            <option value="">Seleccione Origen</option>
-                            <option value="ica" selected>Ica</option>
-                            <option value="lima">Lima</option>
-                            <option value="arequipa">Arequipa</option>
-                        </select>
-                    </div>
-
-                    <div class="input-field">
-                        <label for="destino">Destino *</label>
-                        <select id="destino" name="destino" required>
-                            <option value="">Seleccione Destino</option>
-                            <option value="lima">Lima</option>
-                            <option value="arequipa">Arequipa</option>
-                            <option value="nasca">Nasca</option>
-                        </select>
-                    </div>
-
-                    <div class="input-field">
-                        <label for="fecha">Fecha de Viaje *</label>
-                        <input type="date" id="fecha" name="fecha" required>
-                    </div>
+    <main style="padding: 20px;">
+        <section class="booking-card">
+            <h2>Compra de Pasaje</h2>
+            <form action="#" method="POST">
+                <div class="form-group">
+                    <label for="origen">Origen *</label>
+                    <select id="origen" name="origen" required>
+                        <option value="Ica" selected>Ica</option>
+                        <option value="Lima">Lima</option>
+                        <option value="Arequipa">Arequipa</option>
+                    </select>
                 </div>
 
-                <div class="form-row" style="margin-top: 1rem;">
-                    <div class="input-field">
-                        <label for="dni">DNI / Pasaporte *</label>
-                        <input type="text" id="dni" name="dni" placeholder="Ingrese 8 dígitos" required>
-                    </div>
+                <div class="form-group">
+                    <label for="destino">Destino *</label>
+                    <select id="destino" name="destino" required>
+                        <option value="" disabled selected>Seleccione Destino</option>
+                        <option value="Lima">Lima (Javier Prado)</option>
+                        <option value="Arequipa">Arequipa</option>
+                        <option value="Nasca">Nasca</option>
+                    </select>
                 </div>
 
-                <button type="submit" class="btn-compra submit-button" style="margin-top: 1.5rem;">Comprar Pasaje</button>
+                <div class="form-group">
+                    <label for="fecha">Fecha de Viaje *</label>
+                    <input type="date" id="fecha" name="fecha" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="documento">DNI / Pasaporte *</label>
+                    <input type="text" id="documento" name="documento" placeholder="Ingrese 8 dígitos" maxlength="12" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Comprar Pasaje</button>
             </form>
-        </div>
+        </section>
 
-        <!-- Tabla de horarios por ruta -->
-        <div class="tabla-section fade-in-up" style="margin-top: 3rem;">
-            <h3 class="sub-title">Horarios Disponibles por Ruta</h3>
-            <table class="schedule-table tabla-horarios">
+        <section class="schedule-section">
+            <h3>Horarios Disponibles por Ruta</h3>
+            <table class="styled-table">
                 <thead>
                     <tr>
                         <th>Origen</th>
@@ -92,28 +248,28 @@
                         <td>Lima (Javier Prado)</td>
                         <td>06:00 AM / 10:00 AM / 04:00 PM</td>
                         <td>Ejecutivo Cama</td>
-                        <td>S/ 50.00</td>
+                        <td><strong>S/ 50.00</strong></td>
                     </tr>
                     <tr>
                         <td>Ica</td>
                         <td>Arequipa</td>
                         <td>08:00 PM / 10:00 PM</td>
                         <td>Suite 180°</td>
-                        <td>S/ 90.00</td>
+                        <td><strong>S/ 90.00</strong></td>
                     </tr>
                     <tr>
                         <td>Ica</td>
                         <td>Nasca</td>
                         <td>07:00 AM / 01:00 PM / 06:00 PM</td>
                         <td>Económico Semicama</td>
-                        <td>S/ 25.00</td>
+                        <td><strong>S/ 25.00</strong></td>
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </section>
     </main>
 
-    <footer class="main-footer">
+    <footer style="background-color: #003366; color: white; text-align: center; padding: 20px; font-size: 0.9rem; margin-top: 40px;">
         <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
     </footer>
 
