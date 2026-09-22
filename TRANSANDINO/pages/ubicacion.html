@@ -1,49 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ubicación y Sedes - TransAndino Perú</title>
-    <link rel="stylesheet" href="../Practica.css">
-    <link rel="stylesheet" href="../css/animaciones.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubicación y Sedes - TransAndino Perú</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo span { color: #38bdf8; }
+    
+    .bus-emoji { display: inline-block; animation: rodar 2s infinite ease-in-out; }
+    @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
+
+    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
+    nav a:hover { color: #ffffff; background: #1e293b; }
+    nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
+    
+    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
+    .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
+    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
+    .btn-register:hover { background: #0369a1 !important; }
+
+    main { max-width: 1000px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; color: #38bdf8; }
+    
+    .sedes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    .card h3 { color: #ea580c; margin-bottom: 0.5rem; }
+    .card p { color: #cbd5e1; font-size: 0.95rem; margin-bottom: 0.4rem; }
+
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
+  </style>
 </head>
 <body>
-    <header class="main-header header-degradado">
-        <div class="header-container">
-            <div class="logo">
-                <h1>TransAndino <span>Perú</span></h1>
-            </div>
-            <nav class="nav-menu navbar">
-                <ul>
-                    <li><a href="../index.html">Inicio</a></li>
-                    <li><a href="servicios.html">Servicios</a></li>
-                    <li><a href="requisitos.html">Requisitos</a></li>
-                    <li><a href="compra-pasajes.html">Reserva / Horarios</a></li>
-                    <li><a href="seguimiento.html">Encomiendas</a></li>
-                    <li><a href="ubicacion.html" class="active">Ubicación y Sedes</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
 
-    <main class="section-container">
-        <h2 class="section-title">Ubicación y Sedes</h2>
-        <div class="contact-grid">
-            <article class="branch-card">
-                <h3>Terminal Principal Ica</h3>
-                <p><strong>Dirección:</strong> Av. San Martín 450, Centro de Ica</p>
-                <p><strong>Teléfono:</strong> (056) 23-4567</p>
-            </article>
-            <article class="branch-card">
-                <h3>Agencia de Encomiendas Ica</h3>
-                <p><strong>Dirección:</strong> Calle Ayacucho 120, Ica</p>
-                <p><strong>Teléfono:</strong> (056) 21-8901</p>
-            </article>
-        </div>
-    </main>
+  <header>
+    <a href="../index.html" class="logo">
+      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
+    </a>
+    <nav>
+      <a href="../index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="requisitos.html">Requisitos</a>
+      <a href="compra-pasajes.html">Reserva / Horarios</a>
+      <a href="seguimiento.html">Encomiendas</a>
+      <a href="ubicacion.html" class="active">Ubicación y Sedes</a>
 
-    <footer class="main-footer">
-        <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
-    </footer>
+      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
+        <a href="../login.html" class="btn-login">Iniciar Sesión</a>
+        <a href="../registro.html" class="btn-register">Registrarse</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Nuestras Sedes</h1>
+    <div class="sedes-grid">
+      <div class="card">
+        <h3>📍 Sede Principal - Ica</h3>
+        <p><strong>Dirección:</strong> Av. Municipalidad 456, Ica</p>
+        <p><strong>Teléfono:</strong> (056) 234-567</p>
+      </div>
+      <div class="card">
+        <h3>📍 Terminal Terrestre - Lima</h3>
+        <p><strong>Dirección:</strong> Av. Javier Prado Este 3200, Lima</p>
+        <p><strong>Teléfono:</strong> (01) 456-7890</p>
+      </div>
+      <div class="card">
+        <h3>📍 Agencia Arequipa</h3>
+        <p><strong>Dirección:</strong> Av. Ejercito 102, Arequipa</p>
+        <p><strong>Teléfono:</strong> (054) 876-543</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const authContainer = document.getElementById('auth-buttons');
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.nombre) {
+        authContainer.innerHTML = `
+          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">Hola, ${user.nombre}</span>
+          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">Cerrar Sesión</button>
+        `;
+        document.getElementById('logout-btn').addEventListener('click', () => {
+          localStorage.removeItem('user');
+          window.location.reload();
+        });
+      }
+    });
+  </script>
+
 </body>
 </html>
