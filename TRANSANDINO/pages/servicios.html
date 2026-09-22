@@ -1,138 +1,100 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servicios y Flota - TransAndino Perú</title>
-    <link rel="stylesheet" href="../Practica.css">
-    <style>
-        .gallery-card {
-            background: white;
-            border: 2px solid #cbd5e1;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-        .gallery-card:hover {
-            transform: translateY(-6px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 51, 102, 0.25);
-            border-color: #e65100;
-        }
-        .gallery-card img {
-            width: 100%;
-            height: 170px;
-            object-fit: cover;
-            display: block;
-        }
-        .gallery-card figcaption {
-            padding: 12px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 0.88rem;
-            color: #003366;
-            background: #f4f6f9;
-            border-top: 1px solid #cbd5e1;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servicios - TransAndino Perú</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo span { color: #38bdf8; }
+    
+    .bus-emoji { display: inline-block; animation: rodar 2s infinite ease-in-out; }
+    @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
+
+    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
+    nav a:hover { color: #ffffff; background: #1e293b; }
+    nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
+    
+    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
+    .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
+    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
+    .btn-register:hover { background: #0369a1 !important; }
+
+    main { max-width: 1100px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; color: #38bdf8; }
+    
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 1.8rem; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    .card h3 { color: #ea580c; font-size: 1.3rem; margin-bottom: 0.8rem; }
+    .card p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }
+
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
+  </style>
 </head>
-<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color: #f4f6f9;">
+<body>
 
-    <header style="background: linear-gradient(135deg, #002b49 0%, #003366 100%); padding: 15px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-        <div style="max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <div class="logo">
-                <a href="../index.html" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
-                        <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
-                    </svg>
-                    <h1 style="color: #ffffff; margin: 0; font-size: 1.5rem;">TransAndino <span style="color: #ff9e00;">Perú</span></h1>
-                </a>
-            </div>
-            <nav>
-                <ul style="display: flex; list-style: none; gap: 15px; margin: 0; padding: 0;">
-                    <li><a href="../index.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Inicio</a></li>
-                    <li><a href="servicios.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px; background-color: #e65100; border-radius: 4px;">Servicios</a></li>
-                    <li><a href="requisitos.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Requisitos</a></li>
-                    <li><a href="compra-pasajes.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Reserva / Horarios</a></li>
-                    <li><a href="seguimiento.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Encomiendas</a></li>
-                    <li><a href="ubicacion.html" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 12px;">Ubicación y Sedes</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+  <header>
+    <a href="../index.html" class="logo">
+      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
+    </a>
+    <nav>
+      <a href="../index.html">Inicio</a>
+      <a href="servicios.html" class="active">Servicios</a>
+      <a href="requisitos.html">Requisitos</a>
+      <a href="compra-pasajes.html">Reserva / Horarios</a>
+      <a href="seguimiento.html">Encomiendas</a>
+      <a href="ubicacion.html">Ubicación y Sedes</a>
 
-    <main style="max-width: 1100px; margin: 0 auto; padding: 40px 20px;">
-        <h2 style="text-align: center; color: #003366; font-size: 2rem; margin-bottom: 10px;">Nuestros Servicios y Flota</h2>
-        <p style="text-align: center; color: #4b5563; margin-bottom: 30px;">Conoce las opciones de transporte, comodidad y logística que ofrecemos a nivel nacional.</p>
+      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
+        <a href="../login.html" class="btn-login">Iniciar Sesión</a>
+        <a href="../registro.html" class="btn-register">Registrarse</a>
+      </div>
+    </nav>
+  </header>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px;">
-            
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80" alt="Servicio Ejecutivo Bus Cama">
-                <figcaption>1. Servicio Ejecutivo Bus Cama</figcaption>
-            </figure>
+  <main>
+    <h1>Nuestros Servicios</h1>
+    <div class="services-grid">
+      <div class="card">
+        <h3>🚌 Transporte Interprovincial</h3>
+        <p>Viajes cómodos y seguros desde Ica a diferentes destinos nacionales en buses reacondicionados.</p>
+      </div>
+      <div class="card">
+        <h3>📦 Envíos y Encomiendas</h3>
+        <p>Servicio express de paquetería y carga pesada con seguimiento en tiempo real.</p>
+      </div>
+      <div class="card">
+        <h3>💺 Asientos VIP</h3>
+        <p>Buses con asientos reclinables 160°, conectores USB, aire acondicionado y entretenimiento a bordo.</p>
+      </div>
+    </div>
+  </main>
 
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=600&q=80" alt="Atención en Terminales">
-                <figcaption>2. Atención en Terminales</figcaption>
-            </figure>
+  <footer>
+    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+  </footer>
 
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=600&q=80" alt="Salidas Nocturnas Directas">
-                <figcaption>3. Salidas Nocturnas Directas</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=600&q=80" alt="Rutas Interprovinciales">
-                <figcaption>4. Rutas Interprovinciales</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=600&q=80" alt="Transporte de Encomiendas">
-                <figcaption>5. Transporte de Encomiendas</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=600&q=80" alt="Monitoreo GPS 24/7">
-                <figcaption>6. Monitoreo GPS 24/7</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1509749837427-ac94a2553d0e?auto=format&fit=crop&w=600&q=80" alt="Asientos Reclinables 160°">
-                <figcaption>7. Asientos Reclinables 160°</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&w=600&q=80" alt="Embarque Preferencial">
-                <figcaption>8. Embarque Preferencial</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1616401784845-180882ba9ba8?auto=format&fit=crop&w=600&q=80" alt="Carga Express">
-                <figcaption>9. Carga Express</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80" alt="Sedes y Oficinas">
-                <figcaption>10. Sedes y Oficinas</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?auto=format&fit=crop&w=600&q=80" alt="Entretenimiento a Bordo">
-                <figcaption>11. Entretenimiento a Bordo</figcaption>
-            </figure>
-
-            <figure class="gallery-card">
-                <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80" alt="Reservas Digitales">
-                <figcaption>12. Reservas Digitales</figcaption>
-            </figure>
-
-        </div>
-    </main>
-
-    <footer style="background-color: #003366; color: white; text-align: center; padding: 20px; font-size: 0.9rem; margin-top: 40px;">
-        <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
-    </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const authContainer = document.getElementById('auth-buttons');
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.nombre) {
+        authContainer.innerHTML = `
+          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">Hola, ${user.nombre}</span>
+          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">Cerrar Sesión</button>
+        `;
+        document.getElementById('logout-btn').addEventListener('click', () => {
+          localStorage.removeItem('user');
+          window.location.reload();
+        });
+      }
+    });
+  </script>
 
 </body>
 </html>
