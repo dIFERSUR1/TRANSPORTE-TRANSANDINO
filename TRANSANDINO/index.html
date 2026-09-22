@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TransAndino Perú - Inicio</title>
+  
+  <!-- Enlaces a tus hojas CSS externas por si las utilizas -->
+  <link rel="stylesheet" href="pages/css/animaciones.css">
+  <link rel="stylesheet" href="css/animaciones.css">
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
@@ -13,6 +18,16 @@
     .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .logo span { color: #38bdf8; }
     
+    /* Animación del Emoji del Bus */
+    .bus-emoji {
+      display: inline-block;
+      animation: rodar 2s infinite ease-in-out;
+    }
+    @keyframes rodar {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(6px) translateY(-2px); }
+    }
+
     nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
     nav a:hover { color: #ffffff; background: #1e293b; }
@@ -20,7 +35,7 @@
     /* Pestaña activa */
     nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
     
-    /* Botones Login y Registro */
+    /* Botones de Login y Registro */
     .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
     .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
     .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
@@ -50,20 +65,20 @@
   <!-- Navegación Principal -->
   <header>
     <a href="index.html" class="logo">
-      🚌 <span>TransAndino Perú</span>
+      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <!-- Inicio (en raíz) -->
+      <!-- Inicio -->
       <a href="index.html" class="active">Inicio</a>
 
-      <!-- Páginas dentro de la carpeta /pages/ -->
+      <!-- Páginas dentro de /pages/ -->
       <a href="pages/servicios.html">Servicios</a>
       <a href="pages/requisitos.html">Requisitos</a>
       <a href="pages/compra-pasajes.html">Reserva / Horarios</a>
       <a href="pages/seguimiento.html">Encomiendas</a>
       <a href="pages/ubicacion.html">Ubicación y Sedes</a>
 
-      <!-- Login y Registro (en raíz) -->
+      <!-- Botones de Iniciar Sesión y Registro -->
       <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
         <a href="login.html" class="btn-login">Iniciar Sesión</a>
         <a href="registro.html" class="btn-register">Registrarse</a>
@@ -79,7 +94,8 @@
         <p>Viaja con seguridad, puntualidad y la máxima comodidad en nuestra flota moderna interprovincial.</p>
       </div>
       <div class="hero-img">
-        <img src="images.jpg" alt="Bus TransAndino" onerror="this.src='https://via.placeholder.com/520x320?text=TransAndino+Per%C3%BA'">
+        <!-- Busca la imagen en la raíz y si no la encuentra la busca en pages/ -->
+        <img src="images.jpg" onerror="this.onerror=null; this.src='pages/images.jpg';" alt="Bus TransAndino">
       </div>
     </section>
 
