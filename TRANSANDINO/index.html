@@ -4,64 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TransAndino Perú - Inicio</title>
+  <link rel="stylesheet" href="css/animaciones.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
     
-    /* Navbar */
+    /* Navbar / Encabezado */
     header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    nav { display: flex; gap: 1rem; align-items: center; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.8rem; border-radius: 4px; transition: background 0.3s; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo span { color: #38bdf8; }
+    
+    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
     nav a:hover { color: #ffffff; background: #1e293b; }
     
-    /* Botones Auth */
-    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; }
+    /* Pestaña activa (Inicio) */
+    nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
+    
+    /* Botones de Inicio de Sesión y Registro */
+    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
     .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
     .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
     .btn-register:hover { background: #0369a1 !important; }
 
-    /* Hero */
-    .hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; gap: 2rem; }
+    /* Hero Section */
+    .hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; gap: 2rem; }
     .hero-text { flex: 1; min-width: 300px; }
-    .hero-text h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #ffffff; line-height: 1.2; }
-    .hero-text p { color: #94a3b8; font-size: 1.1rem; line-height: 1.5; margin-bottom: 1.5rem; }
+    .hero-text h1 { font-size: 2.8rem; margin-bottom: 1rem; color: #ffffff; line-height: 1.2; font-weight: 700; }
+    .hero-text p { color: #94a3b8; font-size: 1.15rem; line-height: 1.6; margin-bottom: 1.8rem; }
+    
     .hero-img { flex: 1; min-width: 300px; text-align: center; }
-    .hero-img img { width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .hero-img img { width: 100%; max-width: 520px; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); border: 1px solid #1e293b; object-fit: cover; }
 
-    /* Section Info */
-    .info-section { text-align: center; padding: 3rem 1rem; background-color: #0f172a; flex: 1; }
-    .info-section h2 { font-size: 1.8rem; margin-bottom: 0.8rem; color: #f8fafc; }
-    .info-section p { color: #94a3b8; max-width: 600px; margin: 0 auto; }
+    /* Sección Informativa */
+    .info-section { text-align: center; padding: 4rem 1rem; background-color: #0f172a; flex: 1; border-top: 1px solid #1e293b; }
+    .info-section h2 { font-size: 2rem; margin-bottom: 0.8rem; color: #f8fafc; font-weight: 700; }
+    .info-section h3 { font-size: 1.2rem; color: #38bdf8; margin-bottom: 1rem; font-weight: 600; }
+    .info-section p { color: #94a3b8; max-width: 650px; margin: 0 auto; font-size: 1rem; line-height: 1.5; }
 
     /* Footer */
-    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; }
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
   </style>
 </head>
 <body>
 
-  <!-- Encabezado / Navegación -->
+  <!-- Navegación Principal -->
   <header>
     <a href="index.html" class="logo">
-      🚌 TransAndino Perú
+      🚌 <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="index.html">Inicio</a>
+      <!-- Todo tu menú original -->
+      <a href="index.html" class="active">Inicio</a>
       <a href="servicios.html">Servicios</a>
       <a href="requisitos.html">Requisitos</a>
       <a href="compra-pasajes.html">Reserva / Horarios</a>
       <a href="seguimiento.html">Encomiendas</a>
       <a href="ubicacion.html">Ubicación y Sedes</a>
-      
-      <!-- Rutas ajustadas según la ubicación de tus archivos -->
-      <div id="auth-buttons" style="display: flex; gap: 0.5rem;">
-        <a href="../login.html" class="btn-login">Iniciar Sesión</a>
-        <a href="../registro.html" class="btn-register">Registrarse</a>
+
+      <!-- Área de Login / Registro -->
+      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
+        <a href="/login.html" class="btn-login">Iniciar Sesión</a>
+        <a href="/registro.html" class="btn-register">Registrarse</a>
       </div>
     </nav>
   </header>
 
-  <!-- Hero Principal -->
+  <!-- Banner Hero con Imagen Original -->
   <main>
     <section class="hero">
       <div class="hero-text">
@@ -69,22 +78,24 @@
         <p>Viaja con seguridad, puntualidad y la máxima comodidad en nuestra flota moderna interprovincial.</p>
       </div>
       <div class="hero-img">
-        <img src="images.jpg" alt="Bus TransAndino" onerror="this.src='https://via.placeholder.com/500x300?text=TransAndino+Per%C3%BA'">
+        <img src="images.jpg" alt="Bus TransAndino" onerror="this.src='https://via.placeholder.com/520x320?text=TransAndino+Per%C3%BA'">
       </div>
     </section>
 
+    <!-- Información en Inicio -->
     <section class="info-section">
       <h2>Bienvenido a TransAndino Perú</h2>
-      <p>¿Planeas viajar? Consulta nuestros horarios diarios y reserva tus pasajes de forma rápida y sencilla.</p>
+      <h3>¿Planeas viajar?</h3>
+      <p>Consulta nuestros horarios diarios y reserva tus pasajes de forma rápida y sencilla.</p>
     </section>
   </main>
 
-  <!-- Pie de Página -->
+  <!-- Footer Original -->
   <footer>
     <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
   </footer>
 
-  <!-- Script para verificar sesión de usuario -->
+  <!-- Detección de Usuario Logueado -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const authContainer = document.getElementById('auth-buttons');
@@ -92,8 +103,8 @@
 
       if (user && user.nombre) {
         authContainer.innerHTML = `
-          <span style="color: #38bdf8; font-weight: bold; align-self: center;">Hola, ${user.nombre}</span>
-          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Cerrar Sesión</button>
+          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">Hola, ${user.nombre}</span>
+          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">Cerrar Sesión</button>
         `;
 
         document.getElementById('logout-btn').addEventListener('click', () => {
