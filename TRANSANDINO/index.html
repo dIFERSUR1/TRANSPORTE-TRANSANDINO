@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TransAndino Perú - Inicio</title>
-  <link rel="stylesheet" href="pages/css/animaciones.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
@@ -21,7 +20,7 @@
     /* Pestaña activa (Inicio) */
     nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
     
-    /* Botones de Inicio de Sesión y Registro */
+    /* Botones Login y Registro */
     .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
     .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
     .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
@@ -54,18 +53,18 @@
       🚌 <span>TransAndino Perú</span>
     </a>
     <nav>
-      <!-- Enlaces con la ruta hacia la carpeta pages/ -->
+      <!-- Enlaces directos a tus archivos -->
       <a href="index.html" class="active">Inicio</a>
-      <a href="pages/servicios.html">Servicios</a>
-      <a href="pages/requisitos.html">Requisitos</a>
-      <a href="pages/compra-pasajes.html">Reserva / Horarios</a>
-      <a href="pages/seguimiento.html">Encomiendas</a>
-      <a href="pages/ubicacion.html">Ubicación y Sedes</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="requisitos.html">Requisitos</a>
+      <a href="compra-pasajes.html">Reserva / Horarios</a>
+      <a href="seguimiento.html">Encomiendas</a>
+      <a href="ubicacion.html">Ubicación y Sedes</a>
 
-      <!-- Accesos a Login y Registro en la raíz -->
+      <!-- Login y Registro -->
       <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="/login.html" class="btn-login">Iniciar Sesión</a>
-        <a href="/registro.html" class="btn-register">Registrarse</a>
+        <a href="login.html" class="btn-login">Iniciar Sesión</a>
+        <a href="registro.html" class="btn-register">Registrarse</a>
       </div>
     </nav>
   </header>
@@ -78,7 +77,7 @@
         <p>Viaja con seguridad, puntualidad y la máxima comodidad en nuestra flota moderna interprovincial.</p>
       </div>
       <div class="hero-img">
-        <img src="pages/images.jpg" alt="Bus TransAndino" onerror="this.src='https://via.placeholder.com/520x320?text=TransAndino+Per%C3%BA'">
+        <img src="images.jpg" alt="Bus TransAndino" onerror="this.src='https://via.placeholder.com/520x320?text=TransAndino+Per%C3%BA'">
       </div>
     </section>
 
