@@ -1,65 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento de Encomiendas - TransAndino Perú</title>
-    <link rel="stylesheet" href="../Practica.css">
-    <link rel="stylesheet" href="css/animaciones.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encomiendas - TransAndino Perú</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo span { color: #38bdf8; }
+    
+    .bus-emoji { display: inline-block; animation: rodar 2s infinite ease-in-out; }
+    @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
+
+    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
+    nav a:hover { color: #ffffff; background: #1e293b; }
+    nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
+    
+    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
+    .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
+    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
+    .btn-register:hover { background: #0369a1 !important; }
+
+    main { max-width: 800px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; color: #38bdf8; }
+    
+    .tracking-card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.4); text-align: center; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group input { width: 100%; padding: 0.8rem; background: #0b192c; border: 1px solid #334155; border-radius: 6px; color: #ffffff; text-align: center; font-size: 1.1rem; }
+
+    .btn-submit { padding: 0.8rem 2rem; background: #0284c7; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+    .btn-submit:hover { background: #0369a1; }
+
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
+  </style>
 </head>
 <body>
 
-    <header class="main-header header-degradado">
-        <div class="header-container">
-            <div class="logo">
-                <svg class="bus-icon-animated" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
-                    <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
-                </svg>
-                <h1>TransAndino <span>Perú</span></h1>
-            </div>
-            <nav class="nav-menu navbar">
-                <ul>
-                    <li><a href="../index.html">Inicio</a></li>
-                    <li><a href="servicios.html">Servicios</a></li>
-                    <li><a href="requisitos.html">Requisitos</a></li>
-                    <li><a href="compra-pasajes.html">Reserva / Horarios</a></li>
-                    <li><a href="seguimiento.html" class="active">Encomiendas</a></li>
-                    <li><a href="ubicacion.html">Ubicación y Sedes</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+  <header>
+    <a href="../index.html" class="logo">
+      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
+    </a>
+    <nav>
+      <a href="../index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="requisitos.html">Requisitos</a>
+      <a href="compra-pasajes.html">Reserva / Horarios</a>
+      <a href="seguimiento.html" class="active">Encomiendas</a>
+      <a href="ubicacion.html">Ubicación y Sedes</a>
 
-    <main class="section-container">
-        <div class="shadow-box">
-            <h2 class="section-title">Seguimiento de Encomienda</h2>
-            <form id="tracking-form" class="booking-form">
-                <div class="form-row">
-                    <div class="input-field" style="width: 100%;">
-                        <label for="tracking-code">Número de Guía o Código de Rastreo *</label>
-                        <input type="text" id="tracking-code" name="tracking-code" placeholder="Ej: ENV-2026-8974" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn-compra submit-button" style="margin-top: 1rem;">Buscar Encomienda</button>
-            </form>
+      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
+        <a href="../login.html" class="btn-login">Iniciar Sesión</a>
+        <a href="../registro.html" class="btn-register">Registrarse</a>
+      </div>
+    </nav>
+  </header>
 
-            <div class="progress-container" style="margin-top: 2.5rem;">
-                <h3>Estado actual del envío: <span class="status-badge" style="color: #e65100;">En Tránsito</span></h3>
-                <div class="progress-bar">
-                    <span class="bus-tracker">🚌</span>
-                </div>
-                <div class="tracking-labels">
-                    <span>Origen: Ica</span>
-                    <span>En Camino</span>
-                    <span>Destino: Lima</span>
-                </div>
-            </div>
-        </div>
-    </main>
+  <main>
+    <h1>Seguimiento de Encomiendas</h1>
+    <div class="tracking-card">
+      <p style="margin-bottom: 1.5rem; color: #94a3b8;">Ingresa el código de guía para rastrear el estado de tu paquete</p>
+      <div class="form-group">
+        <input type="text" placeholder="Ejemplo: TR-982341" required>
+      </div>
+      <button class="btn-submit">Rastrear Encomienda</button>
+    </div>
+  </main>
 
-    <footer class="main-footer">
-        <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
-    </footer>
+  <footer>
+    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const authContainer = document.getElementById('auth-buttons');
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.nombre) {
+        authContainer.innerHTML = `
+          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">Hola, ${user.nombre}</span>
+          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">Cerrar Sesión</button>
+        `;
+        document.getElementById('logout-btn').addEventListener('click', () => {
+          localStorage.removeItem('user');
+          window.location.reload();
+        });
+      }
+    });
+  </script>
 
 </body>
 </html>
