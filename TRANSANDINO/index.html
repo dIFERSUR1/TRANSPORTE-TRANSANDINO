@@ -17,7 +17,7 @@
     nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
     nav a:hover { color: #ffffff; background: #1e293b; }
     
-    /* Pestaña activa (Inicio) */
+    /* Pestaña activa */
     nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
     
     /* Botones Login y Registro */
@@ -53,15 +53,17 @@
       🚌 <span>TransAndino Perú</span>
     </a>
     <nav>
-      <!-- Enlaces directos a tus archivos -->
+      <!-- Inicio (en raíz) -->
       <a href="index.html" class="active">Inicio</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="requisitos.html">Requisitos</a>
-      <a href="compra-pasajes.html">Reserva / Horarios</a>
-      <a href="seguimiento.html">Encomiendas</a>
-      <a href="ubicacion.html">Ubicación y Sedes</a>
 
-      <!-- Login y Registro -->
+      <!-- Páginas dentro de la carpeta /pages/ -->
+      <a href="pages/servicios.html">Servicios</a>
+      <a href="pages/requisitos.html">Requisitos</a>
+      <a href="pages/compra-pasajes.html">Reserva / Horarios</a>
+      <a href="pages/seguimiento.html">Encomiendas</a>
+      <a href="pages/ubicacion.html">Ubicación y Sedes</a>
+
+      <!-- Login y Registro (en raíz) -->
       <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
         <a href="login.html" class="btn-login">Iniciar Sesión</a>
         <a href="registro.html" class="btn-register">Registrarse</a>
