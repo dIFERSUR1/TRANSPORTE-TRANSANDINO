@@ -1,72 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TransAndino Perú - Inicio</title>
-    <link rel="stylesheet" href="Practica.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TransAndino Perú - Inicio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Navbar */
+    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    nav { display: flex; gap: 1rem; align-items: center; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.8rem; border-radius: 4px; transition: background 0.3s; }
+    nav a:hover { color: #ffffff; background: #1e293b; }
+    
+    /* Botones de Auth en el Nav */
+    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; }
+    .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
+    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
+    .btn-register:hover { background: #0369a1 !important; }
+
+    /* Hero Section */
+    .hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; gap: 2rem; }
+    .hero-text { flex: 1; min-width: 300px; }
+    .hero-text h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #ffffff; line-height: 1.2; }
+    .hero-text p { color: #94a3b8; font-size: 1.1rem; line-height: 1.5; margin-bottom: 1.5rem; }
+    .hero-img { flex: 1; min-width: 300px; text-align: center; }
+    .hero-img img { width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+
+    /* Section Info */
+    .info-section { text-align: center; padding: 3rem 1rem; background-color: #0f172a; flex: 1; }
+    .info-section h2 { font-size: 1.8rem; margin-bottom: 0.8rem; color: #f8fafc; }
+    .info-section p { color: #94a3b8; max-width: 600px; margin: 0 auto; }
+
+    /* Footer */
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; }
+  </style>
 </head>
 <body>
 
-    <header class="main-header header-degradado">
-        <div class="header-container">
-            <div class="logo">
-                <a href="index.html" class="logo-link">
-                    <svg class="bus-icon-animated" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="white">
-                        <path d="M4 16c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h8v2c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
-                    </svg>
-                    <h1>TransAndino <span>Perú</span></h1>
-                </a>
-            </div>
-            <nav class="nav-menu navbar">
-                <ul>
-                    <li><a href="index.html" class="active">Inicio</a></li>
-                    <li><a href="pages/servicios.html">Servicios</a></li>
-                    <li><a href="pages/requisitos.html">Requisitos</a></li>
-                    <li><a href="pages/compra-pasajes.html">Reserva / Horarios</a></li>
-                    <li><a href="pages/seguimiento.html">Encomiendas</a></li>
-                    <li><a href="pages/ubicacion.html">Ubicación y Sedes</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+  <!-- Encabezado / Navegación -->
+  <header>
+    <a href="index.html" class="logo">
+      🚌 TransAndino Perú
+    </a>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="requisitos.html">Requisitos</a>
+      <a href="compra-pasajes.html">Reserva / Horarios</a>
+      <a href="seguimiento.html">Encomiendas</a>
+      <a href="ubicacion.html">Ubicación y Sedes</a>
+      
+      <!-- Área Dinámica para Auth -->
+      <div id="auth-buttons" style="display: flex; gap: 0.5rem;">
+        <a href="login.html" class="btn-login">Iniciar Sesión</a>
+        <a href="registro.html" class="btn-register">Registrarse</a>
+      </div>
+    </nav>
+  </header>
 
-    <!-- SECCIÓN HERO CORREGIDA CON BACKGROUND AZUL -->
-    <section class="hero" style="background: linear-gradient(135deg, #002b49 0%, #003366 100%); padding: 50px 20px; color: #ffffff;">
-        <div class="hero-container" style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap;">
-            
-            <div class="hero-content" style="flex: 1 1 400px;">
-                <h2 style="font-size: 2.2rem; margin-bottom: 15px; color: #ffffff;">Conectando Ica con todo el Perú</h2>
-                <p style="font-size: 1.1rem; margin-bottom: 25px; color: #e2e8f0;">Viaja con seguridad, puntualidad y la máxima comodidad en nuestra flota moderna interprovincial.</p>
-                <a href="pages/compra-pasajes.html" class="cta-button">Comprar Pasajes Ahora</a>
-            </div>
-
-            <!-- CRITERIO 4: Imagen Responsiva usando <picture>, media y srcset para 3 resoluciones -->
-            <div class="hero-image" style="flex: 1 1 400px; text-align: center;">
-                <picture>
-                    <!-- Resolución Grande (Escritorio > 1024px) -->
-                    <source media="(min-width: 1024px)" srcset="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80">
-                    <!-- Resolución Mediana (Tablet > 600px) -->
-                    <source media="(min-width: 600px)" srcset="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=600&q=80">
-                    <!-- Resolución Pequeña (Móvil por defecto) -->
-                    <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=400&q=80" alt="Bus Interprovincial TransAndino" style="width: 100%; max-width: 500px; height: auto; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2);">
-                </picture>
-            </div>
-
-        </div>
+  <!-- Hero Principal -->
+  <main>
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Conectando Ica con todo el Perú</h1>
+        <p>Viaja con seguridad, puntualidad y la máxima comodidad en nuestra flota moderna interprovincial.</p>
+      </div>
+      <div class="hero-img">
+        <img src="images.jpg" alt="Bus TransAndino" onerror="this.src='https://via.placeholder.com/500x300?text=TransAndino+Per%C3%BA'">
+      </div>
     </section>
 
-    <main class="section-container">
-        <h2 class="section-title" style="text-align: center; margin-top: 30px;">Bienvenido a TransAndino Perú</h2>
-        <div style="text-align: center; margin-top: 15px;">
-            <h3>¿Planeas viajar?</h3>
-            <p>Consulta nuestros horarios diarios y reserva tus pasajes de forma rápida y sencilla.</p>
-        </div>
-    </main>
+    <section class="info-section">
+      <h2>Bienvenido a TransAndino Perú</h2>
+      <p>¿Planeas viajar? Consulta nuestros horarios diarios y reserva tus pasajes de forma rápida y sencilla.</p>
+    </section>
+  </main>
 
-    <footer class="main-footer">
-        <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
-    </footer>
+  <!-- Pie de Página -->
+  <footer>
+    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+  </footer>
+
+  <!-- Script para verificar sesión de usuario -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const authContainer = document.getElementById('auth-buttons');
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (user && user.nombre) {
+        authContainer.innerHTML = `
+          <span style="color: #38bdf8; font-weight: bold; align-self: center;">Hola, ${user.nombre}</span>
+          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+        `;
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+          localStorage.removeItem('user');
+          window.location.reload();
+        });
+      }
+    });
+  </script>
 
 </body>
 </html>
