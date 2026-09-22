@@ -11,35 +11,51 @@
     header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
     .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .logo span { color: #38bdf8; }
-    
     .bus-emoji { display: inline-block; animation: rodar 2s infinite ease-in-out; }
     @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
-
+    
     nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
     nav a:hover { color: #ffffff; background: #1e293b; }
-    nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
-    
-    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
-    .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
-    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
-    .btn-register:hover { background: #0369a1 !important; }
+    .active { background: #ea580c; color: #ffffff !important; font-weight: bold; }
 
-    main { max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-    h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; color: #38bdf8; }
-    
-    .booking-card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    .user-info { display: flex; align-items: center; gap: 10px; margin-left: 10px; }
+    .user-name { color: #38bdf8; font-weight: bold; font-size: 0.9rem; }
+    .btn-logout { background: #dc2626; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-decoration: none; }
+
+    main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem; }
+    .form-title { font-size: 2.2rem; font-weight: bold; color: #38bdf8; margin-bottom: 2rem; text-align: center; }
+
+    .card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
     .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: #cbd5e1; }
-    .form-group select, .form-group input { width: 100%; padding: 0.75rem; background: #0b192c; border: 1px solid #334155; border-radius: 6px; color: #ffffff; }
+    .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: #cbd5e1; font-weight: 500; }
+    .form-group select, .form-group input { width: 100%; padding: 0.75rem 1rem; background: #0b192c; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 0.95rem; outline: none; }
+    .form-group select:focus, .form-group input:focus { border-color: #38bdf8; }
 
-    .btn-submit { width: 100%; padding: 0.8rem; background: #ea580c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+    .btn-submit { width: 100%; padding: 0.85rem; background: #ea580c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 1rem; }
     .btn-submit:hover { background: #c2410c; }
 
-    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
+    /* Modal / Animación de Confirmación */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
+    .modal-content { background: #15233b; border: 2px solid #38bdf8; border-radius: 12px; padding: 2.5rem; text-align: center; max-width: 450px; width: 90%; transform: scale(0.7); opacity: 0; transition: all 0.3s ease-out; }
+    .modal-overlay.active { display: flex; }
+    .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
+    .code-badge { background: #0284c7; color: #ffffff; font-size: 1.6rem; font-weight: bold; padding: 0.8rem 1.5rem; border-radius: 8px; display: inline-block; margin: 1.2rem 0; letter-spacing: 2px; border: 1px dashed #ffffff; }
+    .btn-close { background: #38bdf8; color: #0b192c; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 1rem; font-size: 0.95rem; }
+
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; }
   </style>
 </head>
 <body>
+
+  <!-- Validación estricta de Sesión (RF-22.3) -->
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || (!user.nombre && !user.email)) {
+      alert('🔒 Acceso Denegado: Debes iniciar sesión para realizar una compra de pasaje.');
+      window.location.href = '../login.html';
+    }
+  </script>
 
   <header>
     <a href="../index.html" class="logo">
@@ -53,58 +69,118 @@
       <a href="seguimiento.html">Encomiendas</a>
       <a href="ubicacion.html">Ubicación y Sedes</a>
 
-      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="../login.html" class="btn-login">Iniciar Sesión</a>
-        <a href="../registro.html" class="btn-register">Registrarse</a>
+      <div class="user-info" id="user-box">
+        <span class="user-name" id="username-display"></span>
+        <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
       </div>
     </nav>
   </header>
 
   <main>
-    <h1>Reserva de Pasajes</h1>
-    <div class="booking-card">
-      <form id="reserva-form">
+    <h1 class="form-title">Reserva de Pasajes</h1>
+
+    <div class="card">
+      <form id="form-compra">
         <div class="form-group">
-          <label>Origen</label>
-          <select><option>Ica</option></select>
-        </div>
-        <div class="form-group">
-          <label>Destino</label>
-          <select>
-            <option>Lima</option>
-            <option>Arequipa</option>
-            <option>Cusco</option>
-            <option>Huancayo</option>
+          <label for="origen">Origen</label>
+          <select id="origen" required>
+            <option value="Ica">Ica</option>
+            <option value="Lima">Lima</option>
+            <option value="Arequipa">Arequipa</option>
           </select>
         </div>
+
         <div class="form-group">
-          <label>Fecha de Viaje</label>
-          <input type="date" required>
+          <label for="destino">Destino</label>
+          <select id="destino" required>
+            <option value="Lima">Lima</option>
+            <option value="Arequipa">Arequipa</option>
+            <option value="Cusco">Cusco</option>
+            <option value="Huancayo">Huancayo</option>
+          </select>
         </div>
-        <button type="submit" class="btn-submit">Buscar Horarios Disponibles</button>
+
+        <div class="form-group">
+          <label for="fecha_viaje">Fecha de Viaje</label>
+          <input type="date" id="fecha_viaje" required>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-comprar">Confirmar Reserva y Guardar Pasaje</button>
       </form>
     </div>
   </main>
+
+  <!-- Modal Animado de Confirmación (RF-22.4) -->
+  <div class="modal-overlay" id="modal-confirmacion">
+    <div class="modal-content">
+      <h2 style="color: #4ade80; margin-bottom: 0.5rem;">¡Reserva Exitosa! 🎉</h2>
+      <p style="color: #cbd5e1; font-size: 0.95rem;">Tu pasaje se ha registrado en la base de datos Neon.</p>
+      
+      <div class="code-badge" id="display-codigo">TA-XXXXXX</div>
+      
+      <p style="color: #94a3b8; font-size: 0.85rem;">Guarda este código para consultar el estado de tu viaje.</p>
+      <button class="btn-close" onclick="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
 
   <footer>
     <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
   </footer>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const authContainer = document.getElementById('auth-buttons');
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user && user.nombre) {
-        authContainer.innerHTML = `
-          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">Hola, ${user.nombre}</span>
-          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">Cerrar Sesión</button>
-        `;
-        document.getElementById('logout-btn').addEventListener('click', () => {
-          localStorage.removeItem('user');
-          window.location.reload();
+    // Mostrar nombre del usuario en la barra
+    document.getElementById('username-display').textContent = 'Hola, ' + (user.nombre || user.email);
+
+    // Asignar fecha mínima a hoy
+    document.getElementById('fecha_viaje').min = new Date().toISOString().split('T')[0];
+
+    // Procesar envío del formulario a Neon (RF-22.4)
+    document.getElementById('form-compra').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const btn = document.getElementById('btn-comprar');
+      btn.disabled = true;
+      btn.textContent = 'Guardando en la base de datos...';
+
+      const payload = {
+        nombre_pasajero: user.nombre || user.email,
+        origen: document.getElementById('origen').value,
+        destino: document.getElementById('destino').value,
+        fecha_viaje: document.getElementById('fecha_viaje').value
+      };
+
+      try {
+        const res = await fetch('/api/compras', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          document.getElementById('display-codigo').textContent = data.codigo_seguimiento;
+          document.getElementById('modal-confirmacion').classList.add('active');
+        } else {
+          alert('Error: ' + (data.message || 'No se pudo registrar la reserva.'));
+        }
+      } catch (error) {
+        alert('Error de conexión con el servidor al guardar la compra.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirmar Reserva y Guardar Pasaje';
       }
     });
+
+    function cerrarModal() {
+      document.getElementById('modal-confirmacion').classList.remove('active');
+      window.location.href = '../index.html';
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('user');
+      window.location.href = '../login.html';
+    }
   </script>
 
 </body>
