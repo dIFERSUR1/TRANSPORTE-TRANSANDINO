@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reserva / Horarios - TransAndino Perú</title>
+  <title>Venta de Pasajes - TransAndino Perú</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
@@ -21,26 +21,33 @@
 
     .user-info { display: flex; align-items: center; gap: 10px; margin-left: 10px; }
     .user-name { color: #38bdf8; font-weight: bold; font-size: 0.9rem; }
-    .btn-logout { background: #dc2626; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-decoration: none; }
+    .btn-logout { background: #dc2626; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
 
     main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem; }
     .form-title { font-size: 2.2rem; font-weight: bold; color: #38bdf8; margin-bottom: 2rem; text-align: center; }
 
-    .card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 520px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-group { margin-bottom: 1.2rem; }
+    .form-group.full { grid-column: span 2; }
     .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: #cbd5e1; font-weight: 500; }
     .form-group select, .form-group input { width: 100%; padding: 0.75rem 1rem; background: #0b192c; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 0.95rem; outline: none; }
     .form-group select:focus, .form-group input:focus { border-color: #38bdf8; }
 
-    .btn-submit { width: 100%; padding: 0.85rem; background: #ea580c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 1rem; }
-    .btn-submit:hover { background: #c2410c; }
+    .price-box { background: #070f1e; border: 1px solid #38bdf8; border-radius: 8px; padding: 1rem; text-align: center; margin-bottom: 1.2rem; grid-column: span 2; }
+    .price-title { font-size: 0.85rem; color: #94a3b8; }
+    .price-amount { font-size: 1.8rem; font-weight: bold; color: #4ade80; }
 
-    /* Modal / Animación de Confirmación */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
-    .modal-content { background: #15233b; border: 2px solid #38bdf8; border-radius: 12px; padding: 2.5rem; text-align: center; max-width: 450px; width: 90%; transform: scale(0.7); opacity: 0; transition: all 0.3s ease-out; }
+    .btn-submit { width: 100%; padding: 0.95rem; background: #22c55e; color: #070f1e; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; grid-column: span 2; }
+    .btn-submit:hover { background: #16a34a; color: white; }
+
+    /* Modal de Boleta / Confirmación de Venta */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 1000; }
+    .modal-content { background: #15233b; border: 2px solid #22c55e; border-radius: 12px; padding: 2rem; text-align: center; max-width: 480px; width: 90%; transform: scale(0.7); opacity: 0; transition: all 0.3s ease-out; }
     .modal-overlay.active { display: flex; }
     .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
-    .code-badge { background: #0284c7; color: #ffffff; font-size: 1.6rem; font-weight: bold; padding: 0.8rem 1.5rem; border-radius: 8px; display: inline-block; margin: 1.2rem 0; letter-spacing: 2px; border: 1px dashed #ffffff; }
+    .ticket-details { background: #0b192c; border: 1px dashed #38bdf8; padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: left; font-size: 0.9rem; line-height: 1.6; }
+    .code-badge { background: #0284c7; color: #ffffff; font-size: 1.5rem; font-weight: bold; padding: 0.6rem 1.2rem; border-radius: 8px; display: inline-block; margin-top: 0.5rem; letter-spacing: 2px; }
     .btn-close { background: #38bdf8; color: #0b192c; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 1rem; font-size: 0.95rem; }
 
     footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; }
@@ -52,7 +59,7 @@
   <script>
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || (!user.nombre && !user.email)) {
-      alert('🔒 Acceso Denegado: Debes iniciar sesión para realizar una compra de pasaje.');
+      alert('🔒 Acceso Denegado: Debes iniciar sesión para realizar la compra de un pasaje.');
       window.location.href = '../login.html';
     }
   </script>
@@ -65,7 +72,7 @@
       <a href="../index.html">Inicio</a>
       <a href="servicios.html">Servicios</a>
       <a href="requisitos.html">Requisitos</a>
-      <a href="compra-pasajes.html" class="active">Reserva / Horarios</a>
+      <a href="compra-pasajes.html" class="active">Venta de Pasajes</a>
       <a href="seguimiento.html">Encomiendas</a>
       <a href="ubicacion.html">Ubicación y Sedes</a>
 
@@ -77,13 +84,13 @@
   </header>
 
   <main>
-    <h1 class="form-title">Reserva de Pasajes</h1>
+    <h1 class="form-title">Venta de Pasajes en Línea</h1>
 
     <div class="card">
-      <form id="form-compra">
+      <form id="form-compra" class="form-grid">
         <div class="form-group">
           <label for="origen">Origen</label>
-          <select id="origen" required>
+          <select id="origen" required onchange="actualizarPrecio()">
             <option value="Ica">Ica</option>
             <option value="Lima">Lima</option>
             <option value="Arequipa">Arequipa</option>
@@ -92,7 +99,7 @@
 
         <div class="form-group">
           <label for="destino">Destino</label>
-          <select id="destino" required>
+          <select id="destino" required onchange="actualizarPrecio()">
             <option value="Lima">Lima</option>
             <option value="Arequipa">Arequipa</option>
             <option value="Cusco">Cusco</option>
@@ -105,21 +112,53 @@
           <input type="date" id="fecha_viaje" required>
         </div>
 
-        <button type="submit" class="btn-submit" id="btn-comprar">Confirmar Reserva y Guardar Pasaje</button>
+        <div class="form-group">
+          <label for="asiento">N° de Asiento</label>
+          <select id="asiento" required>
+            <option value="12 (Segundo Piso)">Asiento 12 (Ventana)</option>
+            <option value="15 (Segundo Piso)">Asiento 15 (Pasillo)</option>
+            <option value="04 (Primer Piso VIP)">Asiento 04 (VIP)</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label for="metodo_pago">Método de Pago</label>
+          <select id="metodo_pago" required>
+            <option value="Tarjeta de Crédito / Débito">💳 Tarjeta de Crédito / Débito</option>
+            <option value="Yape / Plin">📱 Yape / Plin</option>
+            <option value="PagoEfectivo">💵 PagoEfectivo</option>
+          </select>
+        </div>
+
+        <div class="price-box">
+          <div class="price-title">Monto Total a Pagar:</div>
+          <div class="price-amount" id="precio-display">S/ 45.00</div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-comprar">💳 PAGAR Y COMPRAR PASAJE</button>
       </form>
     </div>
   </main>
 
-  <!-- Modal Animado de Confirmación (RF-22.4) -->
+  <!-- Modal / Boleta de Confirmación de Venta (RF-22.4) -->
   <div class="modal-overlay" id="modal-confirmacion">
     <div class="modal-content">
-      <h2 style="color: #4ade80; margin-bottom: 0.5rem;">¡Reserva Exitosa! 🎉</h2>
-      <p style="color: #cbd5e1; font-size: 0.95rem;">Tu pasaje se ha registrado en la base de datos Neon.</p>
-      
+      <h2 style="color: #4ade80; margin-bottom: 0.3rem;">¡Venta Exitosa! 🎟️</h2>
+      <p style="color: #cbd5e1; font-size: 0.9rem;">Tu pasaje ha sido pagado y guardado en Neon DB.</p>
+
+      <div class="ticket-details">
+        <p><strong>Pasajero:</strong> <span id="ticket-pasajero"></span></p>
+        <p><strong>Ruta:</strong> <span id="ticket-ruta"></span></p>
+        <p><strong>Fecha:</strong> <span id="ticket-fecha"></span></p>
+        <p><strong>Asiento:</strong> <span id="ticket-asiento"></span></p>
+        <p><strong>Monto Pagado:</strong> <span id="ticket-monto" style="color:#4ade80; font-weight:bold;"></span></p>
+      </div>
+
+      <p style="color: #94a3b8; font-size: 0.8rem;">Código de Boleto / Seguimiento:</p>
       <div class="code-badge" id="display-codigo">TA-XXXXXX</div>
       
-      <p style="color: #94a3b8; font-size: 0.85rem;">Guarda este código para consultar el estado de tu viaje.</p>
-      <button class="btn-close" onclick="cerrarModal()">Aceptar</button>
+      <br>
+      <button class="btn-close" onclick="cerrarModal()">Aceptar y Finalizar</button>
     </div>
   </div>
 
@@ -128,19 +167,24 @@
   </footer>
 
   <script>
-    // Mostrar nombre del usuario en la barra
     document.getElementById('username-display').textContent = 'Hola, ' + (user.nombre || user.email);
-
-    // Asignar fecha mínima a hoy
     document.getElementById('fecha_viaje').min = new Date().toISOString().split('T')[0];
 
-    // Procesar envío del formulario a Neon (RF-22.4)
+    function actualizarPrecio() {
+      const orig = document.getElementById('origen').value;
+      const dest = document.getElementById('destino').value;
+      let precio = 45;
+      if (orig === 'Arequipa' || dest === 'Cusco') precio = 75;
+      if (orig === 'Lima' && dest === 'Huancayo') precio = 50;
+      document.getElementById('precio-display').textContent = `S/ ${precio}.00`;
+    }
+
     document.getElementById('form-compra').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const btn = document.getElementById('btn-comprar');
       btn.disabled = true;
-      btn.textContent = 'Guardando en la base de datos...';
+      btn.textContent = 'Procesando pago y registrando en BD...';
 
       const payload = {
         nombre_pasajero: user.nombre || user.email,
@@ -159,16 +203,23 @@
         const data = await res.json();
 
         if (res.ok && data.success) {
+          // Llenar datos de la boleta de venta
+          document.getElementById('ticket-pasajero').textContent = payload.nombre_pasajero;
+          document.getElementById('ticket-ruta').textContent = `${payload.origen} ➔ ${payload.destino}`;
+          document.getElementById('ticket-fecha').textContent = payload.fecha_viaje;
+          document.getElementById('ticket-asiento').textContent = document.getElementById('asiento').value;
+          document.getElementById('ticket-monto').textContent = document.getElementById('precio-display').textContent;
           document.getElementById('display-codigo').textContent = data.codigo_seguimiento;
+
           document.getElementById('modal-confirmacion').classList.add('active');
         } else {
-          alert('Error: ' + (data.message || 'No se pudo registrar la reserva.'));
+          alert('Error: ' + (data.message || 'No se pudo realizar la compra.'));
         }
       } catch (error) {
-        alert('Error de conexión con el servidor al guardar la compra.');
+        alert('Error de conexión con el servidor.');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Confirmar Reserva y Guardar Pasaje';
+        btn.textContent = '💳 PAGAR Y COMPRAR PASAJE';
       }
     });
 
