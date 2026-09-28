@@ -4,17 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TransAndino Perú - Inicio</title>
-  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    
-    /* Navbar / Encabezado */
     header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
     .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .logo span { color: #38bdf8; }
-    
-    /* Animación del Emoji del Bus */
     .bus-emoji {
       display: inline-block;
       animation: rodar 2s infinite ease-in-out;
@@ -23,66 +18,45 @@
       0%, 100% { transform: translateX(0) translateY(0); }
       50% { transform: translateX(6px) translateY(-2px); }
     }
-
     nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
     nav a:hover { color: #ffffff; background: #1e293b; }
-    
-    /* Pestaña activa */
     nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
-    
-    /* Botones de Login y Registro */
     .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
     .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
     .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
     .btn-register:hover { background: #0369a1 !important; }
-
-    /* Hero Section */
     .hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; width: 100%; gap: 2rem; }
     .hero-text { flex: 1; min-width: 300px; }
     .hero-text h1 { font-size: 2.8rem; margin-bottom: 1rem; color: #ffffff; line-height: 1.2; font-weight: 700; }
     .hero-text p { color: #94a3b8; font-size: 1.15rem; line-height: 1.6; margin-bottom: 1.8rem; }
-    
     .hero-img { flex: 1; min-width: 300px; text-align: center; }
     .hero-img img { width: 100%; max-width: 520px; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); border: 1px solid #1e293b; object-fit: cover; }
-
-    /* Sección Informativa */
     .info-section { text-align: center; padding: 4rem 1rem; background-color: #0f172a; flex: 1; border-top: 1px solid #1e293b; }
     .info-section h2 { font-size: 2rem; margin-bottom: 0.8rem; color: #f8fafc; font-weight: 700; }
     .info-section h3 { font-size: 1.2rem; color: #38bdf8; margin-bottom: 1rem; font-weight: 600; }
     .info-section p { color: #94a3b8; max-width: 650px; margin: 0 auto; font-size: 1rem; line-height: 1.5; }
-
-    /* Footer */
     footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
   </style>
 </head>
 <body>
-
-  <!-- Navegación Principal -->
   <header>
     <a href="index.html" class="logo">
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <!-- Inicio -->
       <a href="index.html" class="active">Inicio</a>
-
-      <!-- Páginas dentro de /pages/ -->
       <a href="pages/servicios.html">Servicios</a>
       <a href="pages/requisitos.html">Requisitos</a>
       <a href="pages/compra-pasajes.html">Reserva / Horarios</a>
       <a href="pages/seguimiento.html">Encomiendas</a>
       <a href="pages/ubicacion.html">Ubicación y Sedes</a>
-
-      <!-- Botones de Iniciar Sesión y Registro -->
       <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
         <a href="login.html" class="btn-login">Iniciar Sesión</a>
         <a href="registro.html" class="btn-register">Registrarse</a>
       </div>
     </nav>
   </header>
-
-  <!-- Banner Hero -->
   <main>
     <section class="hero">
       <div class="hero-text">
@@ -96,21 +70,15 @@
              alt="Bus TransAndino">
       </div>
     </section>
-
-    <!-- Información en Inicio -->
     <section class="info-section">
       <h2>Bienvenido a TransAndino Perú</h2>
       <h3>¿Planeas viajar?</h3>
       <p>Consulta nuestros horarios diarios y reserva tus pasajes de forma rápida y sencilla.</p>
     </section>
   </main>
-
-  <!-- Footer -->
   <footer>
     <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
   </footer>
-
-  <!-- Detección de Usuario Logueado -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const authContainer = document.getElementById('auth-buttons');
