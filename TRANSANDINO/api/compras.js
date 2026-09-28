@@ -1,41 +1,59 @@
-import { neon } from '@neondatabase/serverless';
-
-function generarCodigoSeguimiento() {
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let codigo = 'TA-';
-  for (let i = 0; i < 7; i++) {
-    codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-  }
-  return codigo;
-}
+import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método no permitido' });
-  }
-
-  const { nombre_pasajero, origen, destino, fecha_viaje } = req.body;
-
-  if (!nombre_pasajero || !origen || !destino || !fecha_viaje) {
-    return res.status(400).json({ message: 'Faltan datos requeridos.' });
-  }
+  const { method } = req;
 
   try {
-    const sql = neon(process.env.DATABASE_URL);
-    const codigo_seguimiento = generarCodigoSeguimiento();
+    if (method === 'GET') {
+      const { id_usuario } = req.query;
+      if (id_usuario) {
+        const result = await sql`SELECT * FROM compras_pasajes WHERE id_usuario = ${id_usuario} ORDER BY id DESC;`;
+        return res.status(200).json(result.rows);
+      } else {
+        const result = await sql`SELECT * FROM compras_pasajes ORDER BY id DESC;`;
+        return res.status(200).json(result.rows);
+      }
+    }
 
-    await sql`
-      INSERT INTO compras_pasajes (codigo_seguimiento, nombre_pasajero, origen, destino, fecha_viaje)
-      VALUES (${codigo_seguimiento}, ${nombre_pasajero}, ${origen}, ${destino}, ${fecha_viaje})
-    `;
+    if (method === 'POST') {
+      const { id_usuario, origen, destino, fecha, precio, estado } = req.body;
+      const estadoFinal = estado || 'registrado';
+      const result = await sql`
+        INSERT INTO compras_pasajes (id_usuario, origen, destino, fecha, precio, estado)
+        VALUES (${id_usuario}, ${origen}, ${destino}, ${fecha}, ${precio}, ${estadoFinal})
+        RETURNING *;
+      `;
+      return res.status(201).json(result.rows[0]);
+    }
 
-    return res.status(200).json({
-      success: true,
-      codigo_seguimiento,
-      message: 'Compra registrada con éxito.'
-    });
+    if (method === 'PUT') {
+      const { id } = req.query;
+      const { origen, destino, fecha, precio, estado } = req.body;
+
+      if (estado) {
+        await sql`
+          UPDATE compras_pasajes 
+          SET origen=${origen}, destino=${destino}, fecha=${fecha}, precio=${precio}, estado=${estado}
+          WHERE id=${id};
+        `;
+      } else {
+        await sql`
+          UPDATE compras_pasajes 
+          SET origen=${origen}, destino=${destino}, fecha=${fecha}
+          WHERE id=${id} AND estado='registrado';
+        `;
+      }
+      return res.status(200).json({ message: 'Registro actualizado' });
+    }
+
+    if (method === 'DELETE') {
+      const { id } = req.query;
+      await sql`DELETE FROM compras_pasajes WHERE id=${id};`;
+      return res.status(200).json({ message: 'Registro eliminado' });
+    }
+
+    return res.status(405).json({ message: 'Método no permitido' });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error interno en la base de datos.' });
+    return res.status(500).json({ error: error.message });
   }
 }
