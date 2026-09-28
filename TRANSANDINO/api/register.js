@@ -18,14 +18,10 @@ export default async function handler(req, res) {
 
   try {
     await client.connect();
-
-    // Verificar si el correo ya está en uso
     const checkUser = await client.query('SELECT id FROM usuarios WHERE email = $1', [email]);
     if (checkUser.rows.length > 0) {
       return res.status(400).json({ message: 'Este correo ya está registrado.' });
     }
-
-    // Insertar el nuevo usuario en Neon
     await client.query(
       'INSERT INTO usuarios (nombre, email, password) VALUES ($1, $2, $3)',
       [nombre, email, password]
