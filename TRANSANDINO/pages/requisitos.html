@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Requisitos - TransAndino Perú</title>
+  <title>Requisitos de Viaje - TransAndino Perú</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
@@ -12,12 +12,18 @@
     .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .logo span { color: #38bdf8; }
     
-    .bus-emoji { display: inline-block; animation: rodar 2s infinite ease-in-out; }
+    .emoji { display: inline-block; transition: transform 0.3s ease; }
+    .bus-emoji, .emoji-roll { display: inline-block; animation: rodar 2s infinite ease-in-out; }
     @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
+    .emoji-bounce { display: inline-block; animation: rebotar 2.5s infinite ease-in-out; }
+    @keyframes rebotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    .emoji-pulse { display: inline-block; animation: pulso 2s infinite ease-in-out; }
+    @keyframes pulso { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
 
     nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
     nav a:hover { color: #ffffff; background: #1e293b; }
+    nav a:hover .emoji { transform: scale(1.25) rotate(10deg); }
     nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
     
     .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
@@ -25,13 +31,16 @@
     .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
     .btn-register:hover { background: #0369a1 !important; }
 
-    main { max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-    h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; color: #38bdf8; }
+    main { max-width: 1100px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; color: #38bdf8; display: flex; align-items: center; justify-content: center; gap: 10px; }
     
-    .req-box { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-    .req-box ul { list-style: none; }
-    .req-box li { margin-bottom: 1.2rem; font-size: 1rem; color: #cbd5e1; display: flex; align-items: flex-start; gap: 10px; }
-    .req-box li span { color: #ea580c; font-weight: bold; }
+    .req-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .req-card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 1.8rem; box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: transform 0.3s ease, border-color 0.3s ease; }
+    .req-card:hover { transform: translateY(-5px); border-color: #38bdf8; }
+    .req-card h3 { color: #ea580c; font-size: 1.25rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
+    .req-card ul { list-style-type: none; }
+    .req-card li { color: #94a3b8; font-size: 0.95rem; margin-bottom: 0.6rem; position: relative; padding-left: 1.2rem; }
+    .req-card li::before { content: "✔"; color: #38bdf8; position: absolute; left: 0; font-weight: bold; }
 
     footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
   </style>
@@ -43,29 +52,49 @@
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="../index.html">Inicio</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="requisitos.html" class="active">Requisitos</a>
-      <a href="compra-pasajes.html">Reserva / Horarios</a>
-      <a href="seguimiento.html">Encomiendas</a>
-      <a href="ubicacion.html">Ubicación y Sedes</a>
+      <a href="../index.html"><span class="emoji emoji-roll">🏠</span> Inicio</a>
+      <a href="servicios.html"><span class="emoji emoji-bounce">🧳</span> Servicios</a>
+      <a href="requisitos.html" class="active"><span class="emoji">📋</span> Requisitos</a>
+      <a href="compra-pasajes.html"><span class="emoji emoji-bounce">🎟️</span> Reserva / Horarios</a>
+      <a href="seguimiento.html"><span class="emoji emoji-bounce">📦</span> Encomiendas</a>
+      <a href="ubicacion.html"><span class="emoji emoji-pulse">📍</span> Ubicación y Sedes</a>
 
       <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="../login.html" class="btn-login">Iniciar Sesión</a>
-        <a href="../registro.html" class="btn-register">Registrarse</a>
+        <a href="../login.html" class="btn-login"><span class="emoji">🔑</span> Iniciar Sesión</a>
+        <a href="../registro.html" class="btn-register"><span class="emoji">✍️</span> Registrarse</a>
       </div>
     </nav>
   </header>
 
   <main>
-    <h1>Requisitos de Viaje</h1>
-    <div class="req-box">
-      <ul>
-        <li><span>✔</span> Documento Nacional de Identidad (DNI) o Pasaporte vigente obligatorio para el embarque.</li>
-        <li><span>✔</span> Menores de edad deben viajar acompañados por un padre o portar autorización notarial firmada.</li>
-        <li><span>✔</span> Presentarse en la agencia 30 minutos antes de la hora de salida programada.</li>
-        <li><span>✔</span> El equipaje permitido en bodega es de hasta 20 kg por pasajero sin costo adicional.</li>
-      </ul>
+    <h1>Requisitos para el Viaje <span class="emoji emoji-pulse">📋</span></h1>
+    <div class="req-grid">
+      <div class="req-card">
+        <h3><span class="emoji">🆔</span> Documentación Obligatoria</h3>
+        <ul>
+          <li>DNI vigencia original para peruanos.</li>
+          <li>Pasaporte o Carnet de Extranjería para extranjeros.</li>
+          <li>Boleto impreso o digital guardado en el teléfono.</li>
+        </ul>
+      </div>
+
+      <div class="req-card">
+        <h3><span class="emoji emoji-bounce">👶</span> Menores de Edad</h3>
+        <ul>
+          <li>DNI vigente del menor.</li>
+          <li>Acompañado por padre, madre o tutor legal.</li>
+          <li>Permiso notarial si viaja solo o con terceros.</li>
+        </ul>
+      </div>
+
+      <div class="req-card">
+        <h3><span class="emoji emoji-bounce">🧳</span> Equipaje Permitido</h3>
+        <ul>
+          <li>Hasta 20 kg libres de equipaje en bodega.</li>
+          <li>Equipaje de mano no mayor a 5 kg.</li>
+          <li>Prohibido transportar objetos peligrosos o inflamables.</li>
+        </ul>
+      </div>
     </div>
   </main>
 
@@ -79,7 +108,7 @@
       const user = JSON.parse(localStorage.getItem('user'));
       if (user && user.nombre) {
         authContainer.innerHTML = `
-          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">Hola, ${user.nombre}</span>
+          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">👋 Hola, ${user.nombre}</span>
           <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">Cerrar Sesión</button>
         `;
         document.getElementById('logout-btn').addEventListener('click', () => {
