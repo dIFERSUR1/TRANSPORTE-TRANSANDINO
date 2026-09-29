@@ -7,149 +7,197 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    
     header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
     .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .logo span { color: #38bdf8; }
+    nav { display: flex; gap: 0.5rem; align-items: center; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; }
     
-    .emoji { display: inline-block; transition: transform 0.3s ease; }
-    .bus-emoji, .emoji-roll { display: inline-block; animation: rodar 2s infinite ease-in-out; }
-    @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
-    .emoji-bounce { display: inline-block; animation: rebotar 2.5s infinite ease-in-out; }
-    @keyframes rebotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-    .emoji-pulse { display: inline-block; animation: pulso 2s infinite ease-in-out; }
-    @keyframes pulso { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
-
-    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
-    nav a:hover { color: #ffffff; background: #1e293b; }
-    nav a:hover .emoji { transform: scale(1.25) rotate(10deg); }
-    nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
+    main { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    h1 { color: #38bdf8; margin-bottom: 1.5rem; text-align: center; }
+    .card-box { background: #15233b; border: 1px solid #1e293b; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
+    .table-horarios { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .table-horarios th, .table-horarios td { padding: 1rem; text-align: left; border-bottom: 1px solid #1e293b; font-size: 0.9rem; }
+    .table-horarios th { background: #070f1e; color: #38bdf8; }
     
-    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
-    .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
-    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
-    .btn-register:hover { background: #0369a1 !important; }
-
-    main { max-width: 1100px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-    h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; color: #38bdf8; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-comprar { background: #0284c7; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-comprar:hover { background: #0369a1; }
+    #modal-asientos { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; width: 90%; max-width: 500px; text-align: center; }
     
-    .booking-container { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.4); margin-bottom: 2rem; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end; }
-    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group label { font-size: 0.9rem; color: #38bdf8; font-weight: bold; }
-    .form-group select, .form-group input { padding: 0.7rem; background: #0b192c; border: 1px solid #1e293b; color: #ffffff; border-radius: 6px; outline: none; }
-    .btn-search { background: #ea580c; color: white; border: none; padding: 0.75rem; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.3s ease; }
-    .btn-search:hover { background: #c2410c; }
+    .bus-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 1.5rem 0; background: #0b192c; padding: 1rem; border-radius: 8px; }
+    .asiento { padding: 0.8rem; background: #1e293b; border: 1px solid #38bdf8; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .asiento:hover { background: #38bdf8; color: #000; }
+    .asiento.seleccionado { background: #ea580c !important; color: white; border-color: #ea580c; }
+    
+    .btn-confirmar { background: #ea580c; color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; }
+    .btn-cancelar { background: #64748b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; width: 100%; }
 
-    .schedule-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: #15233b; border-radius: 8px; overflow: hidden; }
-    .schedule-table th, .schedule-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #1e293b; }
-    .schedule-table th { background: #070f1e; color: #38bdf8; font-size: 0.95rem; }
-    .schedule-table td { color: #cbd5e1; font-size: 0.9rem; }
-    .btn-buy { background: #0284c7; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .btn-buy:hover { background: #0369a1; }
-
-    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; margin-top: auto; }
   </style>
 </head>
 <body>
 
   <header>
-    <a href="../index.html" class="logo">
-      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
-    </a>
+    <a href="../index.html" class="logo">🚌 <span>TransAndino Perú</span></a>
     <nav>
-      <a href="../index.html"><span class="emoji emoji-roll">🏠</span> Inicio</a>
-      <a href="servicios.html"><span class="emoji emoji-bounce">🧳</span> Servicios</a>
-      <a href="requisitos.html"><span class="emoji">📋</span> Requisitos</a>
-      <a href="compra-pasajes.html" class="active"><span class="emoji emoji-bounce">🎟️</span> Reserva / Horarios</a>
-      <a href="seguimiento.html"><span class="emoji emoji-bounce">📦</span> Encomiendas</a>
-      <a href="ubicacion.html"><span class="emoji emoji-pulse">📍</span> Ubicación y Sedes</a>
-
-      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="../login.html" class="btn-login"><span class="emoji">🔑</span> Iniciar Sesión</a>
-        <a href="../registro.html" class="btn-register"><span class="emoji">✍️</span> Registrarse</a>
-      </div>
+      <a href="../index.html">🏠 Inicio</a>
+      <a href="servicios.html">🧳 Servicios</a>
+      <a href="requisitos.html">📋 Requisitos</a>
+      <a href="compra-pasajes.html" style="background:#ea580c; color:white;">🎟️ Reserva / Horarios</a>
+      <a href="seguimiento.html">📦 Encomiendas</a>
+      <a href="ubicacion.html">📍 Ubicación</a>
+      <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem;"></span>
     </nav>
   </header>
 
   <main>
-    <h1>Reserva de Pasajes y Horarios <span class="emoji emoji-bounce">🎟️</span></h1>
-    
-    <div class="booking-container">
-      <form class="form-grid">
-        <div class="form-group">
-          <label>Origen</label>
-          <select><option>Ica</option><option>Lima</option><option>Arequipa</option></select>
-        </div>
-        <div class="form-group">
-          <label>Destino</label>
-          <select><option>Lima</option><option>Ica</option><option>Arequipa</option></select>
-        </div>
-        <div class="form-group">
-          <label>Fecha de Viaje</label>
-          <input type="date">
-        </div>
-        <button type="button" class="btn-search"><span class="emoji emoji-roll">🔍</span> Buscar Horarios</button>
-      </form>
-    </div>
+    <h1>Reserva de Pasajes y Horarios 🎟️</h1>
 
-    <table class="schedule-table">
-      <thead>
-        <tr>
-          <th>Ruta</th>
-          <th>Hora Salida</th>
-          <th>Servicio</th>
-          <th>Precio</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Ica ➔ Lima</td>
-          <td>08:00 AM</td>
-          <td>Ejecutivo 160°</td>
-          <td>S/ 45.00</td>
-          <td><button class="btn-buy">Comprar</button></td>
-        </tr>
-        <tr>
-          <td>Ica ➔ Lima</td>
-          <td>02:30 PM</td>
-          <td>VIP Suite</td>
-          <td>S/ 60.00</td>
-          <td><button class="btn-buy">Comprar</button></td>
-        </tr>
-        <tr>
-          <td>Ica ➔ Arequipa</td>
-          <td>08:00 PM</td>
-          <td>VIP Suite</td>
-          <td>S/ 90.00</td>
-          <td><button class="btn-buy">Comprar</button></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="card-box">
+      <table class="table-horarios">
+        <thead>
+          <tr>
+            <th>Ruta</th>
+            <th>Hora Salida</th>
+            <th>Servicio</th>
+            <th>Precio</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ica ➔ Lima</td>
+            <td>08:00 AM</td>
+            <td>Ejecutivo 160°</td>
+            <td>S/ 45.00</td>
+            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Lima', 45.00)">Comprar</button></td>
+          </tr>
+          <tr>
+            <td>Ica ➔ Lima</td>
+            <td>02:30 PM</td>
+            <td>VIP Suite</td>
+            <td>S/ 60.00</td>
+            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Lima', 60.00)">Comprar</button></td>
+          </tr>
+          <tr>
+            <td>Ica ➔ Arequipa</td>
+            <td>08:00 PM</td>
+            <td>VIP Suite</td>
+            <td>S/ 90.00</td>
+            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Arequipa', 90.00)">Comprar</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 
+  <!-- Modal para Selección de Asientos -->
+  <div id="modal-asientos">
+    <div class="modal-content">
+      <h2 style="color:#38bdf8;">Selecciona tu Asiento 💺</h2>
+      <p id="info-ruta" style="margin-top:0.5rem; color:#94a3b8;"></p>
+
+      <div class="bus-grid" id="grid-asientos">
+        <!-- Generado por JavaScript -->
+      </div>
+
+      <p id="asiento-seleccionado-txt" style="margin-bottom:1rem; color:#38bdf8; font-weight:bold;">Ningún asiento seleccionado</p>
+
+      <button class="btn-confirmar" id="btn-procesar" onclick="procesarCompra()" disabled>Confirmar Compra</button>
+      <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+
   <footer>
-    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nicolai Perez Huamani.</p>
   </footer>
 
   <script>
+    let viajeSeleccionado = {};
+    let asientoElegido = null;
+
     document.addEventListener('DOMContentLoaded', () => {
-      const authContainer = document.getElementById('auth-buttons');
       const user = JSON.parse(localStorage.getItem('user'));
       if (user && user.nombre) {
-        authContainer.innerHTML = `
-          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">👋 Hola, ${user.nombre}</span>
-          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">Cerrar Sesión</button>
-        `;
-        document.getElementById('logout-btn').addEventListener('click', () => {
-          localStorage.removeItem('user');
-          window.location.reload();
-        });
+        document.getElementById('user-display').innerText = `👋 ${user.nombre}`;
       }
     });
-  </script>
 
+    function abrirModal(origen, destino, precio) {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        alert('Debes iniciar sesión para comprar un pasaje.');
+        window.location.href = '../login.html';
+        return;
+      }
+
+      viajeSeleccionado = { origen, destino, precio, id_usuario: user.id, nombre_pasajero: user.nombre };
+      document.getElementById('info-ruta').innerText = `${origen} ➔ ${destino} | Precio: S/ ${precio.toFixed(2)}`;
+      
+      // Generar 12 asientos en pantalla
+      const grid = document.getElementById('grid-asientos');
+      grid.innerHTML = '';
+      asientoElegido = null;
+      document.getElementById('btn-procesar').disabled = true;
+      document.getElementById('asiento-seleccionado-txt').innerText = 'Ningún asiento seleccionado';
+
+      for (let i = 1; i <= 12; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'asiento';
+        btn.innerText = `N° ${i}`;
+        btn.onclick = () => seleccionarAsiento(i, btn);
+        grid.appendChild(btn);
+      }
+
+      document.getElementById('modal-asientos').style.display = 'flex';
+    }
+
+    function seleccionarAsiento(numero, elemento) {
+      document.querySelectorAll('.asiento').forEach(el => el.classList.remove('seleccionado'));
+      elemento.classList.add('seleccionado');
+      asientoElegido = numero;
+      document.getElementById('asiento-seleccionado-txt').innerText = `Asiento Seleccionado: N° ${numero}`;
+      document.getElementById('btn-procesar').disabled = false;
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal-asientos').style.display = 'none';
+    }
+
+    async function procesarCompra() {
+      if (!asientoElegido) return;
+
+      const hoy = new Date().toISOString().split('T')[0];
+      const datosCompra = {
+        id_usuario: viajeSeleccionado.id_usuario,
+        nombre_pasajero: viajeSeleccionado.nombre_pasajero,
+        origen: viajeSeleccionado.origen,
+        destino: viajeSeleccionado.destino,
+        fecha: hoy,
+        precio: viajeSeleccionado.precio,
+        estado: 'registrado'
+      };
+
+      try {
+        const res = await fetch('/api/compras', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datosCompra)
+        });
+
+        const respuesta = await res.json();
+
+        if (res.ok) {
+          alert(`¡Compra realizada con éxito! 🎉\nCódigo de seguimiento: ${respuesta.codigo_seguimiento || 'TA-OK'}`);
+          cerrarModal();
+        } else {
+          alert('Error al registrar la compra: ' + (respuesta.message || 'Intente nuevamente'));
+        }
+      } catch (err) {
+        alert('Error de conexión al procesar la compra.');
+      }
+    }
+  </script>
 </body>
 </html>
