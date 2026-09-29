@@ -1,1 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Pasajes - TransAndino Perú</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    html { scrollbar-gutter: stable; }
+    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
 
+    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .logo span { color: #38bdf8; }
+
+    .emoji { display: inline-flex; justify-content: center; align-items: center; width: 24px; text-align: center; }
+
+    nav { display: flex; gap: 0.5rem; align-items: center; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+    nav a:hover { color: #ffffff; background: #1e293b; }
+    nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
+
+    main { max-width: 1100px; margin: 2.5rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    h1 { font-size: 2rem; color: #38bdf8; margin-bottom: 1.5rem; text-align: center; }
+
+    .table-container { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; overflow-x: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 1rem; border-bottom: 1px solid #1e293b; font-size: 0.9rem; }
+    th { background: #070f1e; color: #38bdf8; }
+
+    .status-badge { padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+    .status-registrado { background: #0284c7; color: white; }
+    .status-atendido { background: #22c55e; color: white; }
+
+    .btn-edit { background: #ea580c; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-edit:hover { background: #c2410c; }
+
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="logo"><span class="emoji">🚌</span> <span>TransAndino Perú</span></a>
+    <nav>
+      <a href="../index.html"><span class="emoji">🏠</span> Inicio</a>
+      <a href="servicios.html"><span class="emoji">📘</span> Servicios</a>
+      <a href="requisitos.html"><span class="emoji">📜</span> Requisitos</a>
+      <a href="compra-pasajes.html"><span class="emoji">🎟</span> Reserva / Horarios</a>
+      <a href="mis-compras.html" class="active"><span class="emoji">📋</span> Mis Pasajes</a>
+      <a href="seguimiento.html"><span class="emoji">📦</span> Encomiendas</a>
+      <a href="ubicacion.html"><span class="emoji">📍</span> Ubicación y Sedes</a>
+      <div id="auth-buttons"></div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Mis Registros de Compra de Pasajes <span class="emoji">📜</span></h1>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Asiento</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acción (RF-22.6)</th>
+          </tr>
+        </thead>
+        <tbody id="mis-compras-tbody">
+          <!-- Carga dinámica -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', cargarMisCompras);
+
+    async function cargarMisCompras() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        alert('Debes iniciar sesión para ver tus pasajes.');
+        window.location.href = '../login.html';
+        return;
+      }
+
+      const tbody = document.getElementById('mis-compras-tbody');
+      tbody.innerHTML = '';
+
+      let registros = [];
+      try {
+        // Consulta SQL SELECT ... WHERE id_usuario = user.id
+        const res = await fetch(`/api/compras-pasajes/usuario/${user.id || 1}`);
+        if (res.ok) {
+          registros = await res.json();
+        } else {
+          let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+          registros = local.filter(r => r.id_usuario === (user.id || 1));
+        }
+      } catch (err) {
+        let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+        registros = local.filter(r => r.id_usuario === (user.id || 1));
+      }
+
+      if (registros.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8;">No tienes registros de pasajes guardados.</td></tr>`;
+        return;
+      }
+
+      registros.forEach(item => {
+        const tr = document.createElement('tr');
+        const puedeEditar = item.estado === 'registrado';
+
+        tr.innerHTML = `
+          <td>#${item.id || '1'}</td>
+          <td>${item.origen}</td>
+          <td>${item.destino}</td>
+          <td>${item.fecha_viaje}</td>
+          <td>${item.hora_viaje}</td>
+          <td>${item.num_asiento} (${item.tipo_asiento || 'Estándar'})</td>
+          <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio}.00</td>
+          <td><span class="status-badge ${item.estado === 'registrado' ? 'status-registrado' : 'status-atendido'}">${item.estado}</span></td>
+          <td>
+            ${puedeEditar 
+              ? `<button class="btn-edit" onclick="editarRegistro(${item.id})">✏️ Editar</button>`
+              : `<span style="color:#64748b; font-size:0.8rem;">Atendido (No editable)</span>`}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editarRegistro(id) {
+      const nuevoOrigen = prompt('Nuevo Origen:', 'Ica');
+      const nuevoDestino = prompt('Nuevo Destino:', 'Lima');
+
+      if (nuevoOrigen && nuevoDestino) {
+        let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+        let index = local.findIndex(r => r.id === id);
+        if (index !== -1) {
+          local[index].origen = nuevoOrigen;
+          local[index].destino = nuevoDestino;
+          localStorage.setItem('compras_pasajes', JSON.stringify(local));
+          alert('Registro actualizado correctamente.');
+          cargarMisCompras();
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
