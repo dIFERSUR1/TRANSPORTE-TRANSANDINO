@@ -12,7 +12,6 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* FIX DEFINITIVO DE SALTO DE PÁGINA: MANTIENE LA BARRA DE SCROLL SIEMPRE VISIBLE */
     html {
       overflow-y: scroll;
       scrollbar-gutter: stable;
@@ -26,7 +25,6 @@
       flex-direction: column;
     }
 
-    /* HEADER Y NAVEGACIÓN UNIFICADOS */
     header {
       background-color: #070f1e;
       padding: 1rem 2rem;
@@ -50,7 +48,6 @@
       color: #38bdf8;
     }
 
-    /* ANIMACIONES Y TAMAÑOS DE EMOJIS UNIFICADOS */
     .emoji, .bus-emoji {
       display: inline-flex;
       justify-content: center;
@@ -105,16 +102,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      outline: none;
     }
 
     nav a:hover {
       color: #ffffff;
       background: #1e293b;
-    }
-
-    nav a:hover .emoji {
-      transform: scale(1.2) rotate(8deg);
     }
 
     nav a.active {
@@ -129,19 +121,10 @@
       margin-left: 0.5rem;
     }
 
-    .btn-login:hover {
-      background: #38bdf8 !important;
-      color: #0b192c !important;
-    }
-
     .btn-register {
       background: #0284c7;
       color: #ffffff !important;
       font-weight: bold;
-    }
-
-    .btn-register:hover {
-      background: #0369a1 !important;
     }
 
     .btn-admin {
@@ -212,7 +195,6 @@
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.2s ease;
     }
 
     .btn-edit:hover { background: #c2410c; }
@@ -280,11 +262,26 @@
   </footer>
 
   <script>
-    document.addEventListener('DOMContentLoaded', cargarMisCompras);
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarMisCompras();
+      renderAuthHeader();
+    });
+
+    function getUsuarioActual() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) return null;
+      // Captura única de la ID del cliente (id, dni o email)
+      return {
+        id: user.id || user.dni || user.email,
+        nombre: user.nombre || user.email || user.dni,
+        rol: user.rol || 'cliente',
+        email: user.email
+      };
+    }
 
     async function cargarMisCompras() {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (!user) {
+      const user = getUsuarioActual();
+      if (!user || !user.id) {
         alert('Debes iniciar sesión para ver tus pasajes.');
         window.location.href = '../login.html';
         return;
@@ -295,20 +292,22 @@
 
       let registros = [];
       try {
-        const res = await fetch(`/api/compras-pasajes/usuario/${user.id || 1}`);
+        const res = await fetch(`/api/compras-pasajes/usuario/${user.id}`);
         if (res.ok) {
           registros = await res.json();
         } else {
           let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-          registros = local.filter(r => r.id_usuario === (user.id || 1));
+          // FILTRADO ESTRICTO RF-22.5: Solo pasajes pertenecientes al id de la cuenta activa
+          registros = local.filter(r => String(r.id_usuario) === String(user.id));
         }
       } catch (err) {
         let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-        registros = local.filter(r => r.id_usuario === (user.id || 1));
+        // FILTRADO ESTRICTO RF-22.5
+        registros = local.filter(r => String(r.id_usuario) === String(user.id));
       }
 
       if (registros.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8;">No tienes registros de pasajes guardados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8; padding: 2rem;">No tienes registros de pasajes guardados con esta cuenta (${user.id}).</td></tr>`;
         return;
       }
 
@@ -352,19 +351,18 @@
       }
     }
 
-    // MANEJO DE SESIÓN EN HEADER
-    document.addEventListener('DOMContentLoaded', () => {
+    function renderAuthHeader() {
       const authContainer = document.getElementById('auth-buttons');
       const user = JSON.parse(localStorage.getItem('user'));
       if (user) {
-        let html = `<span style="color:#38bdf8; font-weight:bold;">👋 ${user.nombre || user.email}</span>`;
+        let html = `<span style="color:#38bdf8; font-weight:bold;">👋 ${user.nombre || user.dni || user.email}</span>`;
         if (user.rol === 'admin' || user.rol === 'empleado' || user.email === 'axlperez183@gmail.com') {
           html += `<a href="../panel.html" class="btn-admin" style="padding:0.4rem 0.8rem; border-radius:6px; text-decoration:none; margin-left:0.5rem;">⚙️ Panel</a>`;
         }
-        html += `<button onclick="localStorage.removeItem('user'); location.reload();" style="background:#ef4444; color:white; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; margin-left:0.5rem; font-weight:bold;">Cerrar Sesión</button>`;
+        html += `<button onclick="localStorage.removeItem('user'); window.location.href='../login.html';" style="background:#ef4444; color:white; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; margin-left:0.5rem; font-weight:bold;">Cerrar Sesión</button>`;
         authContainer.innerHTML = html;
       }
-    });
+    }
   </script>
 
 </body>
