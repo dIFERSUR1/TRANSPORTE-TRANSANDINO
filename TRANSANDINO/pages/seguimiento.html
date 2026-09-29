@@ -7,96 +7,101 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    
     header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
     .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .logo span { color: #38bdf8; }
-    
-    .emoji { display: inline-block; transition: transform 0.3s ease; }
-    .bus-emoji, .emoji-roll { display: inline-block; animation: rodar 2s infinite ease-in-out; }
-    @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
-    .emoji-bounce { display: inline-block; animation: rebotar 2.5s infinite ease-in-out; }
-    @keyframes rebotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-    .emoji-pulse { display: inline-block; animation: pulso 2s infinite ease-in-out; }
-    @keyframes pulso { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
-
     nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
-    nav a:hover { color: #ffffff; background: #1e293b; }
-    nav a:hover .emoji { transform: scale(1.25) rotate(10deg); }
-    nav a.active { background-color: #ea580c; color: #ffffff; font-weight: bold; }
-    
-    .btn-login { border: 1px solid #38bdf8; color: #38bdf8 !important; margin-left: 0.5rem; }
-    .btn-login:hover { background: #38bdf8 !important; color: #0b192c !important; }
-    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
-    .btn-register:hover { background: #0369a1 !important; }
+    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; }
+    .btn-logout { background: #ef4444; color: white; border: none; padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; margin-left: 0.5rem; }
+    .btn-logout:hover { background: #dc2626; }
+    .btn-admin { background: #ea580c; color: white; border-radius: 6px; font-weight: bold; margin-left: 0.5rem; }
 
     main { max-width: 800px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; text-align: center; }
-    h1 { font-size: 2.2rem; margin-bottom: 1.5rem; color: #38bdf8; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    p.subtitle { color: #94a3b8; margin-bottom: 2rem; }
+    h1 { color: #38bdf8; margin-bottom: 1.5rem; font-size: 2.2rem; }
     
-    .tracking-card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-    .search-box { display: flex; gap: 0.5rem; max-width: 500px; margin: 0 auto; }
-    .search-box input { flex: 1; padding: 0.8rem 1rem; background: #0b192c; border: 1px solid #1e293b; color: #ffffff; border-radius: 6px; font-size: 1rem; outline: none; }
-    .search-box button { background: #ea580c; color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.3s ease; }
+    .card-box { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; }
+    .search-box { display: flex; gap: 10px; margin-top: 1.5rem; justify-content: center; }
+    .search-box input { padding: 0.8rem; border-radius: 6px; border: 1px solid #1e293b; background: #0b192c; color: white; font-size: 1rem; width: 60%; }
+    .search-box button { background: #ea580c; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .search-box button:hover { background: #c2410c; }
 
-    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; margin-top: auto; }
   </style>
 </head>
 <body>
 
   <header>
-    <a href="../index.html" class="logo">
-      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
-    </a>
+    <a href="../index.html" class="logo">🚌 <span>TransAndino Perú</span></a>
     <nav>
-      <a href="../index.html"><span class="emoji emoji-roll">🏠</span> Inicio</a>
-      <a href="servicios.html"><span class="emoji emoji-bounce">🧳</span> Servicios</a>
-      <a href="requisitos.html"><span class="emoji">📋</span> Requisitos</a>
-      <a href="compra-pasajes.html"><span class="emoji emoji-bounce">🎟️</span> Reserva / Horarios</a>
-      <a href="seguimiento.html" class="active"><span class="emoji emoji-bounce">📦</span> Encomiendas</a>
-      <a href="ubicacion.html"><span class="emoji emoji-pulse">📍</span> Ubicación y Sedes</a>
+      <a href="../index.html">🏠 Inicio</a>
+      <a href="servicios.html">🧳 Servicios</a>
+      <a href="requisitos.html">📋 Requisitos</a>
+      <a href="compra-pasajes.html">🎟️ Reserva / Horarios</a>
+      <a href="seguimiento.html" style="background:#ea580c; color:white;">📦 Encomiendas</a>
+      <a href="ubicacion.html">📍 Ubicación</a>
 
-      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="../login.html" class="btn-login"><span class="emoji">🔑</span> Iniciar Sesión</a>
-        <a href="../registro.html" class="btn-register"><span class="emoji">✍️</span> Registrarse</a>
-      </div>
+      <!-- Perfil y Panel Admin alineados -->
+      <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem;"></span>
+      <a href="../panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;">⚙️ Panel Admin</a>
+      <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;">Cerrar Sesión</button>
     </nav>
   </header>
 
   <main>
-    <h1>Rastreo de Encomiendas <span class="emoji emoji-bounce">📦</span></h1>
-    <p class="subtitle">Ingresa tu número de guía o código de seguimiento para conocer el estado de tu paquete.</p>
-
-    <div class="tracking-card">
+    <h1>Seguimiento de Encomiendas 📦</h1>
+    
+    <div class="card-box">
+      <p style="color:#cbd5e1;">Ingresa el código de rastreo de tu encomienda para conocer su estado en tiempo real.</p>
+      
       <div class="search-box">
-        <input type="text" placeholder="Ejemplo: G-987654">
-        <button type="button"><span class="emoji emoji-roll">🔎</span> Buscar</button>
+        <input type="text" id="codigo-tracking" placeholder="Ej: ENC-12345">
+        <button onclick="buscarEncomienda()">Buscar</button>
       </div>
+
+      <div id="resultado-busqueda" style="margin-top: 2rem; display: none;"></div>
     </div>
   </main>
 
   <footer>
-    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nicolai Perez Huamani.</p>
   </footer>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const authContainer = document.getElementById('auth-buttons');
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user && user.nombre) {
-        authContainer.innerHTML = `
-          <span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">👋 Hola, ${user.nombre}</span>
-          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">Cerrar Sesión</button>
-        `;
-        document.getElementById('logout-btn').addEventListener('click', () => {
-          localStorage.removeItem('user');
-          window.location.reload();
-        });
+      const usuarioActual = JSON.parse(localStorage.getItem('user'));
+
+      if (usuarioActual) {
+        document.getElementById('user-display').innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
+        document.getElementById('btn-logout').style.display = 'inline-block';
+
+        if (usuarioActual.email === 'axlperez183@gmail.com') {
+          document.getElementById('btn-panel-admin').style.display = 'inline-block';
+        } else {
+          document.getElementById('btn-panel-admin').style.display = 'none';
+        }
+      } else {
+        document.getElementById('user-display').innerText = '';
+        document.getElementById('btn-logout').style.display = 'none';
+        document.getElementById('btn-panel-admin').style.display = 'none';
       }
     });
-  </script>
 
+    function cerrarSesion() {
+      localStorage.removeItem('user');
+      alert('Sesión cerrada correctamente.');
+      window.location.href = '../login.html';
+    }
+
+    function buscarEncomienda() {
+      const cod = document.getElementById('codigo-tracking').value.trim();
+      const res = document.getElementById('resultado-busqueda');
+      if (!cod) {
+        alert('Por favor, ingresa un código de seguimiento.');
+        return;
+      }
+      res.style.display = 'block';
+      res.innerHTML = `<p style="color:#38bdf8;">Buscando información para el paquete <strong>${cod}</strong>...</p>`;
+    }
+  </script>
 </body>
 </html>
