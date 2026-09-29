@@ -12,22 +12,28 @@
     .logo span { color: #38bdf8; }
     nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; }
+    .btn-login { background: #0284c7; color: white; border-radius: 6px; font-weight: bold; margin-left: 0.5rem; text-decoration: none; }
+    .btn-login:hover { background: #0369a1; }
+    .btn-admin { background: #ea580c; color: white; border-radius: 6px; font-weight: bold; margin-left: 0.5rem; text-decoration: none; }
+    .btn-admin:hover { background: #c2410c; }
     .btn-logout { background: #ef4444; color: white; border: none; padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; margin-left: 0.5rem; }
     .btn-logout:hover { background: #dc2626; }
-    .btn-admin { background: #ea580c; color: white; border-radius: 6px; font-weight: bold; margin-left: 0.5rem; }
 
-    main { max-width: 1100px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-    .hero { display: flex; align-items: center; justify-content: space-between; gap: 2rem; background: #15233b; border: 1px solid #1e293b; padding: 2.5rem; border-radius: 12px; margin-bottom: 3rem; }
-    .hero-text { flex: 1; }
-    .hero-text h1 { font-size: 2.5rem; color: #ffffff; margin-bottom: 1rem; line-height: 1.2; }
-    .hero-text p { color: #94a3b8; font-size: 1.1rem; line-height: 1.6; }
-    .hero-img { flex: 1; text-align: center; }
-    .hero-img img { max-width: 100%; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
 
-    .welcome-section { text-align: center; max-width: 700px; margin: 0 auto; }
+    /* Hero Banner */
+    .hero-banner { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; display: flex; align-items: center; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap; }
+    .hero-text { flex: 1; min-width: 280px; }
+    .hero-text h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 1rem; line-height: 1.2; }
+    .hero-text p { color: #94a3b8; font-size: 1.05rem; line-height: 1.6; }
+    .hero-img { flex: 1; min-width: 280px; text-align: center; }
+    .hero-img img { width: 100%; max-width: 450px; border-radius: 10px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+
+    /* Welcome Section */
+    .welcome-section { text-align: center; margin-top: 1rem; }
     .welcome-section h2 { color: #38bdf8; font-size: 1.8rem; margin-bottom: 0.5rem; }
-    .welcome-section h3 { color: #38bdf8; font-size: 1.2rem; margin-bottom: 0.5rem; }
-    .welcome-section p { color: #94a3b8; font-size: 1rem; }
+    .welcome-section h4 { color: #38bdf8; font-weight: 500; margin-bottom: 0.5rem; }
+    .welcome-section p { color: #94a3b8; font-size: 0.95rem; }
 
     footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; margin-top: auto; }
   </style>
@@ -44,15 +50,18 @@
       <a href="pages/seguimiento.html">📦 Encomiendas</a>
       <a href="pages/ubicacion.html">📍 Ubicación</a>
 
-      <!-- Zona de perfil / Panel Admin alineados -->
-      <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem;"></span>
+      <!-- Botón de Iniciar Sesión (Si no hay sesión activa) -->
+      <a href="login.html" id="btn-login" class="btn-login">🔑 Iniciar Sesión</a>
+
+      <!-- Datos de Sesión (Si el usuario ya inició sesión) -->
+      <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem; display:none;"></span>
       <a href="panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;">⚙️ Panel Admin</a>
       <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;">Cerrar Sesión</button>
     </nav>
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero-banner">
       <div class="hero-text">
         <h1>Conectando Ica con todo el Perú 🇵🇪</h1>
         <p>Viaja con seguridad, puntualidad y la máxima comodidad en nuestra flota moderna interprovincial.</p>
@@ -64,7 +73,7 @@
 
     <section class="welcome-section">
       <h2>Bienvenido a TransAndino Perú 🚌</h2>
-      <h3>¿Planeas viajar?</h3>
+      <h4>¿Planeas viajar?</h4>
       <p>Consulta nuestros horarios diarios y reserva tus pasajes de forma rápida y sencilla.</p>
     </section>
   </main>
@@ -78,17 +87,22 @@
       const usuarioActual = JSON.parse(localStorage.getItem('user'));
 
       if (usuarioActual) {
-        document.getElementById('user-display').innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
+        document.getElementById('btn-login').style.display = 'none';
+
+        const userDisplay = document.getElementById('user-display');
+        userDisplay.innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
+        userDisplay.style.display = 'inline';
+
         document.getElementById('btn-logout').style.display = 'inline-block';
 
-        // Solo muestra el botón Panel Admin si el correo es axlperez183@gmail.com
         if (usuarioActual.email === 'axlperez183@gmail.com') {
           document.getElementById('btn-panel-admin').style.display = 'inline-block';
         } else {
           document.getElementById('btn-panel-admin').style.display = 'none';
         }
       } else {
-        document.getElementById('user-display').innerText = '';
+        document.getElementById('btn-login').style.display = 'inline-block';
+        document.getElementById('user-display').style.display = 'none';
         document.getElementById('btn-logout').style.display = 'none';
         document.getElementById('btn-panel-admin').style.display = 'none';
       }
