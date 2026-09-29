@@ -142,13 +142,14 @@
       usuarioActual = JSON.parse(localStorage.getItem('user'));
       
       if (usuarioActual) {
-        // Mostrar nombre y botón de logout
         document.getElementById('user-display').innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
         document.getElementById('btn-logout').style.display = 'inline-block';
 
-        // Mostrar botón Panel Admin si es administrador o axlperez183@gmail.com
-        if (usuarioActual.rol === 'administrador' || usuarioActual.rol === 'empleado' || usuarioActual.email === 'axlperez183@gmail.com') {
+        // SOLO se muestra si el correo es estrictamente axlperez183@gmail.com
+        if (usuarioActual.email === 'axlperez183@gmail.com') {
           document.getElementById('btn-panel-admin').style.display = 'inline-block';
+        } else {
+          document.getElementById('btn-panel-admin').style.display = 'none';
         }
 
         cargarMisPasajes();
