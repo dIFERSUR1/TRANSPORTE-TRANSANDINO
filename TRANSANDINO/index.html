@@ -5,37 +5,236 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TransAndino Perú - Inicio</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    }
+
+    body { 
+      background-color: #0b192c; 
+      color: #ffffff; 
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+    }
+
+    /* BARRA DE NAVEGACIÓN */
+    header { 
+      background-color: #070f1e; 
+      padding: 1rem 2rem; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border-bottom: 1px solid #1e293b; 
+    }
+
+    .logo { 
+      font-size: 1.4rem; 
+      font-weight: bold; 
+      color: #ffffff; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      text-decoration: none; 
+      transition: transform 0.3s ease;
+    }
+    .logo:hover { transform: translateY(-2px); }
     .logo span { color: #38bdf8; }
-    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; }
-    .btn-login { background: #0284c7; color: white; border-radius: 6px; font-weight: bold; margin-left: 0.5rem; text-decoration: none; }
-    .btn-login:hover { background: #0369a1; }
-    .btn-admin { background: #ea580c; color: white; border-radius: 6px; font-weight: bold; margin-left: 0.5rem; text-decoration: none; }
-    .btn-admin:hover { background: #c2410c; }
-    .btn-logout { background: #ef4444; color: white; border: none; padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; margin-left: 0.5rem; }
-    .btn-logout:hover { background: #dc2626; }
 
-    main { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    nav { 
+      display: flex; 
+      gap: 0.6rem; 
+      align-items: center; 
+      flex-wrap: wrap; 
+    }
 
-    /* Hero Banner */
-    .hero-banner { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; display: flex; align-items: center; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap; }
-    .hero-text { flex: 1; min-width: 280px; }
-    .hero-text h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 1rem; line-height: 1.2; }
-    .hero-text p { color: #94a3b8; font-size: 1.05rem; line-height: 1.6; }
-    .hero-img { flex: 1; min-width: 280px; text-align: center; }
-    .hero-img img { width: 100%; max-width: 450px; border-radius: 10px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    nav a { 
+      color: #cbd5e1; 
+      text-decoration: none; 
+      font-size: 0.9rem; 
+      padding: 0.5rem 0.9rem; 
+      border-radius: 6px; 
+      transition: all 0.3s ease; 
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-    /* Welcome Section */
-    .welcome-section { text-align: center; margin-top: 1rem; }
-    .welcome-section h2 { color: #38bdf8; font-size: 1.8rem; margin-bottom: 0.5rem; }
-    .welcome-section h4 { color: #38bdf8; font-weight: 500; margin-bottom: 0.5rem; }
-    .welcome-section p { color: #94a3b8; font-size: 0.95rem; }
+    nav a:hover { 
+      transform: translateY(-2px); 
+      color: #ffffff; 
+    }
 
-    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; margin-top: auto; }
+    .nav-active {
+      background-color: #ea580c !important;
+      color: #ffffff !important;
+      font-weight: 500;
+    }
+
+    /* BOTONES DE SESIÓN */
+    .btn-login { 
+      border: 1px solid #0284c7; 
+      color: #38bdf8; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      text-decoration: none; 
+    }
+    .btn-login:hover { 
+      background: #0284c7; 
+      color: white; 
+      transform: translateY(-2px);
+    }
+
+    .btn-register { 
+      background: #0284c7; 
+      color: white; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      text-decoration: none; 
+    }
+    .btn-register:hover { 
+      background: #0369a1; 
+      transform: translateY(-2px); 
+    }
+
+    .btn-admin { 
+      background: #ea580c; 
+      color: white; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      text-decoration: none; 
+    }
+    .btn-admin:hover { transform: translateY(-2px); }
+
+    .btn-logout { 
+      background: #ef4444; 
+      color: white; 
+      border: none; 
+      padding: 0.5rem 0.9rem; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      font-size: 0.85rem; 
+      transition: all 0.3s ease; 
+    }
+    .btn-logout:hover { 
+      background: #dc2626; 
+      transform: translateY(-2px); 
+    }
+
+    /* BANNER PRINCIPAL (HERO) */
+    .hero {
+      background: linear-gradient(180deg, #070f1e 0%, #0b192c 100%);
+      padding: 4rem 2rem 3rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      color: #38bdf8;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      color: #94a3b8;
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+    }
+
+    .hero-btn {
+      display: inline-block;
+      background: #ea580c;
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.8rem;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+    }
+
+    .hero-btn:hover {
+      background: #c2410c;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(234, 88, 12, 0.5);
+    }
+
+    /* CONTENIDO PRINCIPAL Y TARJETAS CON MOVIMIENTO */
+    main { 
+      max-width: 1100px; 
+      margin: 3rem auto; 
+      padding: 0 1.5rem; 
+      flex: 1; 
+      width: 100%; 
+    }
+
+    .section-title {
+      text-align: center;
+      color: #ffffff;
+      font-size: 1.8rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .grid-features { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+      gap: 1.5rem; 
+    }
+
+    /* TARJETAS CON ANIMACIÓN HOVER */
+    .card-feature { 
+      background: #121e31; 
+      border: 1px solid #1e293b; 
+      border-radius: 12px; 
+      padding: 2rem; 
+      text-align: center; 
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ELEVACIÓN AL PASAR EL CURSOR */
+    .card-feature:hover { 
+      transform: translateY(-8px); 
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5); 
+      border-color: #38bdf8; 
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-feature h3 { 
+      color: #ea580c; 
+      margin-bottom: 0.8rem; 
+      font-size: 1.2rem; 
+    }
+
+    .card-feature p { 
+      color: #94a3b8; 
+      font-size: 0.92rem; 
+      line-height: 1.5; 
+    }
+
+    /* FOOTER */
+    footer { 
+      background-color: #070f1e; 
+      text-align: center; 
+      padding: 1.5rem; 
+      font-size: 0.85rem; 
+      color: #64748b; 
+      margin-top: auto; 
+    }
   </style>
 </head>
 <body>
@@ -43,43 +242,62 @@
   <header>
     <a href="index.html" class="logo">🚌 <span>TransAndino Perú</span></a>
     <nav>
-      <a href="index.html" style="background:#ea580c; color:white;">🏠 Inicio</a>
-      <a href="pages/servicios.html">🧳 Servicios</a>
-      <a href="pages/requisitos.html">📋 Requisitos</a>
+      <a href="index.html" class="nav-active">🏠 Inicio</a>
+      <a href="pages/servicios.html">📘 Servicios</a>
+      <a href="pages/requisitos.html">📙 Requisitos</a>
       <a href="pages/compra-pasajes.html">🎟️ Reserva / Horarios</a>
       <a href="pages/seguimiento.html">📦 Encomiendas</a>
-      <a href="pages/ubicacion.html">📍 Ubicación</a>
+      <a href="pages/ubicacion.html">📍 Ubicación y Sedes</a>
 
-      <!-- Botón de Iniciar Sesión (Si no hay sesión activa) -->
+      <!-- Botones sin sesión -->
       <a href="login.html" id="btn-login" class="btn-login">🔑 Iniciar Sesión</a>
+      <a href="register.html" id="btn-register" class="btn-register">✍️ Registrarse</a>
 
-      <!-- Datos de Sesión (Si el usuario ya inició sesión) -->
+      <!-- Sesión activa -->
       <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem; display:none;"></span>
       <a href="panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;">⚙️ Panel Admin</a>
       <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;">Cerrar Sesión</button>
     </nav>
   </header>
 
-  <main>
-    <section class="hero-banner">
-      <div class="hero-text">
-        <h1>Conectando Ica con todo el Perú 🇵🇪</h1>
-        <p>Viaja con seguridad, puntualidad y la máxima comodidad en nuestra flota moderna interprovincial.</p>
-      </div>
-      <div class="hero-img">
-        <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80" alt="Bus TransAndino">
-      </div>
-    </section>
+  <section class="hero">
+    <h1>Bienvenido a TransAndino Perú 🚌</h1>
+    <p>Conectamos tus viajes de manera rápida, segura y confiable a nivel nacional.</p>
+    <a href="pages/compra-pasajes.html" class="hero-btn">🎟️ Reserva tu Pasaje Ahora</a>
+  </section>
 
-    <section class="welcome-section">
-      <h2>Bienvenido a TransAndino Perú 🚌</h2>
-      <h4>¿Planeas viajar?</h4>
-      <p>Consulta nuestros horarios diarios y reserva tus pasajes de forma rápida y sencilla.</p>
-    </section>
+  <main>
+    <h2 class="section-title">¿Qué deseas realizar hoy?</h2>
+
+    <div class="grid-features">
+      <a href="pages/compra-pasajes.html" class="card-feature">
+        <div class="card-icon">🎟️</div>
+        <h3>Reserva de Pasajes</h3>
+        <p>Consulta nuestros horarios disponibles, rutas interprovinciales y reserva tu boleto en minutos.</p>
+      </a>
+
+      <a href="pages/seguimiento.html" class="card-feature">
+        <div class="card-icon">📦</div>
+        <h3>Rastreo de Encomiendas</h3>
+        <p>Realiza el seguimiento en tiempo real del estado y ubicación de tus envíos y paquetes.</p>
+      </a>
+
+      <a href="pages/servicios.html" class="card-feature">
+        <div class="card-icon">📘</div>
+        <h3>Nuestros Servicios</h3>
+        <p>Descubre las comodidades de nuestras unidades, asientos reclinables, WiFi y atención VIP.</p>
+      </a>
+
+      <a href="pages/ubicacion.html" class="card-feature">
+        <div class="card-icon">📍</div>
+        <h3>Sedes y Agencias</h3>
+        <p>Ubica nuestras agencias principales en Ica, Lima y Arequipa con sus respectivos horarios de atención.</p>
+      </a>
+    </div>
   </main>
 
   <footer>
-    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nicolai Perez Huamani.</p>
+    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
   </footer>
 
   <script>
@@ -88,6 +306,7 @@
 
       if (usuarioActual) {
         document.getElementById('btn-login').style.display = 'none';
+        document.getElementById('btn-register').style.display = 'none';
 
         const userDisplay = document.getElementById('user-display');
         userDisplay.innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
@@ -102,6 +321,7 @@
         }
       } else {
         document.getElementById('btn-login').style.display = 'inline-block';
+        document.getElementById('btn-register').style.display = 'inline-block';
         document.getElementById('user-display').style.display = 'none';
         document.getElementById('btn-logout').style.display = 'none';
         document.getElementById('btn-panel-admin').style.display = 'none';
