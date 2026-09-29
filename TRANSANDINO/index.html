@@ -13,43 +13,17 @@
     }
 
     body { 
-      background-color: #0b192c; 
+      background-color: #0b1424; 
       color: #ffffff; 
       min-height: 100vh; 
       display: flex; 
       flex-direction: column; 
     }
 
-    /* ==============================================
-       ANIMACIONES EXCLUSIVAS PARA LOS EMOJIS
-       ============================================== */
-    .emoji {
-      display: inline-block;
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      animation: floatEmoji 3s ease-in-out infinite;
-    }
-
-    @keyframes floatEmoji {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
-
-    nav a:hover .emoji,
-    .hero-btn:hover .emoji,
-    .card-feature:hover .card-icon,
-    .btn-logout:hover .emoji {
-      animation: bounceEmoji 0.5s ease infinite alternate;
-    }
-
-    @keyframes bounceEmoji {
-      from { transform: translateY(0) scale(1.2) rotate(-10deg); }
-      to { transform: translateY(-8px) scale(1.4) rotate(10deg); }
-    }
-
-    /* BARRA DE NAVEGACIÓN */
+    /* BARRA DE NAVEGACIÓN EXACTA */
     header { 
-      background-color: #070f1e; 
-      padding: 1rem 2rem; 
+      background-color: #060d1a; 
+      padding: 0.9rem 2rem; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
@@ -57,7 +31,7 @@
     }
 
     .logo { 
-      font-size: 1.4rem; 
+      font-size: 1.3rem; 
       font-weight: bold; 
       color: #ffffff; 
       display: flex; 
@@ -69,7 +43,7 @@
 
     nav { 
       display: flex; 
-      gap: 0.6rem; 
+      gap: 0.5rem; 
       align-items: center; 
       flex-wrap: wrap; 
     }
@@ -77,10 +51,10 @@
     nav a { 
       color: #cbd5e1; 
       text-decoration: none; 
-      font-size: 0.9rem; 
-      padding: 0.5rem 0.9rem; 
+      font-size: 0.88rem; 
+      padding: 0.45rem 0.85rem; 
       border-radius: 6px; 
-      transition: all 0.3s ease; 
+      transition: all 0.25s ease; 
       display: flex;
       align-items: center;
       gap: 6px;
@@ -89,16 +63,16 @@
     nav a:hover { 
       color: #ffffff; 
       background: rgba(255, 255, 255, 0.05);
-      transform: translateY(-2px);
     }
 
+    /* PESTAÑA ACTIVA EN MENÚ */
     .nav-active {
-      background-color: #ea580c !important;
+      background-color: #f97316 !important;
       color: #ffffff !important;
-      font-weight: 500;
+      font-weight: 600;
     }
 
-    /* BOTONES DE SESIÓN */
+    /* BOTONES DE AUTH */
     .btn-login { 
       border: 1px solid #0284c7; 
       color: #38bdf8; 
@@ -123,7 +97,7 @@
     }
 
     .btn-admin { 
-      background: #ea580c; 
+      background: #f97316; 
       color: white; 
       border-radius: 6px; 
       font-weight: bold; 
@@ -134,153 +108,69 @@
       background: #ef4444; 
       color: white; 
       border: none; 
-      padding: 0.5rem 0.9rem; 
+      padding: 0.45rem 0.85rem; 
       border-radius: 6px; 
       cursor: pointer; 
       font-weight: bold; 
       font-size: 0.85rem; 
     }
-    .btn-logout:hover { 
-      background: #dc2626; 
-    }
-
-    /* BANNER PRINCIPAL (HERO CON IMAGEN Y MOVIMIENTO) */
-    .hero {
-      background: linear-gradient(180deg, #070f1e 0%, #0b192c 100%);
-      padding: 4rem 2rem;
-      border-bottom: 1px solid #1e293b;
-    }
-
-    .hero-container {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 2.5rem;
-      flex-wrap: wrap;
-    }
-
-    .hero-text {
-      flex: 1;
-      min-width: 300px;
-      text-align: left;
-    }
-
-    .hero-text h1 {
-      font-size: 2.5rem;
-      color: #38bdf8;
-      margin-bottom: 1rem;
-      line-height: 1.2;
-    }
-
-    .hero-text p {
-      color: #94a3b8;
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-      line-height: 1.6;
-    }
-
-    .hero-btn {
-      display: inline-block;
-      background: #ea580c;
-      color: white;
-      text-decoration: none;
-      padding: 0.8rem 1.8rem;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
-    }
-
-    .hero-btn:hover {
-      background: #c2410c;
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(234, 88, 12, 0.5);
-    }
-
-    /* IMAGEN DE INICIO CON EFECTO HOVER */
-    .hero-img-container {
-      flex: 1;
-      min-width: 300px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .hero-img {
-      width: 100%;
-      max-width: 500px;
-      height: auto;
-      border-radius: 14px;
-      border: 1px solid #1e293b;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
-      object-fit: cover;
-    }
-
-    .hero-img:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 16px 35px rgba(56, 189, 248, 0.25);
-      border-color: #38bdf8;
-    }
 
     /* CONTENIDO PRINCIPAL */
     main { 
       max-width: 1100px; 
-      margin: 3rem auto; 
+      margin: 3.5rem auto; 
       padding: 0 1.5rem; 
       flex: 1; 
       width: 100%; 
     }
 
-    .section-title {
-      text-align: center;
-      color: #ffffff;
-      font-size: 1.8rem;
-      margin-bottom: 2.5rem;
+    h1 { 
+      text-align: center; 
+      color: #38bdf8; 
+      margin-bottom: 2.5rem; 
+      font-size: 2.2rem; 
+      font-weight: 700;
     }
 
-    .grid-features { 
+    /* GRID DE TARJETAS */
+    .grid-cards { 
       display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
       gap: 1.5rem; 
     }
 
-    .card-feature { 
-      background: #121e31; 
+    /* ESTILO DE TARJETA CON MOVIMIENTO HOVER LIMPIO */
+    .card { 
+      background: #101a2b; 
       border: 1px solid #1e293b; 
-      border-radius: 12px; 
+      border-radius: 10px; 
       padding: 2rem; 
-      text-align: center; 
+      text-align: left; 
       text-decoration: none;
       color: inherit;
-      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      align-items: center;
     }
 
-    .card-feature:hover { 
-      transform: translateY(-8px);
-      border-color: #38bdf8; 
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+    /* MOVIMIENTO EXACTO DE REQUISITOS */
+    .card:hover { 
+      transform: translateY(-6px); 
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); 
+      border-color: #2563eb; 
     }
 
-    .card-icon {
-      font-size: 2.8rem;
-      margin-bottom: 1rem;
-      display: inline-block;
+    .card h3 { 
+      color: #f97316; 
+      margin-bottom: 1rem; 
+      font-size: 1.15rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
     }
 
-    .card-feature h3 { 
-      color: #ea580c; 
-      margin-bottom: 0.8rem; 
-      font-size: 1.2rem; 
-    }
-
-    .card-feature p { 
+    .card p { 
       color: #94a3b8; 
       font-size: 0.92rem; 
       line-height: 1.5; 
@@ -288,11 +178,12 @@
 
     /* FOOTER */
     footer { 
-      background-color: #070f1e; 
+      background-color: #060d1a; 
       text-align: center; 
-      padding: 1.5rem; 
-      font-size: 0.85rem; 
+      padding: 1.2rem; 
+      font-size: 0.82rem; 
       color: #64748b; 
+      border-top: 1px solid #1e293b;
       margin-top: auto; 
     }
   </style>
@@ -300,66 +191,43 @@
 <body>
 
   <header>
-    <a href="index.html" class="logo"><span class="emoji">🚌</span> <span>TransAndino Perú</span></a>
+    <a href="index.html" class="logo">🚌 <span>TransAndino Perú</span></a>
     <nav>
-      <a href="index.html" class="nav-active"><span class="emoji">🏠</span> Inicio</a>
-      <a href="pages/servicios.html"><span class="emoji">📘</span> Servicios</a>
-      <a href="pages/requisitos.html"><span class="emoji">📙</span> Requisitos</a>
-      <a href="pages/compra-pasajes.html"><span class="emoji">🎟️</span> Reserva / Horarios</a>
-      <a href="pages/seguimiento.html"><span class="emoji">📦</span> Encomiendas</a>
-      <a href="pages/ubicacion.html"><span class="emoji">📍</span> Ubicación y Sedes</a>
+      <a href="index.html" class="nav-active">🏠 Inicio</a>
+      <a href="pages/servicios.html">📘 Servicios</a>
+      <a href="pages/requisitos.html">📋 Requisitos</a>
+      <a href="pages/compra-pasajes.html">🎟️ Reserva / Horarios</a>
+      <a href="pages/seguimiento.html">📦 Encomiendas</a>
+      <a href="pages/ubicacion.html">📍 Ubicación y Sedes</a>
 
       <!-- Botones sin sesión -->
-      <a href="login.html" id="btn-login" class="btn-login"><span class="emoji">🔑</span> Iniciar Sesión</a>
-      <a href="register.html" id="btn-register" class="btn-register"><span class="emoji">✍️</span> Registrarse</a>
+      <a href="login.html" id="btn-login" class="btn-login">🔑 Iniciar Sesión</a>
+      <a href="register.html" id="btn-register" class="btn-register">🎨 Registrarse</a>
 
       <!-- Sesión activa -->
       <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem; display:none;"></span>
-      <a href="panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;"><span class="emoji">⚙️</span> Panel Admin</a>
-      <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;"><span class="emoji">🚪</span> Cerrar Sesión</button>
+      <a href="panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;">⚙️ Panel Admin</a>
+      <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;">Cerrar Sesión</button>
     </nav>
   </header>
 
-  <section class="hero">
-    <div class="hero-container">
-      <div class="hero-text">
-        <h1>Bienvenido a TransAndino Perú <span class="emoji">🚌</span></h1>
-        <p>Conectamos tus viajes de manera rápida, segura y confiable a nivel nacional.</p>
-        <a href="pages/compra-pasajes.html" class="hero-btn"><span class="emoji">🎟️</span> Reserva tu Pasaje Ahora</a>
-      </div>
-      <div class="hero-img-container">
-        <!-- Reemplaza la ruta 'img/bus.jpg' por el nombre/ruta exacta de tu archivo de imagen -->
-        <img src="img/bus.jpg" alt="Bus TransAndino Perú" class="hero-img" onerror="this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800'">
-      </div>
-    </div>
-  </section>
-
   <main>
-    <h2 class="section-title">¿Qué deseas realizar hoy?</h2>
+    <h1>Bienvenido a TransAndino Perú 🚌</h1>
 
-    <div class="grid-features">
-      <a href="pages/compra-pasajes.html" class="card-feature">
-        <div class="card-icon emoji">🎟️</div>
-        <h3>Reserva de Pasajes</h3>
-        <p>Consulta nuestros horarios disponibles, rutas interprovinciales y reserva tu boleto en minutos.</p>
+    <div class="grid-cards">
+      <a href="pages/compra-pasajes.html" class="card">
+        <h3>🎟️ Reserva / Horarios</h3>
+        <p>Consulta nuestras salidas diarias, rutas interprovinciales disponibles y asegura tu boleto en línea.</p>
       </a>
 
-      <a href="pages/seguimiento.html" class="card-feature">
-        <div class="card-icon emoji">📦</div>
-        <h3>Rastreo de Encomiendas</h3>
-        <p>Realiza el seguimiento en tiempo real del estado y ubicación de tus envíos y paquetes.</p>
+      <a href="pages/seguimiento.html" class="card">
+        <h3>📦 Rastreo de Encomiendas</h3>
+        <p>Monitorea el estado y la llegada de tus envíos o paquetería en tiempo real con tu número de guía.</p>
       </a>
 
-      <a href="pages/servicios.html" class="card-feature">
-        <div class="card-icon emoji">📘</div>
-        <h3>Nuestros Servicios</h3>
-        <p>Descubre las comodidades de nuestras unidades, asientos reclinables, WiFi y atención VIP.</p>
-      </a>
-
-      <a href="pages/ubicacion.html" class="card-feature">
-        <div class="card-icon emoji">📍</div>
-        <h3>Sedes y Agencias</h3>
-        <p>Ubica nuestras agencias principales en Ica, Lima y Arequipa con sus respectivos horarios de atención.</p>
+      <a href="pages/ubicacion.html" class="card">
+        <h3>📍 Ubicación y Sedes</h3>
+        <p>Encuentra las direcciones y teléfonos de contacto de nuestras agencias en Ica, Lima y Arequipa.</p>
       </a>
     </div>
   </main>
