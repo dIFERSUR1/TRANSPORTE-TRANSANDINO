@@ -40,9 +40,10 @@
     .btn-confirmar { background: #ea580c; color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; }
     .btn-cancelar { background: #64748b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; width: 100%; }
 
-    /* Mis Pasajes */
-    .ticket-card { background: #0b192c; border: 1px solid #1e293b; border-radius: 8px; padding: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; }
-    .badge { padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #0284c7; color: white; }
+    /* Mis Pasajes Tarjetas */
+    .ticket-card { background: #0b192c; border: 1px solid #38bdf8; border-radius: 8px; padding: 1.2rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .ticket-info p { margin-bottom: 0.4rem; font-size: 0.95rem; }
+    .badge { padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #22c55e; color: white; display: inline-block; }
 
     footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; margin-top: auto; }
   </style>
@@ -59,7 +60,7 @@
       <a href="seguimiento.html">📦 Encomiendas</a>
       <a href="ubicacion.html">📍 Ubicación</a>
       
-      <!-- Zona de perfil / Panel Admin alineados -->
+      <!-- Perfil y Panel Admin alineados -->
       <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem;"></span>
       <a href="../panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;">⚙️ Panel Admin</a>
       <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;">Cerrar Sesión</button>
@@ -87,31 +88,31 @@
             <td>08:00 AM</td>
             <td>Ejecutivo 160°</td>
             <td>S/ 45.00</td>
-            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Lima', 45.00)">Comprar</button></td>
+            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Lima', 45.00, '08:00 AM')">Comprar</button></td>
           </tr>
           <tr>
             <td>Ica ➔ Lima</td>
             <td>02:30 PM</td>
             <td>VIP Suite</td>
             <td>S/ 60.00</td>
-            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Lima', 60.00)">Comprar</button></td>
+            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Lima', 60.00, '02:30 PM')">Comprar</button></td>
           </tr>
           <tr>
             <td>Ica ➔ Arequipa</td>
             <td>08:00 PM</td>
             <td>VIP Suite</td>
             <td>S/ 90.00</td>
-            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Arequipa', 90.00)">Comprar</button></td>
+            <td><button class="btn-comprar" onclick="abrirModal('Ica', 'Arequipa', 90.00, '08:00 PM')">Comprar</button></td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Mis Pasajes Comprados (RF-22.5) -->
+    <!-- Mis Pasajes Comprados -->
     <div class="card-box">
       <h2>🎫 Mis Pasajes Comprados</h2>
       <div id="mis-pasajes-container">
-        <p style="color:#64748b;">Inicia sesión para ver tus pasajes.</p>
+        <p style="color:#64748b;">Cargando tus pasajes...</p>
       </div>
     </div>
   </main>
@@ -142,12 +143,12 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       usuarioActual = JSON.parse(localStorage.getItem('user'));
-      
+
       if (usuarioActual) {
-        document.getElementById('user-display').innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
+        const identificador = usuarioActual.nombre || usuarioActual.email;
+        document.getElementById('user-display').innerText = `👋 Hola, ${identificador}`;
         document.getElementById('btn-logout').style.display = 'inline-block';
 
-        // Muestra el Panel Admin solo para axlperez183@gmail.com
         if (usuarioActual.email === 'axlperez183@gmail.com') {
           document.getElementById('btn-panel-admin').style.display = 'inline-block';
         } else {
@@ -159,6 +160,7 @@
         document.getElementById('user-display').innerText = '';
         document.getElementById('btn-logout').style.display = 'none';
         document.getElementById('btn-panel-admin').style.display = 'none';
+        document.getElementById('mis-pasajes-container').innerHTML = '<p style="color:#64748b;">Inicia sesión para ver tus pasajes.</p>';
       }
     });
 
@@ -168,15 +170,23 @@
       window.location.href = '../login.html';
     }
 
-    function abrirModal(origen, destino, precio) {
+    function abrirModal(origen, destino, precio, hora) {
       if (!usuarioActual) {
         alert('Debes iniciar sesión para comprar un pasaje.');
         window.location.href = '../login.html';
         return;
       }
 
-      viajeSeleccionado = { origen, destino, precio, id_usuario: usuarioActual.id, nombre_pasajero: usuarioActual.nombre || usuarioActual.email };
-      document.getElementById('info-ruta').innerText = `${origen} ➔ ${destino} | Precio: S/ ${precio.toFixed(2)}`;
+      viajeSeleccionado = { 
+        origen, 
+        destino, 
+        precio, 
+        hora, 
+        id_usuario: usuarioActual.id || usuarioActual.email, 
+        nombre_pasajero: usuarioActual.nombre || usuarioActual.email 
+      };
+
+      document.getElementById('info-ruta').innerText = `${origen} ➔ ${destino} (${hora}) | Precio: S/ ${precio.toFixed(2)}`;
       
       const grid = document.getElementById('grid-asientos');
       grid.innerHTML = '';
@@ -211,11 +221,15 @@
       if (!asientoElegido) return;
 
       const hoy = new Date().toISOString().split('T')[0];
+      const userId = usuarioActual.id || usuarioActual.email;
+
       const datosCompra = {
-        id_usuario: usuarioActual.id,
+        id_usuario: userId,
         nombre_pasajero: usuarioActual.nombre || usuarioActual.email,
         origen: viajeSeleccionado.origen,
         destino: viajeSeleccionado.destino,
+        hora: viajeSeleccionado.hora,
+        asiento: asientoElegido,
         fecha: hoy,
         precio: viajeSeleccionado.precio,
         estado: 'registrado'
@@ -231,7 +245,7 @@
         const respuesta = await res.json();
 
         if (res.ok) {
-          alert(`¡Compra realizada con éxito! 🎉\nCódigo de seguimiento: ${respuesta.codigo_seguimiento}`);
+          alert(`¡Compra realizada con éxito! 🎉\nCódigo de seguimiento: ${respuesta.codigo_seguimiento || 'TA-' + Date.now().toString().slice(-5)}`);
           cerrarModal();
           cargarMisPasajes();
         } else {
@@ -243,12 +257,15 @@
     }
 
     async function cargarMisPasajes() {
-      if (!usuarioActual || !usuarioActual.id) return;
+      const userId = usuarioActual.id || usuarioActual.email;
+      const cont = document.getElementById('mis-pasajes-container');
 
       try {
-        const res = await fetch(`/api/compras?id_usuario=${usuarioActual.id}`);
+        const res = await fetch(`/api/compras?id_usuario=${encodeURIComponent(userId)}`);
+        
+        if (!res.ok) throw new Error('Error al obtener compras');
+        
         const pasajes = await res.json();
-        const cont = document.getElementById('mis-pasajes-container');
 
         if (!Array.isArray(pasajes) || pasajes.length === 0) {
           cont.innerHTML = '<p style="color:#94a3b8;">Aún no has comprado ningún pasaje.</p>';
@@ -257,22 +274,24 @@
 
         cont.innerHTML = pasajes.map(p => `
           <div class="ticket-card">
-            <div>
-              <p><strong>Código:</strong> <span style="color:#ea580c;">${p.codigo_seguimiento || 'TA-N/A'}</span></p>
-              <p><strong>Ruta:</strong> ${p.origen} ➔ ${p.destino}</p>
-              <p><strong>Fecha:</strong> ${p.fecha || p.fecha_viaje} | <strong>Precio:</strong> S/ ${p.precio}</p>
-              <p><strong>Estado:</strong> <span class="badge">${p.estado}</span></p>
+            <div class="ticket-info">
+              <p><strong>🎟️ Código:</strong> <span style="color:#ea580c; font-weight:bold;">${p.codigo_seguimiento || 'TA-' + p.id}</span></p>
+              <p><strong>📍 Ruta:</strong> ${p.origen} ➔ ${p.destino}</p>
+              <p><strong>📅 Fecha y Hora:</strong> ${p.fecha || p.fecha_viaje || 'Hoy'} ${p.hora ? '| ' + p.hora : ''}</p>
+              <p><strong>💺 Asiento:</strong> N° ${p.asiento || 'Asignado'}</p>
+              <p><strong>💰 Precio:</strong> S/ ${Number(p.precio).toFixed(2)}</p>
+              <p><strong>Status:</strong> <span class="badge">${p.estado || 'Registrado'}</span></p>
             </div>
             <div>
-              ${p.estado === 'registrado' 
-                ? `<button onclick="editarMiPasaje(${p.id}, '${p.origen}', '${p.destino}')" style="background:#ea580c; color:white; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">✏️ Cambiar Ruta</button>`
+              ${p.estado === 'registrado' || !p.estado 
+                ? `<button onclick="editarMiPasaje(${p.id}, '${p.origen}', '${p.destino}')" style="background:#ea580c; color:white; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer; font-weight:bold;">✏️ Cambiar Ruta</button>`
                 : `<small style="color:#64748b;">No editable</small>`
               }
             </div>
           </div>
         `).join('');
       } catch (err) {
-        console.error(err);
+        cont.innerHTML = '<p style="color:#94a3b8;">Aún no tienes pasajes registrados en el sistema.</p>';
       }
     }
 
@@ -282,17 +301,21 @@
 
       if (nuevoOrigen && nuevoDestino) {
         const hoy = new Date().toISOString().split('T')[0];
-        const res = await fetch(`/api/compras?id=${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ origen: nuevoOrigen, destino: nuevoDestino, fecha: hoy })
-        });
+        try {
+          const res = await fetch(`/api/compras?id=${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ origen: nuevoOrigen, destino: nuevoDestino, fecha: hoy })
+          });
 
-        if (res.ok) {
-          alert('Registro de viaje actualizado con éxito.');
-          cargarMisPasajes();
-        } else {
-          alert('No se pudo actualizar el registro.');
+          if (res.ok) {
+            alert('Pasaje actualizado con éxito.');
+            cargarMisPasajes();
+          } else {
+            alert('No se pudo actualizar el pasaje.');
+          }
+        } catch (err) {
+          alert('Error al intentar actualizar.');
         }
       }
     }
