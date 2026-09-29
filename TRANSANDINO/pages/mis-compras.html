@@ -44,9 +44,7 @@
       text-decoration: none;
     }
 
-    .logo span {
-      color: #38bdf8;
-    }
+    .logo span { color: #38bdf8; }
 
     .emoji, .bus-emoji {
       display: inline-flex;
@@ -66,19 +64,13 @@
       50% { transform: translateX(4px) translateY(-2px); }
     }
 
-    .emoji-bounce {
-      animation: rebotar 2.5s infinite ease-in-out;
-    }
-
+    .emoji-bounce { animation: rebotar 2.5s infinite ease-in-out; }
     @keyframes rebotar {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-4px); }
     }
 
-    .emoji-pulse {
-      animation: pulso 2s infinite ease-in-out;
-    }
-
+    .emoji-pulse { animation: pulso 2s infinite ease-in-out; }
     @keyframes pulso {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.15); }
@@ -187,17 +179,31 @@
     .status-registrado { background: #0284c7; color: white; }
     .status-atendido { background: #22c55e; color: white; }
 
+    /* BOTONES DE ACCIÓN */
     .btn-edit {
       background: #ea580c;
       color: white;
       border: none;
-      padding: 0.4rem 0.8rem;
+      padding: 0.4rem 0.7rem;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      transition: background 0.2s ease;
     }
-
     .btn-edit:hover { background: #c2410c; }
+
+    .btn-delete {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 0.3rem;
+      transition: background 0.2s ease;
+    }
+    .btn-delete:hover { background: #dc2626; }
 
     footer {
       background-color: #070f1e;
@@ -270,7 +276,6 @@
     function getUsuarioActual() {
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user) return null;
-      // Captura única de la ID del cliente (id, dni o email)
       return {
         id: user.id || user.dni || user.email,
         nombre: user.nombre || user.email || user.dni,
@@ -297,23 +302,21 @@
           registros = await res.json();
         } else {
           let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-          // FILTRADO ESTRICTO RF-22.5: Solo pasajes pertenecientes al id de la cuenta activa
           registros = local.filter(r => String(r.id_usuario) === String(user.id));
         }
       } catch (err) {
         let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-        // FILTRADO ESTRICTO RF-22.5
         registros = local.filter(r => String(r.id_usuario) === String(user.id));
       }
 
       if (registros.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8; padding: 2rem;">No tienes registros de pasajes guardados con esta cuenta (${user.id}).</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8; padding: 2rem;">No tienes registros de pasajes guardados.</td></tr>`;
         return;
       }
 
       registros.forEach(item => {
         const tr = document.createElement('tr');
-        const puedeEditar = item.estado === 'registrado';
+        const puedeAccionar = item.estado === 'registrado';
 
         tr.innerHTML = `
           <td>#${item.id || '1'}</td>
@@ -325,9 +328,10 @@
           <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio}.00</td>
           <td><span class="status-badge ${item.estado === 'registrado' ? 'status-registrado' : 'status-atendido'}">${item.estado}</span></td>
           <td>
-            ${puedeEditar 
-              ? `<button class="btn-edit" onclick="editarRegistro(${item.id})">✏️ Editar</button>`
-              : `<span style="color:#64748b; font-size:0.8rem;">Atendido (No editable)</span>`}
+            ${puedeAccionar 
+              ? `<button class="btn-edit" onclick="editarRegistro(${item.id})">✏️ Editar</button>
+                 <button class="btn-delete" onclick="eliminarRegistro(${item.id})">🗑️ Eliminar</button>`
+              : `<span style="color:#64748b; font-size:0.8rem;">Atendido (No modificable)</span>`}
           </td>
         `;
         tbody.appendChild(tr);
@@ -340,7 +344,7 @@
 
       if (nuevoOrigen && nuevoDestino) {
         let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-        let index = local.findIndex(r => r.id === id);
+        let index = local.findIndex(r => String(r.id) === String(id));
         if (index !== -1) {
           local[index].origen = nuevoOrigen;
           local[index].destino = nuevoDestino;
@@ -349,6 +353,23 @@
           cargarMisCompras();
         }
       }
+    }
+
+    async function eliminarRegistro(id) {
+      if (!confirm('¿Estás seguro de que deseas eliminar este pasaje?')) return;
+
+      try {
+        await fetch(`/api/compras-pasajes/${id}`, { method: 'DELETE' });
+      } catch (err) {
+        console.log('Eliminando localmente...');
+      }
+
+      let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      local = local.filter(r => String(r.id) !== String(id));
+      localStorage.setItem('compras_pasajes', JSON.stringify(local));
+
+      alert('Registro de pasaje eliminado con éxito.');
+      cargarMisCompras();
     }
 
     function renderAuthHeader() {
