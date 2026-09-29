@@ -10,9 +10,12 @@
     header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
     .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .logo span { color: #38bdf8; }
-    nav { display: flex; gap: 0.5rem; align-items: center; }
+    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; }
-    
+    .btn-logout { background: #ef4444; color: white; border: none; padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; margin-left: 0.5rem; }
+    .btn-logout:hover { background: #dc2626; }
+    .btn-admin { background: #ea580c; color: white; border-radius: 6px; font-weight: bold; }
+
     main { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
     h1, h2 { color: #38bdf8; margin-bottom: 1rem; }
     h1 { text-align: center; margin-bottom: 1.5rem; }
@@ -37,7 +40,7 @@
     .btn-confirmar { background: #ea580c; color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; }
     .btn-cancelar { background: #64748b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; width: 100%; }
 
-    /* Estilos Mis Pasajes */
+    /* Mis Pasajes */
     .ticket-card { background: #0b192c; border: 1px solid #1e293b; border-radius: 8px; padding: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; }
     .badge { padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #0284c7; color: white; }
 
@@ -52,17 +55,19 @@
       <a href="../index.html">🏠 Inicio</a>
       <a href="servicios.html">🧳 Servicios</a>
       <a href="requisitos.html">📋 Requisitos</a>
-      <a href="compra-pasajes.html" style="background:#ea580c; color:white;">🎟️ Reserva / Horarios</a>
+      <a href="compra-pasajes.html" style="background:#0284c7; color:white;">🎟️ Reserva / Horarios</a>
       <a href="seguimiento.html">📦 Encomiendas</a>
       <a href="ubicacion.html">📍 Ubicación</a>
+      <a href="../panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;">⚙️ Panel Admin</a>
       <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem;"></span>
+      <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;">Cerrar Sesión</button>
     </nav>
   </header>
 
   <main>
     <h1>Reserva de Pasajes y Horarios 🎟️</h1>
 
-    <!-- Buscador / Horarios -->
+    <!-- Tabla Horarios -->
     <div class="card-box">
       <table class="table-horarios">
         <thead>
@@ -99,13 +104,17 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Mis Pasajes Comprados (RF-22.5) -->
     <div class="card-box">
       <h2>🎫 Mis Pasajes Comprados</h2>
       <div id="mis-pasajes-container">
-        <p style="color:#64748b;">Cargando tus compras...</p>
+        <p style="color:#64748b;">Inicia sesión para ver tus pasajes.</p>
       </div>
     </div>
   </main>
+
+  <!-- Modal Selección de Asientos -->
   <div id="modal-asientos">
     <div class="modal-content">
       <h2 style="color:#38bdf8;">Selecciona tu Asiento 💺</h2>
@@ -131,13 +140,30 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       usuarioActual = JSON.parse(localStorage.getItem('user'));
-      if (usuarioActual && usuarioActual.nombre) {
-        document.getElementById('user-display').innerText = `👋 ${usuarioActual.nombre}`;
+      
+      if (usuarioActual) {
+        // Mostrar nombre y botón de logout
+        document.getElementById('user-display').innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
+        document.getElementById('btn-logout').style.display = 'inline-block';
+
+        // Mostrar botón Panel Admin si es administrador o axlperez183@gmail.com
+        if (usuarioActual.rol === 'administrador' || usuarioActual.rol === 'empleado' || usuarioActual.email === 'axlperez183@gmail.com') {
+          document.getElementById('btn-panel-admin').style.display = 'inline-block';
+        }
+
         cargarMisPasajes();
       } else {
-        document.getElementById('mis-pasajes-container').innerHTML = '<p style="color:#94a3b8;">Inicia sesión para ver tus pasajes comprados.</p>';
+        document.getElementById('user-display').innerText = '';
+        document.getElementById('btn-logout').style.display = 'none';
+        document.getElementById('btn-panel-admin').style.display = 'none';
       }
     });
+
+    function cerrarSesion() {
+      localStorage.removeItem('user');
+      alert('Sesión cerrada correctamente.');
+      window.location.href = '../login.html';
+    }
 
     function abrirModal(origen, destino, precio) {
       if (!usuarioActual) {
@@ -146,7 +172,7 @@
         return;
       }
 
-      viajeSeleccionado = { origen, destino, precio, id_usuario: usuarioActual.id, nombre_pasajero: usuarioActual.nombre };
+      viajeSeleccionado = { origen, destino, precio, id_usuario: usuarioActual.id, nombre_pasajero: usuarioActual.nombre || usuarioActual.email };
       document.getElementById('info-ruta').innerText = `${origen} ➔ ${destino} | Precio: S/ ${precio.toFixed(2)}`;
       
       const grid = document.getElementById('grid-asientos');
@@ -183,8 +209,8 @@
 
       const hoy = new Date().toISOString().split('T')[0];
       const datosCompra = {
-        id_usuario: viajeSeleccionado.id_usuario,
-        nombre_pasajero: viajeSeleccionado.nombre_pasajero,
+        id_usuario: usuarioActual.id,
+        nombre_pasajero: usuarioActual.nombre || usuarioActual.email,
         origen: viajeSeleccionado.origen,
         destino: viajeSeleccionado.destino,
         fecha: hoy,
@@ -213,7 +239,6 @@
       }
     }
 
-    // RF-22.5 y RF-22.6: Consultar y editar registros propios
     async function cargarMisPasajes() {
       if (!usuarioActual || !usuarioActual.id) return;
 
