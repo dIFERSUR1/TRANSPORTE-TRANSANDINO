@@ -1,14 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // Verificar que el usuario tenga rol de administrador o empleado
-  if (!user || (user.rol !== 'administrador' && user.rol !== 'empleado')) {
+  // Verificar si es administrador por rol o por el correo principal
+  const esAdmin = user && (user.rol === 'administrador' || user.rol === 'empleado' || user.email === 'axlperez183@gmail.com');
+
+  if (!esAdmin) {
     alert('Acceso restringido únicamente para Administrador o Empleado.');
-    window.location.href = 'index.html';
+    window.location.href = '../index.html';
     return;
   }
 
-  document.getElementById('user-info').innerText = `👤 ${user.nombre} (${user.rol})`;
+  // Si el usuario en localStorage no tenía el rol guardado, se le fuerza visualmente
+  const nombreMostrar = user ? user.nombre || 'Axl Perez' : 'Axl Perez';
+  document.getElementById('user-info').innerText = `👤 ${nombreMostrar} (Administrador)`;
 
   cargarPasajes();
 
@@ -17,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const id = document.getElementById('pasaje-id').value;
     const datos = {
-      id_usuario: parseInt(document.getElementById('id-usuario').value),
+      id_usuario: parseInt(document.getElementById('id-usuario').value) || null,
       origen: document.getElementById('origen').value,
       destino: document.getElementById('destino').value,
       fecha: document.getElementById('fecha').value,
@@ -26,15 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (id) {
-      // Actualizar registro existente
-      await fetch(`/api/compras_pasajes/${id}`, {
+      await fetch(`/api/compras?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datos)
       });
     } else {
-      // Crear nuevo registro
-      await fetch('/api/compras_pasajes', {
+      await fetch('/api/compras', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datos)
@@ -48,30 +50,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Consultar TODOS los registros sin filtro por usuario
 async function cargarPasajes() {
-  const res = await fetch('/api/compras_pasajes');
-  const datos = await res.json();
-  const tbody = document.getElementById('tabla-pasajes');
-  tbody.innerHTML = '';
+  try {
+    const res = await fetch('/api/compras');
+    const datos = await res.json();
+    const tbody = document.getElementById('tabla-pasajes');
+    tbody.innerHTML = '';
 
-  datos.forEach(p => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${p.id}</td>
-        <td>${p.id_usuario}</td>
-        <td>${p.origen}</td>
-        <td>${p.destino}</td>
-        <td>${p.fecha}</td>
-        <td>S/ ${p.precio}</td>
-        <td><strong>${p.estado}</strong></td>
-        <td>
-          <button class="btn-edit" onclick="editarPasaje(${p.id}, ${p.id_usuario}, '${p.origen}', '${p.destino}', '${p.fecha}', ${p.precio}, '${p.estado}')">✏️ Editar</button>
-          <button class="btn-delete" onclick="eliminarPasaje(${p.id})">🗑️ Eliminar</button>
-        </td>
-      </tr>
-    `;
-  });
+    if (!Array.isArray(datos)) return;
+
+    datos.forEach(p => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${p.id}</td>
+          <td>${p.id_usuario || 'N/A'}</td>
+          <td>${p.origen}</td>
+          <td>${p.destino}</td>
+          <td>${p.fecha || p.fecha_viaje}</td>
+          <td>S/ ${p.precio || 0}</td>
+          <td><strong>${p.estado}</strong></td>
+          <td>
+            <button class="btn-edit" onclick="editarPasaje(${p.id}, ${p.id_usuario || 0}, '${p.origen}', '${p.destino}', '${p.fecha || p.fecha_viaje}', ${p.precio || 0}, '${p.estado}')">✏️ Editar</button>
+            <button class="btn-delete" onclick="eliminarPasaje(${p.id})">🗑️ Eliminar</button>
+          </td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function editarPasaje(id, id_usuario, origen, destino, fecha, precio, estado) {
@@ -87,7 +94,7 @@ function editarPasaje(id, id_usuario, origen, destino, fecha, precio, estado) {
 
 async function eliminarPasaje(id) {
   if (confirm('¿Desea eliminar este registro de compra de pasaje?')) {
-    await fetch(`/api/compras_pasajes/${id}`, { method: 'DELETE' });
+    await fetch(`/api/compras?id=${id}`, { method: 'DELETE' });
     cargarPasajes();
   }
 }
