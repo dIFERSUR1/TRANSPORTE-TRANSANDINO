@@ -14,7 +14,9 @@
     nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; }
     
     main { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-    h1 { color: #38bdf8; margin-bottom: 1.5rem; text-align: center; }
+    h1, h2 { color: #38bdf8; margin-bottom: 1rem; }
+    h1 { text-align: center; margin-bottom: 1.5rem; }
+
     .card-box { background: #15233b; border: 1px solid #1e293b; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
     .table-horarios { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     .table-horarios th, .table-horarios td { padding: 1rem; text-align: left; border-bottom: 1px solid #1e293b; font-size: 0.9rem; }
@@ -22,16 +24,22 @@
     
     .btn-comprar { background: #0284c7; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-comprar:hover { background: #0369a1; }
+
+    /* Modal / Selección Asientos */
     #modal-asientos { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2rem; width: 90%; max-width: 500px; text-align: center; }
     
     .bus-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 1.5rem 0; background: #0b192c; padding: 1rem; border-radius: 8px; }
-    .asiento { padding: 0.8rem; background: #1e293b; border: 1px solid #38bdf8; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .asiento { padding: 0.8rem; background: #1e293b; border: 1px solid #38bdf8; border-radius: 6px; cursor: pointer; font-weight: bold; color: #fff; }
     .asiento:hover { background: #38bdf8; color: #000; }
     .asiento.seleccionado { background: #ea580c !important; color: white; border-color: #ea580c; }
     
     .btn-confirmar { background: #ea580c; color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; }
     .btn-cancelar { background: #64748b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; width: 100%; }
+
+    /* Estilos Mis Pasajes */
+    .ticket-card { background: #0b192c; border: 1px solid #1e293b; border-radius: 8px; padding: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .badge { padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #0284c7; color: white; }
 
     footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; margin-top: auto; }
   </style>
@@ -54,6 +62,7 @@
   <main>
     <h1>Reserva de Pasajes y Horarios 🎟️</h1>
 
+    <!-- Buscador / Horarios -->
     <div class="card-box">
       <table class="table-horarios">
         <thead>
@@ -90,17 +99,19 @@
         </tbody>
       </table>
     </div>
+    <div class="card-box">
+      <h2>🎫 Mis Pasajes Comprados</h2>
+      <div id="mis-pasajes-container">
+        <p style="color:#64748b;">Cargando tus compras...</p>
+      </div>
+    </div>
   </main>
-
-  <!-- Modal para Selección de Asientos -->
   <div id="modal-asientos">
     <div class="modal-content">
       <h2 style="color:#38bdf8;">Selecciona tu Asiento 💺</h2>
       <p id="info-ruta" style="margin-top:0.5rem; color:#94a3b8;"></p>
 
-      <div class="bus-grid" id="grid-asientos">
-        <!-- Generado por JavaScript -->
-      </div>
+      <div class="bus-grid" id="grid-asientos"></div>
 
       <p id="asiento-seleccionado-txt" style="margin-bottom:1rem; color:#38bdf8; font-weight:bold;">Ningún asiento seleccionado</p>
 
@@ -116,26 +127,28 @@
   <script>
     let viajeSeleccionado = {};
     let asientoElegido = null;
+    let usuarioActual = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user && user.nombre) {
-        document.getElementById('user-display').innerText = `👋 ${user.nombre}`;
+      usuarioActual = JSON.parse(localStorage.getItem('user'));
+      if (usuarioActual && usuarioActual.nombre) {
+        document.getElementById('user-display').innerText = `👋 ${usuarioActual.nombre}`;
+        cargarMisPasajes();
+      } else {
+        document.getElementById('mis-pasajes-container').innerHTML = '<p style="color:#94a3b8;">Inicia sesión para ver tus pasajes comprados.</p>';
       }
     });
 
     function abrirModal(origen, destino, precio) {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (!user) {
+      if (!usuarioActual) {
         alert('Debes iniciar sesión para comprar un pasaje.');
         window.location.href = '../login.html';
         return;
       }
 
-      viajeSeleccionado = { origen, destino, precio, id_usuario: user.id, nombre_pasajero: user.nombre };
+      viajeSeleccionado = { origen, destino, precio, id_usuario: usuarioActual.id, nombre_pasajero: usuarioActual.nombre };
       document.getElementById('info-ruta').innerText = `${origen} ➔ ${destino} | Precio: S/ ${precio.toFixed(2)}`;
       
-      // Generar 12 asientos en pantalla
       const grid = document.getElementById('grid-asientos');
       grid.innerHTML = '';
       asientoElegido = null;
@@ -189,13 +202,70 @@
         const respuesta = await res.json();
 
         if (res.ok) {
-          alert(`¡Compra realizada con éxito! 🎉\nCódigo de seguimiento: ${respuesta.codigo_seguimiento || 'TA-OK'}`);
+          alert(`¡Compra realizada con éxito! 🎉\nCódigo de seguimiento: ${respuesta.codigo_seguimiento}`);
           cerrarModal();
+          cargarMisPasajes();
         } else {
           alert('Error al registrar la compra: ' + (respuesta.message || 'Intente nuevamente'));
         }
       } catch (err) {
         alert('Error de conexión al procesar la compra.');
+      }
+    }
+
+    // RF-22.5 y RF-22.6: Consultar y editar registros propios
+    async function cargarMisPasajes() {
+      if (!usuarioActual || !usuarioActual.id) return;
+
+      try {
+        const res = await fetch(`/api/compras?id_usuario=${usuarioActual.id}`);
+        const pasajes = await res.json();
+        const cont = document.getElementById('mis-pasajes-container');
+
+        if (!Array.isArray(pasajes) || pasajes.length === 0) {
+          cont.innerHTML = '<p style="color:#94a3b8;">Aún no has comprado ningún pasaje.</p>';
+          return;
+        }
+
+        cont.innerHTML = pasajes.map(p => `
+          <div class="ticket-card">
+            <div>
+              <p><strong>Código:</strong> <span style="color:#ea580c;">${p.codigo_seguimiento || 'TA-N/A'}</span></p>
+              <p><strong>Ruta:</strong> ${p.origen} ➔ ${p.destino}</p>
+              <p><strong>Fecha:</strong> ${p.fecha || p.fecha_viaje} | <strong>Precio:</strong> S/ ${p.precio}</p>
+              <p><strong>Estado:</strong> <span class="badge">${p.estado}</span></p>
+            </div>
+            <div>
+              ${p.estado === 'registrado' 
+                ? `<button onclick="editarMiPasaje(${p.id}, '${p.origen}', '${p.destino}')" style="background:#ea580c; color:white; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">✏️ Cambiar Ruta</button>`
+                : `<small style="color:#64748b;">No editable</small>`
+              }
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function editarMiPasaje(id, origenActual, destinoActual) {
+      const nuevoOrigen = prompt('Ingrese nuevo Origen:', origenActual);
+      const nuevoDestino = prompt('Ingrese nuevo Destino:', destinoActual);
+
+      if (nuevoOrigen && nuevoDestino) {
+        const hoy = new Date().toISOString().split('T')[0];
+        const res = await fetch(`/api/compras?id=${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ origen: nuevoOrigen, destino: nuevoDestino, fecha: hoy })
+        });
+
+        if (res.ok) {
+          alert('Registro de viaje actualizado con éxito.');
+          cargarMisPasajes();
+        } else {
+          alert('No se pudo actualizar el registro.');
+        }
       }
     }
   </script>
