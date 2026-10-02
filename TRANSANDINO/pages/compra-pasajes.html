@@ -70,7 +70,35 @@
     .user-section {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.8rem;
+    }
+
+    /* Botones de Iniciar Sesión / Registro de la imagen */
+    .btn-outline-blue {
+      border: 1px solid #0284c7;
+      color: #38bdf8;
+      background: transparent;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .btn-solid-blue {
+      background-color: #0284c7;
+      color: #ffffff;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
     }
 
     .user-greeting {
@@ -294,16 +322,15 @@
   <header>
     <a href="../index.html" class="logo">🚌 TransAndino Perú</a>
     <nav>
-      <a href="../index.html">Inicio</a>
-      <a href="#">📘 Servicios</a>
+      <a href="../index.html">👏 Inicio</a>
+      <a href="servicios.html">📘 Servicios</a>
       <a href="requisitos.html">📜 Requisitos</a>
-      <a href="compra-pasajes.html" class="active">✔ Pasajes</a>
-      <a href="#">📦 Encomiendas</a>
-      <a href="#">📍 Ubicación</a>
+      <a href="compra-pasajes.html" class="active">✏️ Pasajes</a>
+      <a href="encomiendas.html">📦 Encomiendas</a>
+      <a href="ubicacion.html">📍 Ubicación</a>
     </nav>
-    <div class="user-section">
-      <span class="user-greeting" id="lbl-usuario">✋ Hola, Invitado</span>
-      <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+    <div class="user-section" id="auth-buttons">
+      <!-- Se llena dinámicamente según si hay sesión iniciada -->
     </div>
   </header>
 
@@ -388,13 +415,22 @@
     const PRECIO_PASAJE = 50.00;
     let seleccionados = [];
 
-    // Carga el nombre de usuario desde localStorage al iniciar
+    // Renderiza la barra superior de autenticación según si hay usuario
     document.addEventListener('DOMContentLoaded', () => {
+      const authContainer = document.getElementById('auth-buttons');
       const user = JSON.parse(localStorage.getItem('user'));
+
       if (user && (user.nombre || user.email)) {
-        document.getElementById('lbl-usuario').innerText = `✋ Hola, ${user.nombre || user.email.split('@')[0]}`;
+        const nombreMostrar = user.nombre || user.email.split('@')[0];
+        authContainer.innerHTML = `
+          <span class="user-greeting">✋ Hola, ${nombreMostrar}</span>
+          <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        `;
       } else {
-        document.getElementById('lbl-usuario').innerText = `✋ Hola, Invitado`;
+        authContainer.innerHTML = `
+          <a href="../login.html" class="btn-outline-blue">🔑 Iniciar Sesión</a>
+          <a href="../register.html" class="btn-solid-blue">✍️ Registrarse</a>
+        `;
       }
     });
 
@@ -437,7 +473,6 @@
 
       grid.innerHTML = '';
 
-      // Generar los 40 asientos
       for (let i = 1; i <= 40; i++) {
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -514,7 +549,7 @@
         }
 
         alert(`¡Reserva realizada con éxito!\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}`);
-        await cargarAsientos(); // Recargar grilla
+        await cargarAsientos();
       } catch (err) {
         console.error('Error al guardar la reserva:', err);
         alert('Ocurrió un problema al guardar la reserva.');
@@ -523,11 +558,10 @@
       }
     }
 
-    // Cierra la sesión limpiando localStorage
     function cerrarSesion() {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      window.location.href = "../index.html";
+      window.location.reload();
     }
   </script>
 </body>
