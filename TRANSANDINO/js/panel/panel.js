@@ -1,5 +1,9 @@
-document.addEventListener('DOMContentLoaded', cargarTodosLosPasajes);
+document.addEventListener('DOMContentLoaded', () => {
+  cargarTodosLosPasajes();
+  cargarTablaAsientos();
+});
 
+// 1. Cargar la tabla principal de Pasajes / Precios
 async function cargarTodosLosPasajes() {
   const tbody = document.getElementById('panel-tbody');
   if (!tbody) return;
@@ -8,7 +12,7 @@ async function cargarTodosLosPasajes() {
 
   try {
     const res = await fetch('/api/compras');
-    if (!res.ok) throw new Error('Error al conectar con la base de datos.');
+    if (!res.ok) throw new Error('Error al conectar con la BD.');
 
     const pasajes = await res.json();
     tbody.innerHTML = '';
@@ -53,6 +57,48 @@ async function cargarTodosLosPasajes() {
   }
 }
 
+// 2. Cargar la vista de la pestaña "Asientos de Bus"
+async function cargarTablaAsientos() {
+  const tbodyAsientos = document.getElementById('asientos-tbody') || document.querySelector('.table-container table tbody');
+  if (!tbodyAsientos) return;
+
+  try {
+    const res = await fetch('/api/compras');
+    if (!res.ok) return;
+
+    const pasajes = await res.json();
+    
+    // Si no estamos en la pestaña de asientos, retornar
+    if (!document.querySelector('th:nth-child(1)')?.textContent.includes('N° Asiento')) {
+      return;
+    }
+
+    tbodyAsientos.innerHTML = '';
+
+    if (!Array.isArray(pasajes) || pasajes.length === 0) {
+      tbodyAsientos.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay asientos asignados actualmente.</td></tr>`;
+      return;
+    }
+
+    pasajes.forEach((item) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="color:#ea580c; font-weight:bold;">Asiento ${item.num_asiento || item.asiento || '-'}</td>
+        <td>Usuario #${item.id_usuario || '1'}</td>
+        <td>${item.origen} ➔ ${item.destino}</td>
+        <td><span style="color:${item.estado === 'cancelado' ? '#ef4444' : '#22c55e'}; font-weight:bold;">${item.estado || 'Ocupado'}</span></td>
+        <td>
+          <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Liberar Asiento</button>
+        </td>
+      `;
+      tbodyAsientos.appendChild(tr);
+    });
+  } catch (error) {
+    console.error('Error al cargar asientos:', error);
+  }
+}
+
+// 3. Cambiar estado de un pasaje
 async function cambiarEstado(id, nuevoEstado) {
   try {
     const res = await fetch(`/api/compras?id=${id}`, {
@@ -61,17 +107,22 @@ async function cambiarEstado(id, nuevoEstado) {
       body: JSON.stringify({ estado: nuevoEstado })
     });
 
-    if (res.ok) cargarTodosLosPasajes();
+    if (res.ok) {
+      cargarTodosLosPasajes();
+      cargarTablaAsientos();
+    }
   } catch (error) {
     console.error('Error al cambiar estado:', error);
   }
 }
-
 async function eliminarRegistro(id) {
-  if (confirm(`¿Seguro de que deseas eliminar permanentemente el registro #${id}?`)) {
+  if (confirm(`¿Seguro que deseas eliminar/liberar la reserva #${id}?`)) {
     try {
       const res = await fetch(`/api/compras?id=${id}`, { method: 'DELETE' });
-      if (res.ok) cargarTodosLosPasajes();
+      if (res.ok) {
+        cargarTodosLosPasajes();
+        cargarTablaAsientos();
+      }
     } catch (error) {
       console.error('Error al eliminar:', error);
     }
