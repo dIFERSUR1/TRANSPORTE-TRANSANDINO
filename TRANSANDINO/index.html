@@ -30,9 +30,9 @@
       flex-direction: column;
     }
 
-    /* Navbar Unificado */
+    /* Navbar Oscuro Unificado (#030710) */
     .navbar {
-      background-color: #030710 !important;
+      background: #030710;
       padding: 0.8rem 2rem;
       display: flex;
       justify-content: space-between;
@@ -50,6 +50,21 @@
       text-decoration: none;
     }
 
+    /* Movimiento constante del emoji del bus en el logo */
+    .brand .bus-icon {
+      display: inline-block;
+      animation: busDrive 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes busDrive {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(6px);
+      }
+    }
+
     .nav-links {
       display: flex;
       gap: 0.5rem;
@@ -57,7 +72,7 @@
       align-items: center;
     }
 
-    .nav-links .nav-item {
+    .nav-item {
       color: var(--text-color);
       text-decoration: none;
       font-size: 0.88rem;
@@ -66,27 +81,27 @@
       gap: 0.45rem;
       padding: 0.5rem 0.9rem;
       border-radius: 8px;
-      background: transparent;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .nav-links .nav-item span.icon {
+    /* Animación de movimiento al pasar el cursor sobre los emojis */
+    .nav-item span.icon {
       display: inline-block;
       transition: transform 0.25s ease;
     }
 
-    .nav-links .nav-item:hover {
+    .nav-item:hover {
       background: rgba(255, 255, 255, 0.08);
       transform: translateY(-2px);
     }
 
-    .nav-links .nav-item:hover span.icon {
+    .nav-item:hover span.icon {
       transform: scale(1.25) rotate(-5deg);
     }
 
-    .nav-links .nav-item.active {
-      background: var(--orange-accent) !important;
-      color: #ffffff !important;
+    .nav-item.active {
+      background: var(--orange-accent);
+      color: #ffffff;
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
     }
@@ -131,73 +146,83 @@
       background: #0369a1;
     }
 
-    .main-content {
+    /* Contenido Principal */
+    .main-container {
       flex: 1;
-      max-width: 1000px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.5rem;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 2.5rem 1rem;
       width: 100%;
+    }
+
+    .page-title {
+      font-size: 2.2rem;
+      color: #38bdf8;
+      margin-bottom: 2rem;
+      font-weight: 800;
       text-align: center;
     }
 
-    h1.hero-title {
-      font-size: 2.1rem;
-      color: #38bdf8;
-      margin-bottom: 1.8rem;
-      font-weight: 800;
-    }
-
-    .banner-container {
-      background: #09111e;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-      margin-bottom: 2.5rem;
-    }
-
-    .banner-img {
+    .hero-banner {
       width: 100%;
-      max-height: 400px;
+      max-width: 1000px;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-banner img {
+      width: 100%;
+      height: 380px;
       object-fit: cover;
       display: block;
     }
 
-    .cards-grid {
+    .features-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1.5rem;
-      text-align: left;
+      width: 100%;
+      max-width: 1000px;
     }
 
-    .card {
+    .feature-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 1.5rem;
+      transition: all 0.3s ease;
       text-decoration: none;
       color: inherit;
-      display: block;
-      transition: transform 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
     }
 
-    .card:hover {
-      transform: translateY(-3px);
+    .feature-card:hover {
+      transform: translateY(-5px);
       border-color: var(--orange-accent);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
 
-    .card h3 {
-      font-size: 1.05rem;
+    .feature-title {
+      font-size: 1.1rem;
       color: var(--orange-accent);
-      margin-bottom: 0.8rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .card p {
-      font-size: 0.85rem;
+    .feature-desc {
+      font-size: 0.88rem;
       color: var(--text-muted);
-      line-height: 1.5;
+      line-height: 1.4;
     }
 
     footer {
@@ -212,46 +237,50 @@
 <body>
 
   <header class="navbar">
-    <a href="index.html" class="brand"><span class="icon">🚌</span> TransAndino Perú</a>
+    <a href="index.html" class="brand">
+      <span class="bus-icon">🚌</span> TransAndino Perú
+    </a>
+    
     <nav>
       <ul class="nav-links">
         <li><a href="index.html" class="nav-item active"><span class="icon">🏡</span> Inicio</a></li>
         <li><a href="pages/servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
         <li><a href="pages/requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
-        <li><a href="pages/compra-pasajes.html" class="nav-item"><span class="icon">🎟️</span> Reserva / Horarios</a></li>
+        <li><a href="pages/compra-pasajes.html" class="nav-item"><span class="icon">🎟️️</span> Reserva / Horarios</a></li>
         <li><a href="pages/seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
         <li><a href="pages/ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación y Sedes</a></li>
       </ul>
     </nav>
+
     <div class="auth-buttons">
       <a href="pages/login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
       <a href="pages/registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
     </div>
   </header>
 
-  <main class="main-content">
-    <h1 class="hero-title">Bienvenido a TransAndino Perú 🚌</h1>
+  <main class="main-container">
+    <h1 class="page-title">Bienvenido a TransAndino Perú 🚌</h1>
 
-    <div class="banner-container">
-      <img src="images.jpg" alt="Bus TransAndino" class="banner-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1000&auto=format&fit=crop';">
+    <div class="hero-banner">
+      <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop" alt="Bus TransAndino">
     </div>
 
-    <section class="cards-grid">
-      <a href="pages/compra-pasajes.html" class="card">
-        <h3>🎟️ Reserva de Pasajes</h3>
-        <p>Consulta nuestras salidas diarias, rutas interprovinciales disponibles y asegura tu boleto en línea.</p>
+    <div class="features-grid">
+      <a href="pages/compra-pasajes.html" class="feature-card">
+        <h2 class="feature-title">🎟️ Reserva de Pasajes</h2>
+        <p class="feature-desc">Consulta nuestras salidas diarias, rutas interprovinciales disponibles y asegura tu boleto en línea.</p>
       </a>
 
-      <a href="pages/seguimiento.html" class="card">
-        <h3>📦 Rastreo de Encomiendas</h3>
-        <p>Monitorea el estado y la llegada de tus envíos o paquetería en tiempo real con tu número de guía.</p>
+      <a href="pages/seguimiento.html" class="feature-card">
+        <h2 class="feature-title">📦 Rastreo de Encomiendas</h2>
+        <p class="feature-desc">Monitorea el estado y la llegada de tus envíos o paquetería en tiempo real con tu número de guía.</p>
       </a>
 
-      <a href="pages/ubicacion.html" class="card">
-        <h3>📍 Sedes y Agencias</h3>
-        <p>Encuentra las direcciones, referencias y teléfonos de contacto de nuestras terminales a nivel nacional.</p>
+      <a href="pages/ubicacion.html" class="feature-card">
+        <h2 class="feature-title">📍 Sedes y Agencias</h2>
+        <p class="feature-desc">Encuentra las direcciones, referencias y teléfonos de contacto de nuestras terminales a nivel nacional.</p>
       </a>
-    </section>
+    </div>
   </main>
 
   <footer>
