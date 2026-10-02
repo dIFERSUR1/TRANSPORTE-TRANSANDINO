@@ -20,7 +20,6 @@
       flex-direction: column;
     }
 
-    /* HEADER FIEL A TU INDEX.HTML */
     header {
       background-color: #0b0f19;
       padding: 0.8rem 2rem;
@@ -62,7 +61,6 @@
       color: #ffffff;
     }
 
-    /* Pestaña activa con estilo naranja del index */
     nav a.active {
       background-color: #ea580c;
       color: #ffffff !important;
@@ -95,7 +93,6 @@
       font-size: 0.85rem;
     }
 
-    /* CONTENEDOR PRINCIPAL */
     main {
       flex: 1;
       max-width: 900px;
@@ -113,7 +110,6 @@
       gap: 0.5rem;
     }
 
-    /* TARJETA CON ESTILO DE TU INDEX */
     .card {
       background-color: #111827;
       border: 1px solid #1f2d42;
@@ -177,7 +173,6 @@
       background-color: #c2410c;
     }
 
-    /* SECCIÓN ASIENTOS */
     #seccion-asientos {
       display: none;
     }
@@ -226,7 +221,6 @@
       gap: 8px;
     }
 
-    /* Pasillo central */
     .seats-grid button:nth-child(4n+2) {
       margin-right: 14px;
     }
@@ -249,6 +243,13 @@
       background-color: #ea580c;
       color: white;
       box-shadow: 0 0 6px rgba(234, 88, 12, 0.8);
+    }
+
+    .seat-btn.ocupado {
+      background-color: #ef4444 !important;
+      color: white !important;
+      cursor: not-allowed !important;
+      opacity: 0.8;
     }
 
     .checkout-bar {
@@ -346,7 +347,7 @@
       </form>
     </div>
 
-    <!-- SECCIÓN DE 40 ASIENTOS -->
+    <!-- SECCIÓN DE ASIENTOS -->
     <div class="card" id="seccion-asientos">
       <div class="bus-title">🚌 Selección de Asientos (Bus 40 Pasajeros)</div>
 
@@ -358,6 +359,10 @@
         <div class="legend-item">
           <div class="dot" style="background-color: #ea580c;"></div>
           <span>Seleccionado</span>
+        </div>
+        <div class="legend-item">
+          <div class="dot" style="background-color: #ef4444;"></div>
+          <span>Ocupado</span>
         </div>
       </div>
 
@@ -383,33 +388,63 @@
     const PRECIO_PASAJE = 50.00;
     let seleccionados = [];
 
-    document.getElementById('form-busqueda').addEventListener('submit', function (e) {
+    document.getElementById('form-busqueda').addEventListener('submit', async function (e) {
       e.preventDefault();
-      
+      await cargarAsientos();
+    });
+
+    async function cargarAsientos() {
       const grid = document.getElementById('seats-grid');
       const seccion = document.getElementById('seccion-asientos');
-      
-      grid.innerHTML = '';
+      const origen = document.getElementById('origen').value.trim().toLowerCase();
+      const destino = document.getElementById('destino').value.trim().toLowerCase();
+      const fecha = document.getElementById('fecha').value;
+
+      grid.innerHTML = '<p style="grid-column: span 4; text-align: center; color: #38bdf8;">Cargando asientos...</p>';
+      seccion.style.display = 'block';
       seleccionados = [];
       actualizarResumen();
 
-      // Generación de los 40 asientos
+      let ocupados = [];
+      try {
+        const res = await fetch('/api/compras');
+        if (res.ok) {
+          const compras = await res.json();
+          ocupados = compras
+            .filter(item => {
+              const origDB = (item.origen || '').trim().toLowerCase();
+              const destDB = (item.destino || '').trim().toLowerCase();
+              const fechaDB = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '');
+              return origDB === origen && destDB === destino && fechaDB === fecha && item.estado !== 'cancelado';
+            })
+            .map(item => parseInt(item.num_asiento || item.asiento));
+        }
+      } catch (err) {
+        console.error('Error al conectar con la base de datos:', err);
+      }
+
+      grid.innerHTML = '';
+
+      // Generar los 40 asientos marcando ocupados los registrados en Neon
       for (let i = 1; i <= 40; i++) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.innerText = i;
-        btn.className = 'seat-btn disponible';
-        
-        btn.onclick = () => toggleAsiento(i, btn);
+
+        if (ocupados.includes(i)) {
+          btn.className = 'seat-btn ocupado';
+          btn.disabled = true;
+        } else {
+          btn.className = 'seat-btn disponible';
+          btn.onclick = () => toggleAsiento(i, btn);
+        }
+
         grid.appendChild(btn);
       }
-
-      seccion.style.display = 'block';
-    });
+    }
 
     function toggleAsiento(numero, boton) {
       const index = seleccionados.indexOf(numero);
-      
       if (index > -1) {
         seleccionados.splice(index, 1);
         boton.classList.remove('seleccionado');
@@ -419,7 +454,6 @@
         boton.classList.remove('disponible');
         boton.classList.add('seleccionado');
       }
-      
       actualizarResumen();
     }
 
@@ -440,12 +474,46 @@
       }
     }
 
-    function confirmarReserva() {
+    async function confirmarReserva() {
       const origen = document.getElementById('origen').value;
       const destino = document.getElementById('destino').value;
-      alert(`Reserva realizada con éxito:\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}\nTotal: S/ ${(seleccionados.length * PRECIO_PASAJE).toFixed(2)}`);
+      const fecha_viaje = document.getElementById('fecha').value;
+      const btnReservar = document.getElementById('btn-reservar');
+
+      btnReservar.disabled = true;
+      btnReservar.innerText = 'Guardando...';
+
+      try {
+        for (const asientoNum of seleccionados) {
+          await fetch('/api/compras', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id_usuario: 1,
+              origen: origen,
+              destino: destino,
+              fecha_viaje: fecha_viaje,
+              hora_viaje: '09:00 AM',
+              num_asiento: asientoNum,
+              precio: PRECIO_PASAJE,
+              estado: 'reservado'
+            })
+          });
+        }
+
+        alert(`¡Reserva realizada con éxito!\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}`);
+        await cargarAsientos(); // Recargar grilla
+      } catch (err) {
+        console.error('Error al guardar la reserva:', err);
+        alert('Ocurrió un problema al guardar la reserva.');
+      } finally {
+        btnReservar.innerText = 'Confirmar Reserva';
+      }
     }
 
     function cerrarSesion() {
       window.location.href = "../index.html";
     }
+  </script>
+</body>
+</html>
