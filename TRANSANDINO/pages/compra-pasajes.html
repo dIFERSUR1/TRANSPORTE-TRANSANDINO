@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reserva de Pasajes - Transporte Transandino</title>
+  <title>Reserva de Pasajes - TransAndino Perú</title>
   <style>
     :root {
-      --bg-color: #0d1527;
-      --card-bg: #131e32;
-      --border-color: rgba(255, 255, 255, 0.12);
-      --accent-blue: #0284c7;
+      --bg-color: #050b14;
+      --card-bg: #0d1626;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --orange-accent: #f97316;
+      --blue-accent: #0284c7;
       --text-color: #f8fafc;
-      
-      /* Colores para los estados de asientos */
-      --asiento-disponible: #253346;
-      --asiento-seleccionado: #ea580c; /* Naranja */
-      --asiento-ocupado: #dc2626;     /* Rojo */
+      --text-muted: #94a3b8;
+      --red-seat: #dc2626;
+      --green-seat: #16a34a;
     }
 
     * {
@@ -28,292 +27,368 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
-      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
     }
 
-    .card-reserva {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 680px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    /* Navbar superior */
+    .navbar {
+      background: #030710;
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
     }
 
-    h1 {
-      text-align: center;
-      font-size: 2rem;
+    .brand {
+      font-size: 1.2rem;
+      font-weight: 700;
       color: #38bdf8;
-      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
     }
 
-    /* Formulario de selección */
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 1.2rem;
-      margin-bottom: 1.8rem;
+    .nav-links {
+      display: flex;
+      gap: 0.6rem;
+      list-style: none;
+      align-items: center;
     }
 
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      color: #94a3b8;
-      margin-bottom: 0.5rem;
+    .nav-item {
+      color: var(--text-color);
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-item.active {
+      background: var(--orange-accent);
+      color: #ffffff;
       font-weight: 600;
     }
 
-    select, input {
-      width: 100%;
-      padding: 0.65rem;
-      border-radius: 8px;
+    .nav-item.btn-box {
+      background: #111e33;
       border: 1px solid var(--border-color);
-      background: #090e1a;
-      color: var(--text-color);
-      outline: none;
-      font-size: 0.95rem;
     }
 
-    select:focus, input:focus {
+    .nav-item.btn-box:hover {
+      background: #1a2c47;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .btn-login {
+      border: 1px solid var(--blue-accent);
+      color: #38bdf8;
+      background: transparent;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-login:hover {
+      background: rgba(2, 132, 199, 0.2);
+    }
+
+    .btn-register {
+      background: var(--blue-accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-register:hover {
+      background: #0369a1;
+    }
+
+    /* Contenedor Principal */
+    .main-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 1rem;
+    }
+
+    .booking-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 680px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .page-title {
+      color: #38bdf8;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* Controles de Filtro */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .control-group label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .control-group select, 
+    .control-group input {
+      background: #081120;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .control-group select:focus, 
+    .control-group input:focus {
       border-color: #38bdf8;
     }
 
-    /* Leyenda de estados */
-    .leyenda {
+    /* Leyenda de Asientos */
+    .section-subtitle {
+      font-size: 0.95rem;
+      color: #38bdf8;
+      margin-bottom: 0.8rem;
+    }
+
+    .legend-bar {
+      background: #081120;
+      padding: 0.6rem;
+      border-radius: 8px;
       display: flex;
       justify-content: center;
       gap: 1.5rem;
       margin-bottom: 1.2rem;
-      font-size: 0.85rem;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 0.6rem;
-      border-radius: 8px;
+      font-size: 0.8rem;
     }
 
-    .item-leyenda {
+    .legend-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
-    .box-color {
-      width: 14px;
-      height: 14px;
-      border-radius: 4px;
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
     }
 
-    .titulo-asientos {
-      display: block;
-      margin-bottom: 0.8rem;
-      font-size: 0.95rem;
-      color: #38bdf8;
-      font-weight: 600;
-    }
+    .dot.free { background: #1e293b; border: 1px solid #334155; }
+    .dot.selected { background: var(--orange-accent); }
+    .dot.occupied { background: var(--red-seat); }
 
-    /* Contenedor de 30 Asientos */
-    .grid-asientos {
+    /* Grilla de Asientos */
+    .seats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr); /* Disposición típica de bus de 4 filas */
-      gap: 0.8rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
       max-height: 320px;
       overflow-y: auto;
-      padding: 1rem;
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      margin-bottom: 1.8rem;
-    }
-
-    /* Scrollbar personalizada para los asientos */
-    .grid-asientos::-webkit-scrollbar {
-      width: 6px;
-    }
-    .grid-asientos::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-    }
-
-    /* Estilo del botón del asiento */
-    .btn-asiento {
-      padding: 0.85rem 0.2rem;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background-color: var(--asiento-disponible);
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-align: center;
-    }
-
-    .btn-asiento:hover:not(:disabled) {
-      transform: scale(1.04);
-      border-color: #38bdf8;
-    }
-
-    /* Estado: Seleccionado (Naranja) */
-    .btn-asiento.seleccionado {
-      background-color: var(--asiento-seleccionado) !important;
-      box-shadow: 0 0 10px rgba(234, 88, 12, 0.6);
-      border-color: #ffedd5;
-    }
-
-    /* Estado: Comprado / Ocupado (Rojo) */
-    .btn-asiento.comprado {
-      background-color: var(--asiento-ocupado) !important;
-      cursor: not-allowed;
-      opacity: 0.65;
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .resumen-precio {
-      text-align: center;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #4ade80;
+      padding-right: 0.3rem;
       margin-bottom: 1.5rem;
     }
 
-    .btn-confirmar {
-      width: 100%;
-      padding: 1rem;
-      border: none;
-      border-radius: 10px;
-      background: #0284c7;
-      color: white;
-      font-size: 1.05rem;
-      font-weight: 700;
+    .seat-btn {
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 0.75rem 0.5rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s ease, transform 0.1s ease;
+      transition: all 0.2s ease;
     }
 
-    .btn-confirmar:hover {
-      background: #0369a1;
+    .seat-btn:hover:not(.occupied) {
+      border-color: var(--orange-accent);
+      background: #334155;
     }
 
-    .btn-confirmar:active {
-      transform: scale(0.98);
+    .seat-btn.selected {
+      background: var(--orange-accent) !important;
+      border-color: #ea580c !important;
+      color: #ffffff;
+    }
+
+    .seat-btn.occupied {
+      background: var(--red-seat) !important;
+      border-color: #b91c1c !important;
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+
+    /* Pie de Compra */
+    .total-price {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--green-seat);
     }
   </style>
 </head>
 <body>
 
-  <div class="card-reserva">
-    <h1>Reserva de Pasajes de Viaje 🖊️</h1>
+  <!-- Navbar idéntico para mantener la navegación -->
+  <header class="navbar">
+    <a href="../index.html" class="brand">
+      🚌 TransAndino Perú
+    </a>
+    
+    <nav>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="nav-item">🏡 Inicio</a></li>
+        <li><a href="servicios.html" class="nav-item btn-box">📘 Servicios</a></li>
+        <li><a href="requisitos.html" class="nav-item">📜 Requisitos</a></li>
+        <li><a href="compra-pasajes.html" class="nav-item active">🩹 Pasajes</a></li>
+        <li><a href="encomiendas.html" class="nav-item">📦 Encomiendas</a></li>
+        <li><a href="ubicacion.html" class="nav-item">📍 Ubicación</a></li>
+      </ul>
+    </nav>
 
-    <!-- Formulario superior -->
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Origen</label>
-        <select><option>Lima</option></select>
+    <div class="auth-buttons">
+      <a href="login.html" class="btn-login">🔑 Iniciar Sesión</a>
+      <a href="registro.html" class="btn-register">✍️ Registrarse</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="booking-card">
+      <h1 class="page-title">Reserva de Pasajes de Viaje 🩹</h1>
+
+      <div class="controls-grid">
+        <div class="control-group">
+          <label for="origen">Origen</label>
+          <select id="origen">
+            <option>Lima</option>
+            <option>Huancayo</option>
+            <option>Arequipa</option>
+            <option>Cusco</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="destino">Destino</label>
+          <select id="destino">
+            <option>Ica</option>
+            <option>Lima</option>
+            <option>Huancayo</option>
+            <option>Ayacucho</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="fecha">Fecha de Viaje</label>
+          <input type="date" id="fecha" value="2026-09-30">
+        </div>
+
+        <div class="control-group">
+          <label for="hora">Hora de Salida</label>
+          <select id="hora">
+            <option>08:00 AM</option>
+            <option>02:00 PM</option>
+            <option>10:00 PM</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Destino</label>
-        <select><option>Ica</option></select>
+
+      <div class="section-subtitle">Selecciona tu Asiento</div>
+
+      <div class="legend-bar">
+        <div class="legend-item"><span class="dot free"></span> Libre</div>
+        <div class="legend-item"><span class="dot selected"></span> Seleccionado</div>
+        <div class="legend-item"><span class="dot occupied"></span> Comprado</div>
       </div>
-      <div class="form-group">
-        <label>Fecha de Viaje</label>
-        <input type="date" value="2026-09-30">
+
+      <div class="seats-grid" id="seatsGrid">
+        <!-- Generado dinámicamente -->
       </div>
-      <div class="form-group">
-        <label>Hora de Salida</label>
-        <select><option>08:00 AM</option></select>
+
+      <div class="total-price" id="totalDisplay">
+        Precio Total: S/ 0.00
       </div>
     </div>
-
-    <span class="titulo-asientos">Selecciona tu Asiento</span>
-
-    <!-- Leyenda explicativa -->
-    <div class="leyenda">
-      <div class="item-leyenda">
-        <div class="box-color" style="background: var(--asiento-disponible);"></div> Libre
-      </div>
-      <div class="item-leyenda">
-        <div class="box-color" style="background: var(--asiento-seleccionado);"></div> Seleccionado
-      </div>
-      <div class="item-leyenda">
-        <div class="box-color" style="background: var(--asiento-ocupado);"></div> Comprado
-      </div>
-    </div>
-
-    <!-- Contenedor dinámico para los 30 asientos -->
-    <div class="grid-asientos" id="grid-asientos"></div>
-
-    <div class="resumen-precio">
-      Precio Total: S/ <span id="precio-total">0.00</span>
-    </div>
-
-    <button class="btn-confirmar" onclick="confirmarReserva()">Confirmar Reserva y Guardar</button>
-  </div>
+  </main>
 
   <script>
-    const TOTAL_ASIENTOS = 30;
-    const PRECIO_PASAJE = 65.00;
-    
-    // Asientos comprados guardados en localStorage (si no hay datos, inicializa con el Asiento 2 y 10 ya comprados para prueba)
-    let asientosComprados = JSON.parse(localStorage.getItem('asientos_comprados')) || [2, 10];
-    let asientoSeleccionado = null;
+    const TICKET_PRICE = 45.00; // Precio por pasaje
+    const occupiedSeats = [2, 10]; // Asientos ocupados según tu diseño
 
-    function renderizarAsientos() {
-      const container = document.getElementById('grid-asientos');
-      container.innerHTML = '';
+    const seatsGrid = document.getElementById('seatsGrid');
+    const totalDisplay = document.getElementById('totalDisplay');
+    let selectedCount = 0;
 
-      for (let i = 1; i <= TOTAL_ASIENTOS; i++) {
-        const btn = document.createElement('button');
-        btn.className = 'btn-asiento';
-        btn.innerText = `Asiento ${i}`;
+    for (let i = 1; i <= 20; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'seat-btn';
+      btn.textContent = `Asiento ${i}`;
 
-        // Verificar si el asiento ya fue comprado (Rojo)
-        if (asientosComprados.includes(i)) {
-          btn.classList.add('comprado');
-          btn.disabled = true; // Bloquea el botón para que NO se pueda volver a comprar
-          btn.title = "Este asiento ya fue comprado";
-        } else {
-          // Si el usuario lo seleccionó (Naranja)
-          if (asientoSeleccionado === i) {
-            btn.classList.add('seleccionado');
+      if (occupiedSeats.includes(i)) {
+        btn.classList.add('occupied');
+      } else {
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('selected');
+          if (btn.classList.contains('selected')) {
+            selectedCount++;
+          } else {
+            selectedCount--;
           }
-          btn.onclick = () => seleccionarAsiento(i);
-        }
-
-        container.appendChild(btn);
-      }
-    }
-
-    function seleccionarAsiento(numero) {
-      asientoSeleccionado = numero;
-      document.getElementById('precio-total').innerText = PRECIO_PASAJE.toFixed(2);
-      renderizarAsientos();
-    }
-
-    function confirmarReserva() {
-      if (!asientoSeleccionado) {
-        alert('Por favor, selecciona un asiento disponible antes de confirmar.');
-        return;
+          const total = selectedCount * TICKET_PRICE;
+          totalDisplay.textContent = `Precio Total: S/ ${total.toFixed(2)}`;
+        });
       }
 
-      // Marcar el asiento seleccionado como comprado
-      asientosComprados.push(asientoSeleccionado);
-      
-      // Guardar en almacenamiento local para persistencia
-      localStorage.setItem('asientos_comprados', JSON.stringify(asientosComprados));
-
-      alert(`¡Reserva confirmada! Has comprado el Asiento ${asientoSeleccionado} por S/ ${PRECIO_PASAJE.toFixed(2)}.`);
-      
-      asientoSeleccionado = null;
-      document.getElementById('precio-total').innerText = '0.00';
-      renderizarAsientos();
+      seatsGrid.appendChild(btn);
     }
-
-    // Inicializar al cargar el documento
-    document.addEventListener('DOMContentLoaded', renderizarAsientos);
   </script>
-
 </body>
 </html>
