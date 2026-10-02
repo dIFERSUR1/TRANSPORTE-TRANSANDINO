@@ -3,328 +3,396 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TransAndino Perú - Inicio</title>
+  <title>Transporte Transandino - Control de Operaciones y Turnos</title>
   <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --text-color: #f1f5f9;
+      --accent-color: #38bdf8;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    /* PREVIENE DESPLAZAMIENTOS AL CAMBIAR DE PÁGINA O HACER CLICK */
-    html {
-      scrollbar-gutter: stable;
     }
 
     body {
-      background-color: #0b192c;
-      color: #ffffff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-gradient);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      color: var(--text-color);
+      padding: 2rem 1rem;
     }
 
-    /* HEADER Y NAVEGACIÓN */
-    header {
-      background-color: #070f1e;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #1e293b;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .logo {
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
-
-    .logo span {
-      color: #38bdf8;
-    }
-
-    /* ANCHO FIJO EN EMOJIS PARA NO MOVER EL TEXTO AL ANIMARSE */
-    .emoji, .bus-emoji {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 24px;
+    /* Encabezado animado */
+    .header {
       text-align: center;
-      transition: transform 0.3s ease;
+      margin-bottom: 2rem;
+      animation: fadeInDown 0.8s ease-out;
     }
 
-    .bus-emoji, .emoji-roll {
-      animation: rodar 2s infinite ease-in-out;
-    }
-
-    @keyframes rodar {
-      0%, 100% { transform: translateX(0) translateY(0); }
-      50% { transform: translateX(4px) translateY(-2px); }
-    }
-
-    .emoji-bounce {
-      animation: rebotar 2.5s infinite ease-in-out;
-    }
-
-    @keyframes rebotar {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-    }
-
-    .emoji-pulse {
-      animation: pulso 2s infinite ease-in-out;
-    }
-
-    @keyframes pulso {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.15); }
-    }
-
-    nav {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    nav a {
-      color: #cbd5e1;
-      text-decoration: none;
-      font-size: 0.9rem;
-      padding: 0.5rem 0.9rem;
-      border-radius: 6px;
-      transition: background 0.3s ease, color 0.3s ease;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      outline: none;
-    }
-
-    nav a:hover {
-      color: #ffffff;
-      background: #1e293b;
-    }
-
-    nav a:hover .emoji {
-      transform: scale(1.2) rotate(8deg);
-    }
-
-    nav a.active {
-      background-color: #ea580c;
-      color: #ffffff;
-      font-weight: bold;
-    }
-
-    /* BOTONES LOGIN Y REGISTRO */
-    .btn-login {
-      border: 1px solid #38bdf8;
-      color: #38bdf8 !important;
-      margin-left: 0.5rem;
-    }
-
-    .btn-login:hover {
-      background: #38bdf8 !important;
-      color: #0b192c !important;
-    }
-
-    .btn-register {
-      background: #0284c7;
-      color: #ffffff !important;
-      font-weight: bold;
-    }
-
-    .btn-register:hover {
-      background: #0369a1 !important;
-    }
-
-    .btn-admin {
-      background: #ea580c;
-      color: #ffffff !important;
-      font-weight: bold;
-    }
-
-    /* CONTENIDO PRINCIPAL */
-    main {
-      max-width: 1100px;
-      margin: 2.5rem auto;
-      padding: 0 1.5rem;
-      flex: 1;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h1 {
-      text-align: center;
+    .header h1 {
       font-size: 2.2rem;
-      margin-bottom: 1.5rem;
-      color: #38bdf8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      color: var(--accent-color);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
     }
 
-    /* IMAGEN DE INICIO */
-    .hero-img-container {
-      width: 100%;
-      max-width: 900px;
-      margin-bottom: 2.5rem;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #1e293b;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
-
-    .hero-img-container img {
-      width: 100%;
-      height: auto;
-      max-height: 380px;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* TARJETAS PRINCIPALES */
-    .req-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      width: 100%;
-    }
-
-    .req-card {
-      background: #15233b;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      padding: 1.8rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-      transition: transform 0.3s ease, border-color 0.3s ease;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-      outline: none;
-    }
-
-    .req-card:hover {
-      transform: translateY(-5px);
-      border-color: #38bdf8;
-    }
-
-    .req-card h3 {
-      color: #ea580c;
-      font-size: 1.25rem;
-      margin-bottom: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .req-card p {
-      color: #94a3b8;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-
-    footer {
-      background-color: #070f1e;
-      text-align: center;
+    /* Panel de simulación (Glassmorphism) */
+    .panel-control {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
       padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      animation: fadeIn 1s ease-out;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+    }
+
+    select {
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--text-color);
+      font-size: 1rem;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+
+    .info-card {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 1rem 1.2rem;
+      border-radius: 10px;
+      border-left: 4px solid var(--accent-color);
+      min-width: 280px;
+    }
+
+    .info-card p {
+      margin: 0.2rem 0;
+      font-size: 0.9rem;
+    }
+
+    /* Grilla de Operaciones */
+    .grid-operaciones {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Tarjeta individual con efectos 3D y hover */
+    .card-op {
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                  box-shadow 0.3s ease,
+                  border-color 0.3s ease;
+      animation: fadeInUp 0.6s ease-out forwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-op:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .card-op h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent-color);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.4rem;
+    }
+
+    .card-op p {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      color: #e2e8f0;
+    }
+
+    /* Badges / Indicadores de Estado */
+    .badge-estado {
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: background-color 0.4s ease, transform 0.2s ease;
+    }
+
+    .badge-pendiente  { background-color: #f59e0b; color: #1e1b4b; }
+    .badge-proceso    { background-color: #3b82f6; color: #ffffff; }
+    .badge-completado { 
+      background-color: #10b981; 
+      color: #ffffff; 
+      animation: pulseGlow 2s infinite; 
+    }
+    .badge-cancelado  { background-color: #ef4444; color: #ffffff; }
+
+    .select-estado {
+      margin-top: 0.8rem;
+      width: 100%;
       font-size: 0.85rem;
-      color: #64748b;
-      border-top: 1px solid #1e293b;
-      margin-top: auto;
+    }
+
+    select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Animaciones CSS3 (Keyframes) */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <a href="index.html" class="logo">
-      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
-    </a>
-    <nav>
-      <a href="index.html" class="active"><span class="emoji emoji-roll">🏠</span> Inicio</a>
-      <a href="pages/servicios.html"><span class="emoji emoji-bounce">📘</span> Servicios</a>
-      <a href="pages/requisitos.html"><span class="emoji emoji-pulse">📜</span> Requisitos</a>
-      <a href="pages/compra-pasajes.html"><span class="emoji emoji-bounce">🎟</span> Pasajes</a>
-      <a href="pages/seguimiento.html"><span class="emoji emoji-bounce">📦</span> Encomiendas</a>
-      <a href="pages/ubicacion.html"><span class="emoji emoji-pulse">📍</span> Ubicación</a>
+  <div class="container">
+    <header class="header">
+      <h1>Transporte Transandino</h1>
+      <p>Panel de Verificación Docente - Gestión de Turnos y Operaciones</p>
+    </header>
 
-      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="login.html" class="btn-login"><span class="emoji">🔑</span> Iniciar Sesión</a>
-        <a href="registro.html" class="btn-register"><span class="emoji">✍️</span> Registrarse</a>
+    <!-- Simulación de sesión -->
+    <section class="panel-control">
+      <div class="control-group">
+        <label for="select-usuario">Simular Usuario Activo:</label>
+        <select id="select-usuario" onchange="cambiarUsuarioActivo()">
+          <!-- Carga dinámicamente -->
+        </select>
       </div>
-    </nav>
-  </header>
 
-  <main>
-    <h1>Bienvenido a TransAndino Perú <span class="emoji bus-emoji">🚌</span></h1>
+      <div class="info-card" id="info-usuario">
+        <!-- Detalles del usuario logueado -->
+      </div>
+    </section>
 
-    <!-- IMAGEN PRINCIPAL -->
-    <div class="hero-img-container">
-      <img src="img/bus.jpg" alt="TransAndino Perú Bus" onerror="this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop';">
-    </div>
-
-    <div class="req-grid">
-      <a href="pages/compra-pasajes.html" class="req-card">
-        <h3><span class="emoji emoji-bounce">🎟</span> Reserva de Pasajes</h3>
-        <p>Consulta nuestras salidas diarias, rutas interprovinciales disponibles y asegura tu boleto en línea.</p>
-      </a>
-
-      <a href="pages/seguimiento.html" class="req-card">
-        <h3><span class="emoji emoji-bounce">📦</span> Rastreo de Encomiendas</h3>
-        <p>Monitorea el estado y la llegada de tus envíos o paquetería en tiempo real con tu número de guía.</p>
-      </a>
-
-      <a href="pages/ubicacion.html" class="req-card">
-        <h3><span class="emoji emoji-pulse">📍</span> Sedes y Agencias</h3>
-        <p>Encuentra las direcciones, referencias y teléfonos de contacto de nuestras terminales a nivel nacional.</p>
-      </a>
-    </div>
-  </main>
-
-  <footer>
-    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
-  </footer>
+    <!-- Contenedor de las 30 operaciones -->
+    <main>
+      <h2 style="margin-bottom: 1rem; font-size: 1.3rem;">
+        Listado de Operaciones (<span id="total-ops">0</span>/30)
+      </h2>
+      <div class="grid-operaciones" id="grid-operaciones">
+        <!-- Las 30 tarjetas cargan con JavaScript -->
+      </div>
+    </main>
+  </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const authContainer = document.getElementById('auth-buttons');
-      const user = JSON.parse(localStorage.getItem('user'));
+    // 1. Datos iniciales: 01 Admin, 3 Empleados (por Turno) y 10 Clientes
+    const usuarios = [
+      { id: 'ADM01', nombre: 'Admin Principal', rol: 'admin', turno: 'todos' },
+      { id: 'EMP01', nombre: 'Carlos López (Turno Mañana: 06:00 - 14:00)', rol: 'empleado', turno: 'manana' },
+      { id: 'EMP02', nombre: 'Ana Martínez (Turno Tarde: 14:00 - 22:00)', rol: 'empleado', turno: 'tarde' },
+      { id: 'EMP03', nombre: 'Pedro Gómez (Turno Noche: 22:00 - 06:00)', rol: 'empleado', turno: 'noche' },
+      { id: 'CLI01', nombre: 'Juan Pérez', rol: 'cliente' },
+      { id: 'CLI02', nombre: 'María Rodríguez', rol: 'cliente' },
+      { id: 'CLI03', nombre: 'Luis García', rol: 'cliente' },
+      { id: 'CLI04', nombre: 'Laura Torres', rol: 'cliente' },
+      { id: 'CLI05', nombre: 'Diego Fernández', rol: 'cliente' },
+      { id: 'CLI06', nombre: 'Sofía Castro', rol: 'cliente' },
+      { id: 'CLI07', nombre: 'Mateo Morales', rol: 'cliente' },
+      { id: 'CLI08', nombre: 'Elena Benítez', rol: 'cliente' },
+      { id: 'CLI09', nombre: 'Javier Ríos', rol: 'cliente' },
+      { id: 'CLI10', nombre: 'Camila Vargas', rol: 'cliente' }
+    ];
+
+    let usuarioActual = usuarios[0]; // Inicia con el Administrador
+
+    // 2. Generación automática de 30 operaciones distintas
+    const tiposOperacion = ['Encomienda', 'Pasaje Directo', 'Carga Pesada', 'Giro Postal', 'Reserva VIP'];
+    const estadosDisponibles = ['Pendiente', 'En Proceso', 'Completado', 'Cancelado'];
+
+    const operaciones = Array.from({ length: 30 }, (_, index) => {
+      const num = (index + 1).toString().padStart(2, '0');
+      const cliente = usuarios.filter(u => u.rol === 'cliente')[index % 10];
       
-      if (user) {
-        const nombreUsuario = user.nombre || user.email;
-        let htmlContent = `<span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">👋 Hola, ${nombreUsuario}</span>`;
+      return {
+        id: `OP-${num}`,
+        cliente: cliente.nombre,
+        tipo: tiposOperacion[index % tiposOperacion.length],
+        monto: `S/. ${(Math.floor(Math.random() * 45) + 5) * 10}`,
+        estado: estadosDisponibles[index % estadosDisponibles.length]
+      };
+    });
 
-        if (user.email === 'axlperez183@gmail.com') {
-          htmlContent += `
-            <a href="panel.html" class="btn-admin" style="padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; text-decoration: none; margin-left: 0.5rem; display: inline-flex; align-items: center; gap: 4px;">
-              <span class="emoji">⚙️</span> Panel Admin
-            </a>
-          `;
-        }
+    // 3. Determinar el turno actual según la hora real del sistema
+    function obtenerTurnoActualSistema() {
+      const hora = new Date().getHours();
+      if (hora >= 6 && hora < 14) return 'manana';
+      if (hora >= 14 && hora < 22) return 'tarde';
+      return 'noche'; // 22:00 a 05:59
+    }
 
-        htmlContent += `
-          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">
-            Cerrar Sesión
-          </button>
-        `;
-
-        authContainer.innerHTML = htmlContent;
-
-        document.getElementById('logout-btn').addEventListener('click', () => {
-          localStorage.removeItem('user');
-          window.location.reload();
-        });
+    // 4. Validar si el usuario activo tiene permisos de edición
+    function validarPermisoEdicion() {
+      if (usuarioActual.rol === 'admin') {
+        return { puedeEditar: true, motivo: 'Acceso Total (Administrador)' };
       }
+      
+      if (usuarioActual.rol === 'empleado') {
+        const turnoActual = obtenerTurnoActualSistema();
+        if (usuarioActual.turno === turnoActual) {
+          return { puedeEditar: true, motivo: `Permitido por Turno Actual (${usuarioActual.turno.toUpperCase()})` };
+        } else {
+          return { 
+            puedeEditar: false, 
+            motivo: `Denegado: Su turno es "${usuarioActual.turno.toUpperCase()}" y el sistema está en turno "${turnoActual.toUpperCase()}".` 
+          };
+        }
+      }
+
+      return { puedeEditar: false, motivo: 'Los clientes no pueden modificar estados.' };
+    }
+
+    // 5. Renderizado y gestión de la interfaz
+    function cargarSelectorUsuarios() {
+      const select = document.getElementById('select-usuario');
+      select.innerHTML = usuarios.map(u => 
+        `<option value="${u.id}">${u.nombre} - [${u.rol.toUpperCase()}]</option>`
+      ).join('');
+    }
+
+    function actualizarInfoUsuario() {
+      const infoContainer = document.getElementById('info-usuario');
+      const validacion = validarPermisoEdicion();
+      
+      infoContainer.innerHTML = `
+        <p><strong>Usuario Activo:</strong> ${usuarioActual.nombre}</p>
+        <p><strong>Rol:</strong> ${usuarioActual.rol.toUpperCase()}</p>
+        <p><strong>Permiso de Edición:</strong> <span style="font-weight: 700; color: ${validacion.puedeEditar ? '#34d399' : '#f87171'}">${validacion.motivo}</span></p>
+      `;
+    }
+
+    function cambiarUsuarioActivo() {
+      const selectedId = document.getElementById('select-usuario').value;
+      usuarioActual = usuarios.find(u => u.id === selectedId);
+      actualizarInfoUsuario();
+      renderizarOperaciones();
+    }
+
+    function cambiarEstado(idOp, nuevoEstado) {
+      const validacion = validarPermisoEdicion();
+      
+      if (!validacion.puedeEditar) {
+        alert(`Acceso Restringido:\n${validacion.motivo}`);
+        renderizarOperaciones(); // Revertir cambios en el selector
+        return;
+      }
+
+      const op = operaciones.find(o => o.id === idOp);
+      if (op) {
+        op.estado = nuevoEstado;
+        renderizarOperaciones();
+      }
+    }
+
+    function renderizarOperaciones() {
+      const container = document.getElementById('grid-operaciones');
+      document.getElementById('total-ops').innerText = operaciones.length;
+      
+      const validacion = validarPermisoEdicion();
+
+      container.innerHTML = operaciones.map(op => {
+        const badgeClass = `badge-${op.estado.toLowerCase().replace(' ', '')}`;
+        
+        return `
+          <div class="card-op">
+            <h3>${op.id} - ${op.tipo}</h3>
+            <p><strong>Cliente:</strong> ${op.cliente}</p>
+            <p><strong>Monto:</strong> ${op.monto}</p>
+            <p><strong>Estado:</strong> <span class="badge-estado ${badgeClass}">${op.estado}</span></p>
+            
+            <select class="select-estado" 
+                    ${!validacion.puedeEditar ? 'disabled' : ''} 
+                    onchange="cambiarEstado('${op.id}', this.value)">
+              ${estadosDisponibles.map(est => 
+                `<option value="${est}" ${est === op.estado ? 'selected' : ''}>${est}</option>`
+              ).join('')}
+            </select>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Inicialización al cargar el DOM
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarSelectorUsuarios();
+      actualizarInfoUsuario();
+      renderizarOperaciones();
     });
   </script>
 
