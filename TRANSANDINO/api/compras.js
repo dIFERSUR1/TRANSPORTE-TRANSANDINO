@@ -26,6 +26,7 @@ export default async function handler(req, res) {
       const result = await client.query('SELECT * FROM compras ORDER BY id DESC');
       return res.status(200).json(result.rows);
     }
+
     if (req.method === 'POST') {
       const {
         id_usuario,
@@ -68,7 +69,6 @@ export default async function handler(req, res) {
       return res.status(201).json(result.rows[0]);
     }
 
-    // PUT: Actualizar registro
     if (req.method === 'PUT') {
       const { id } = req.query;
       const { estado, origen, destino, fecha_viaje, precio } = req.body;
