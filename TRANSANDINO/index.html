@@ -128,7 +128,6 @@
       gap: 0.4rem;
     }
 
-    /* Estilos dinámicos cuando inicia sesión */
     .user-greeting {
       color: #38bdf8;
       font-weight: bold;
@@ -165,7 +164,6 @@
       align-items: center;
     }
 
-    /* Contenido Principal */
     .main-container {
       flex: 1;
       display: flex;
@@ -256,24 +254,24 @@
 <body>
 
   <header class="navbar">
-    <a href="/index.html" class="brand">
+    <a href="index.html" class="brand">
       <span class="bus-icon">🚌</span> TransAndino Perú
     </a>
     
     <nav>
       <ul class="nav-links">
-        <li><a href="/index.html" class="nav-item active"><span class="icon">🍊</span> Inicio</a></li>
-        <li><a href="/pages/servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
-        <li><a href="/pages/requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
-        <li><a href="/pages/compra-pasajes.html" class="nav-item"><span class="icon">🎟</span> Pasajes</a></li>
-        <li><a href="/pages/seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
-        <li><a href="/pages/ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación</a></li>
+        <li><a href="index.html" class="nav-item active"><span class="icon">🍊</span> Inicio</a></li>
+        <li><a href="pages/servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
+        <li><a href="pages/requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
+        <li><a href="pages/compra-pasajes.html" class="nav-item"><span class="icon">🎟</span> Pasajes</a></li>
+        <li><a href="pages/seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
+        <li><a href="pages/ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación</a></li>
       </ul>
     </nav>
 
     <div class="auth-buttons" id="auth-container">
-      <a href="/login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
-      <a href="/registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
+      <a href="login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
+      <a href="registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
     </div>
   </header>
 
@@ -285,17 +283,17 @@
     </div>
 
     <div class="features-grid">
-      <a href="/pages/compra-pasajes.html" class="feature-card">
+      <a href="pages/compra-pasajes.html" class="feature-card">
         <h2 class="feature-title">📌 Reserva de Pasajes</h2>
         <p class="feature-desc">Consulta nuestras salidas diarias, rutas interprovinciales disponibles y asegura tu boleto en línea.</p>
       </a>
 
-      <a href="/pages/seguimiento.html" class="feature-card">
+      <a href="pages/seguimiento.html" class="feature-card">
         <h2 class="feature-title">📦 Rastreo de Encomiendas</h2>
         <p class="feature-desc">Monitorea el estado y la llegada de tus envíos o paquetería en tiempo real con tu número de guía.</p>
       </a>
 
-      <a href="/pages/ubicacion.html" class="feature-card">
+      <a href="pages/ubicacion.html" class="feature-card">
         <h2 class="feature-title">📍 Sedes y Agencias</h2>
         <p class="feature-desc">Encuentra las direcciones, referencias y teléfonos de contacto de nuestras terminales a nivel nacional.</p>
       </a>
@@ -308,22 +306,20 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('userEmail');
-      const userEmail = localStorage.getItem('userEmail') || 'axlperez183@gmail.com';
-      const userRole = localStorage.getItem('userRole') || 'admin';
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const userEmail = localStorage.getItem('userEmail');
+      const userRole = localStorage.getItem('userRole') || 'cliente';
       const authContainer = document.getElementById('auth-container');
 
-      if (isLoggedIn && authContainer) {
-        // Extrae el nombre antes del @ y capitaliza la primera letra (ej. Axlperez183)
+      if (isLoggedIn && userEmail && authContainer) {
         const rawName = userEmail.split('@')[0];
         const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-
         const panelLabel = userRole === 'admin' ? '⚙️ Panel Admin' : '⚙️ Panel';
 
         authContainer.innerHTML = `
           <span class="user-greeting">👋 Hola, ${formattedName}</span>
           ${(userRole === 'admin' || userRole === 'empleado') 
-            ? `<a href="/panel.html" class="btn-panel-admin">${panelLabel}</a>` 
+            ? `<a href="panel.html" class="btn-panel-admin">${panelLabel}</a>` 
             : ''}
           <button onclick="cerrarSesion()" class="btn-logout-red">Cerrar Sesión</button>
         `;
