@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarTablaAsientos();
 });
 
+// ==========================================
+// 1. PESTAÑA: PRECIOS Y PASAJES
+// ==========================================
 async function cargarTodosLosPasajes() {
   const tbody = document.getElementById('panel-tbody') || document.querySelector('table tbody');
   if (!tbody) return;
@@ -26,10 +29,9 @@ async function cargarTodosLosPasajes() {
     pasajes.forEach((item) => {
       const tr = document.createElement('tr');
       
-      // Mapeo exacto con la tabla compras_pasajes de Neon
       const fechaViaje = item.fecha ? (typeof item.fecha === 'string' ? item.fecha.split('T')[0] : item.fecha) : (item.fecha_viaje || '-');
       const horaViaje = item.hora || item.hora_viaje || '09:00 AM';
-      const asiento = item.asiento || item.num_asiento || '1';
+      const asientoNum = item.asiento || item.num_asiento || '1';
 
       tr.innerHTML = `
         <td>#${item.id}</td>
@@ -38,7 +40,7 @@ async function cargarTodosLosPasajes() {
         <td>${item.destino}</td>
         <td>${fechaViaje}</td>
         <td>${horaViaje}</td>
-        <td>Asiento ${asiento}</td>
+        <td>${asientoNum}</td>
         <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio || 0}.00</td>
         <td>
           <select onchange="cambiarEstado(${item.id}, this.value)" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.3rem; border-radius:4px;">
@@ -48,7 +50,7 @@ async function cargarTodosLosPasajes() {
           </select>
         </td>
         <td>
-          <button class="btn-action btn-update" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asiento}', ${item.precio || 0})">Editar Registro</button>
+          <button class="btn-action btn-update" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asientoNum}', ${item.precio || 0})">Editar Registro</button>
           <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
         </td>
       `;
@@ -60,8 +62,11 @@ async function cargarTodosLosPasajes() {
   }
 }
 
+// ==========================================
+// 2. PESTAÑA: ASIENTOS DE BUS
+// ==========================================
 async function cargarTablaAsientos() {
-  const tbodyAsientos = document.getElementById('asientos-tbody');
+  const tbodyAsientos = document.getElementById('asientos-tbody') || document.querySelector('table tbody');
   if (!tbodyAsientos) return;
 
   tbodyAsientos.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">Cargando asientos...</td></tr>';
@@ -80,22 +85,105 @@ async function cargarTablaAsientos() {
 
     pasajes.forEach((item) => {
       const tr = document.createElement('tr');
-      const esCancelado = item.estado === 'cancelado';
-      const asiento = item.asiento || item.num_asiento || '-';
+      
+      const asientoNum = item.asiento || item.num_asiento || item.id;
+      const rolCreador = item.registrado_por || item.creado_por || (item.id_usuario === 1 ? 'Cliente Web' : 'Admin/Empleado');
+      const pasajeroTexto = `Usuario ID: ${item.id_usuario || '1'} (${rolCreador})`;
+
+      const colorEstado = item.estado === 'atendido' ? '#10b981' : item.estado === 'cancelado' ? '#ef4444' : '#38bdf8';
 
       tr.innerHTML = `
-        <td style="color:#ea580c; font-weight:bold;">Asiento ${asiento}</td>
-        <td>Usuario #${item.id_usuario || '1'}</td>
-        <td>${item.origen} ➔ ${item.destino}</td>
-        <td><span style="color:${esCancelado ? '#ef4444' : '#22c55e'}; font-weight:bold;">${esCancelado ? 'Disponible (Cancelado)' : 'Ocupado'}</span></td>
+        <td style="color:#ffffff; font-weight:bold;">Asiento N° ${asientoNum}</td>
+        <td style="color:#cbd5e1;">${pasajeroTexto}</td>
+        <td style="color:#cbd5e1;">${item.origen} - ${item.destino}</td>
+        <td style="color:${colorEstado}; font-weight:bold;">${item.estado}</td>
         <td>
-          <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Liberar Asiento</button>
+          <button class="btn-action btn-update" style="background:#0284c7; color:white; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;" onclick="cambiarEstadoAsiento(${item.id}, '${item.estado}')">Cambiar Estado Asiento</button>
         </td>
       `;
       tbodyAsientos.appendChild(tr);
     });
   } catch (error) {
-    console.error('Error al cargar tabla de asientos:', error);
+    console.error('Error al cargar la tabla de asientos:', error);
+  }
+}
+
+// ==========================================
+// 3. FUNCIONES DE ACCIÓN Y EDICIÓN
+// ==========================================
+
+async function cambiarEstadoAsiento(id, estadoActual) {
+  const nuevoEstado = prompt('Ingresa el nuevo estado (registrado, atendido, cancelado):', estadoActual);
+  if (!nuevoEstado) return;
+
+  try {
+    const res = await fetch(`/api/compras?id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: nuevoEstado.toLowerCase() })
+    });
+
+    if (res.ok) {
+      cargarTablaAsientos();
+      cargarTodosLosPasajes();
+    } else {
+      alert('Error al actualizar el estado del asiento.');
+    }
+  } catch (error) {
+    console.error('Error al cambiar estado:', error);
+  }
+}
+
+async function cambiarEstado(id, nuevoEstado) {
+  try {
+    const res = await fetch(`/api/compras?id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+
+    if (res.ok) {
+      cargarTodosLosPasajes();
+      cargarTablaAsientos();
+    }
+  } catch (error) {
+    console.error('Error al actualizar estado:', error);
+  }
+}
+
+async function actualizarRegistroCompleto(id, origenActual, destinoActual, fechaActual, horaActual, asientoActual, precioActual) {
+  const nuevoOrigen = prompt('Editar Origen:', origenActual);
+  const nuevoDestino = prompt('Editar Destino:', destinoActual);
+  const nuevaFecha = prompt('Editar Fecha (AAAA-MM-DD):', fechaActual);
+  const nuevaHora = prompt('Editar Hora:', horaActual || '09:00 AM');
+  const nuevoAsiento = prompt('Editar Número de Asiento (1 al 40):', asientoActual);
+  const nuevoPrecio = prompt('Editar Precio (S/):', precioActual);
+
+  if (nuevoOrigen && nuevoDestino && nuevaFecha && nuevoAsiento) {
+    try {
+      const res = await fetch(`/api/compras?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          origen: nuevoOrigen,
+          destino: nuevoDestino,
+          fecha: nuevaFecha,
+          hora: nuevaHora,
+          asiento: parseInt(nuevoAsiento) || 1,
+          precio: parseFloat(nuevoPrecio) || 0
+        })
+      });
+
+      if (res.ok) {
+        alert('Registro actualizado con éxito.');
+        cargarTodosLosPasajes();
+        cargarTablaAsientos();
+      } else {
+        alert('Error al actualizar el registro.');
+      }
+    } catch (error) {
+      console.error('Error al editar registro:', error);
+    }
   }
 }
 
@@ -126,12 +214,13 @@ async function crearNuevoPasaje() {
         hora: hora || '09:00 AM',
         asiento: parseInt(asiento) || 1,
         precio: parseFloat(precio) || 0,
-        estado: 'registrado'
+        estado: 'registrado',
+        registrado_por: 'Admin / Empleado'
       })
     });
 
     if (res.ok) {
-      alert('¡Pasaje registrado en la base de datos Neon exitosamente!');
+      alert('¡Pasaje registrado exitosamente!');
       cargarTodosLosPasajes();
       cargarTablaAsientos();
     } else {
@@ -141,59 +230,6 @@ async function crearNuevoPasaje() {
   } catch (error) {
     console.error('Error al crear el pasaje:', error);
     alert('Error de conexión al servidor.');
-  }
-}
-
-async function cambiarEstado(id, nuevoEstado) {
-  try {
-    const res = await fetch(`/api/compras?id=${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ estado: nuevoEstado })
-    });
-
-    if (res.ok) {
-      cargarTodosLosPasajes();
-      cargarTablaAsientos();
-    }
-  } catch (error) {
-    console.error('Error al actualizar estado:', error);
-  }
-}
-
-async function actualizarRegistroCompleto(id, origenActual, destinoActual, fechaActual, horaActual, asientoActual, precioActual) {
-  const nuevoOrigen = prompt('Editar Origen:', origenActual);
-  const nuevoDestino = prompt('Editar Destino:', destinoActual);
-  const nuevaFecha = prompt('Editar Fecha (AAAA-MM-DD):', fechaActual);
-  const nuevaHora = prompt('Editar Hora:', horaActual || '09:00 AM');
-  const nuevoAsiento = prompt('Editar Asiento (1 al 40):', asientoActual);
-  const nuevoPrecio = prompt('Editar Precio (S/):', precioActual);
-
-  if (nuevoOrigen && nuevoDestino && nuevaFecha && nuevoAsiento) {
-    try {
-      const res = await fetch(`/api/compras?id=${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          origen: nuevoOrigen,
-          destino: nuevoDestino,
-          fecha: nuevaFecha,
-          hora: nuevaHora,
-          asiento: parseInt(nuevoAsiento) || 1,
-          precio: parseFloat(nuevoPrecio) || 0
-        })
-      });
-
-      if (res.ok) {
-        alert('Registro y número de asiento actualizados con éxito.');
-        cargarTodosLosPasajes();
-        cargarTablaAsientos();
-      } else {
-        alert('Ocurrió un error al intentar actualizar el registro.');
-      }
-    } catch (error) {
-      console.error('Error al editar registro:', error);
-    }
   }
 }
 
