@@ -312,9 +312,11 @@
       const authContainer = document.getElementById('auth-container');
 
       if (isLoggedIn && userEmail && authContainer) {
-        const rawName = userEmail.split('@')[0];
+        // Extrae el nombre antes de @ o usa el usuario entero si no hay @
+        const rawName = userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
         const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-        const panelLabel = userRole === 'admin' ? '⚙️ Panel Admin' : '⚙️ Panel';
+
+        const panelLabel = userRole === 'admin' ? '⚙️ Panel Admin' : (userRole === 'empleado' ? '⚙️ Panel Empleado' : '⚙️ Mi Panel');
 
         authContainer.innerHTML = `
           <span class="user-greeting">👋 Hola, ${formattedName}</span>
