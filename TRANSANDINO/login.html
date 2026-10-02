@@ -23,14 +23,14 @@
     main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem; }
     .login-card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
     .login-card h2 { text-align: center; font-size: 1.8rem; margin-bottom: 0.5rem; color: #ffffff; font-weight: 700; }
-    .login-card p { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+    .login-card p { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem; }
 
     .form-group { margin-bottom: 1.2rem; }
     .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: #cbd5e1; font-weight: 500; }
     .form-group input { width: 100%; padding: 0.75rem 1rem; background: #0b192c; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 0.95rem; outline: none; }
     .form-group input:focus { border-color: #38bdf8; }
 
-    .btn-submit { width: 100%; padding: 0.8rem; background: #ea580c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 1rem; }
+    .btn-submit { width: 100%; padding: 0.8rem; background: #ea580c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
     .btn-submit:hover { background: #c2410c; }
 
     .form-footer { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: #94a3b8; }
@@ -64,7 +64,7 @@
   <main>
     <div class="login-card">
       <h2>Iniciar Sesión</h2>
-      <p>Ingresa a tu cuenta de TransAndino Perú</p>
+      <p>Ingresa tus credenciales de acceso</p>
 
       <form id="login-form">
         <div class="form-group">
@@ -91,14 +91,51 @@
   </footer>
 
   <script>
+    const ADMIN_EMAIL = "axlperez183@gmail.com";
+    
+    const EMPLEADOS = [
+      { email: "transandinoempleado001@gmail.com", nombre: "Empleado 001", cargo: "Atención y Reservas" },
+      { email: "transandinoempleado002@gmail.com", nombre: "Empleado 002", cargo: "Despacho de Encomiendas" },
+      { email: "transandinoempleado003@gmail.com", nombre: "Empleado 003", cargo: "Gestión de Sedes y Turnos" }
+    ];
+
     document.getElementById('login-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const nombreExtraido = email.split('@')[0];
-      const nombreFormateado = nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1);
+      
+      const emailInput = document.getElementById('email').value.trim().toLowerCase();
+      let usuarioSesion = {};
 
-      // Guarda la sesión en localStorage y redirige al Inicio
-      localStorage.setItem('user', JSON.stringify({ nombre: nombreFormateado, email: email }));
+      if (emailInput === ADMIN_EMAIL) {
+        usuarioSesion = {
+          nombre: "Axl Perez (Administrador)",
+          email: emailInput,
+          rol: "admin"
+        };
+      } 
+      else {
+        const empleadoEncontrado = EMPLEADOS.find(emp => emp.email === emailInput);
+        
+        if (empleadoEncontrado) {
+          usuarioSesion = {
+            nombre: empleadoEncontrado.nombre,
+            email: empleadoEncontrado.email,
+            cargo: empleadoEncontrado.cargo,
+            rol: "empleado"
+          };
+        } 
+        else {
+          const nombreExtraido = emailInput.split('@')[0];
+          const nombreFormateado = nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1);
+          
+          usuarioSesion = {
+            nombre: nombreFormateado,
+            email: emailInput,
+            rol: "cliente"
+          };
+        }
+      }
+
+      localStorage.setItem('user', JSON.stringify(usuarioSesion));
       window.location.href = 'index.html';
     });
   </script>
