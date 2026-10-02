@@ -30,9 +30,8 @@
       flex-direction: column;
     }
 
-    /* Navbar Unificado */
     .navbar {
-      background-color: #030710 !important;
+      background: #030710;
       padding: 0.8rem 2rem;
       display: flex;
       justify-content: space-between;
@@ -50,6 +49,20 @@
       text-decoration: none;
     }
 
+    .brand .bus-icon {
+      display: inline-block;
+      animation: busDrive 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes busDrive {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(6px);
+      }
+    }
+
     .nav-links {
       display: flex;
       gap: 0.5rem;
@@ -57,7 +70,7 @@
       align-items: center;
     }
 
-    .nav-links .nav-item {
+    .nav-item {
       color: var(--text-color);
       text-decoration: none;
       font-size: 0.88rem;
@@ -66,27 +79,30 @@
       gap: 0.45rem;
       padding: 0.5rem 0.9rem;
       border-radius: 8px;
-      background: transparent;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .nav-links .nav-item span.icon {
+    .nav-item span.icon,
+    .btn-login span.icon,
+    .btn-register span.icon {
       display: inline-block;
       transition: transform 0.25s ease;
     }
 
-    .nav-links .nav-item:hover {
+    .nav-item:hover {
       background: rgba(255, 255, 255, 0.08);
       transform: translateY(-2px);
     }
 
-    .nav-links .nav-item:hover span.icon {
+    .nav-item:hover span.icon,
+    .btn-login:hover span.icon,
+    .btn-register:hover span.icon {
       transform: scale(1.25) rotate(-5deg);
     }
 
-    .nav-links .nav-item.active {
-      background: var(--orange-accent) !important;
-      color: #ffffff !important;
+    .nav-item.active {
+      background: var(--orange-accent);
+      color: #ffffff;
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
     }
@@ -137,66 +153,96 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 3rem 1rem;
+      padding: 2.5rem 1.5rem;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
     }
 
-    h1.page-title {
-      font-size: 2.2rem;
-      color: #38bdf8;
-      margin-bottom: 2rem;
-      font-weight: 800;
-      text-align: center;
-    }
-
-    .search-card {
+    .tracking-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 2.5rem;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
       width: 100%;
-      max-width: 600px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
       text-align: center;
     }
 
-    .search-card p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
+    .tracking-title {
+      font-size: 2.2rem;
+      color: #38bdf8;
       margin-bottom: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
-    .search-form {
+    .tracking-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .search-box {
       display: flex;
       gap: 0.8rem;
+      max-width: 550px;
+      margin: 0 auto;
     }
 
     .search-input {
       flex: 1;
-      background: #081120;
+      background: #050b14;
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
       color: var(--text-color);
-      font-size: 0.9rem;
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
       outline: none;
+      transition: border-color 0.2s;
     }
 
     .search-input:focus {
-      border-color: #38bdf8;
+      border-color: var(--blue-accent);
     }
 
     .btn-search {
       background: var(--orange-accent);
       color: white;
       border: none;
-      padding: 0.75rem 1.5rem;
+      padding: 0.8rem 1.8rem;
       border-radius: 8px;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.2s;
     }
 
     .btn-search:hover {
       background: #ea580c;
+      transform: translateY(-1px);
+    }
+
+    /* Contenedor de Resultado del Rastreo */
+    .tracking-result {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #050b14;
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      display: none;
+      text-align: left;
+    }
+
+    .result-status {
+      font-size: 1.1rem;
+      color: #22c55e;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
     }
 
     footer {
@@ -211,7 +257,10 @@
 <body>
 
   <header class="navbar">
-    <a href="../index.html" class="brand"><span class="icon">🚌</span> TransAndino Perú</a>
+    <a href="../index.html" class="brand">
+      <span class="bus-icon">🚌</span> TransAndino Perú
+    </a>
+    
     <nav>
       <ul class="nav-links">
         <li><a href="../index.html" class="nav-item"><span class="icon">🏡</span> Inicio</a></li>
@@ -222,6 +271,7 @@
         <li><a href="ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación y Sedes</a></li>
       </ul>
     </nav>
+
     <div class="auth-buttons">
       <a href="login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
       <a href="registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
@@ -229,21 +279,47 @@
   </header>
 
   <main class="main-container">
-    <h1 class="page-title">Seguimiento de Encomiendas 📦</h1>
+    <div class="tracking-card">
+      <h1 class="tracking-title">Seguimiento de Encomiendas 📦</h1>
+      <p class="tracking-subtitle">
+        Ingresa el código de rastreo de tu encomienda para conocer su estado en tiempo real.
+      </p>
 
-    <div class="search-card">
-      <p>Ingresa el código de rastreo de tu encomienda para conocer su estado en tiempo real.</p>
-      
-      <form class="search-form" onsubmit="event.preventDefault();">
-        <input type="text" class="search-input" placeholder="Ej: ENC-12345" required>
-        <button type="submit" class="btn-search">Buscar</button>
-      </form>
+      <div class="search-box">
+        <input type="text" id="trackingCode" class="search-input" placeholder="Ej: ENC-12345">
+        <button id="searchBtn" class="btn-search">Buscar</button>
+      </div>
+
+      <div id="trackingResult" class="tracking-result">
+        <div class="result-status">🚚 Estado: En tránsito</div>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+          Origen: <strong>Lima</strong> &nbsp;|&nbsp; Destino: <strong>Huancayo</strong>
+        </p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+          Última actualización: Agencia Central - Registro de Salida.
+        </p>
+      </div>
     </div>
   </main>
 
   <footer>
     © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
+
+  <script>
+    
+    const searchBtn = document.getElementById('searchBtn');
+    const trackingInput = document.getElementById('trackingCode');
+    const trackingResult = document.getElementById('trackingResult');
+
+    searchBtn.addEventListener('click', () => {
+      if (trackingInput.value.trim() !== '') {
+        trackingResult.style.display = 'block';
+      } else {
+        alert('Por favor, ingresa un código de rastreo.');
+      }
+    });
+  </script>
 
 </body>
 </html>
