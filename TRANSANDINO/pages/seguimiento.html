@@ -20,6 +20,7 @@
       box-sizing: border-box; 
       margin: 0; 
       padding: 0; 
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
@@ -54,7 +55,6 @@
       align-items: center;
       gap: 0.5rem;
       text-decoration: none;
-      transition: transform 0.25s ease, color 0.25s ease;
     }
 
     .brand:hover {
@@ -79,7 +79,6 @@
       padding: 0.5rem 0.85rem;
       border-radius: 8px;
       font-weight: 500;
-      transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
     }
 
     .nav-item:hover { 
@@ -95,58 +94,31 @@
       box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
-    /* DEFINICIÓN DE ANIMACIONES KEYFRAMES */
+    /* ANIMACIÓN CONTINUA DE EMOJIS */
+    .icon, .brand span, .card h3 span {
+      display: inline-block;
+    }
+
     @keyframes floatEmoji {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-6px);
-      }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
 
     @keyframes pulseEmoji {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.25);
-      }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
     }
 
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(15px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* APLICACIÓN DE ANIMACIONES CONTINUAS A LOS EMOJIS */
-    .icon, 
-    .brand span, 
-    .page-title .icon {
-      display: inline-block;
-      animation: floatEmoji 2.5s ease-in-out infinite !important;
-      will-change: transform;
+    .icon, .brand span {
+      animation: floatEmoji 2.5s ease-in-out infinite;
     }
 
     .card h3 span {
-      display: inline-block;
-      animation: pulseEmoji 2s ease-in-out infinite !important;
-      will-change: transform;
-    }
-
-    .nav-item .icon {
-      transition: transform 0.25s ease;
+      animation: pulseEmoji 2s ease-in-out infinite;
     }
 
     .nav-item:hover .icon {
-      transform: scale(1.3) rotate(10deg) !important;
-      animation: none !important;
+      transform: scale(1.3) rotate(10deg);
     }
 
     /* BOTONES DE AUTENTICACIÓN */
@@ -165,7 +137,6 @@
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
     }
 
     .btn-login:hover {
@@ -182,7 +153,6 @@
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
     }
 
     .btn-register:hover {
@@ -205,7 +175,6 @@
       text-decoration: none;
       font-weight: bold;
       font-size: 0.85rem;
-      transition: background 0.25s ease, transform 0.25s ease;
     }
 
     .btn-panel-admin:hover {
@@ -222,7 +191,6 @@
       font-weight: bold;
       font-size: 0.85rem;
       cursor: pointer;
-      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
     }
 
     .btn-logout-red:hover {
@@ -238,7 +206,12 @@
       max-width: 1000px;
       margin: 0 auto;
       width: 100%;
-      animation: fadeInUp 0.5s ease-out forwards;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .page-title {
@@ -259,7 +232,6 @@
       padding: 1.8rem;
       margin-bottom: 1.5rem;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
     .card:hover {
@@ -277,43 +249,15 @@
       gap: 0.5rem;
     }
 
-    .track-input-group {
-      display: flex;
-      gap: 0.8rem;
-      margin-top: 1rem;
+    .card ul { 
+      list-style-position: inside; 
+      color: var(--text-muted); 
+      line-height: 1.8; 
+      font-size: 0.95rem; 
     }
 
-    .track-input-group input {
-      flex: 1;
-      padding: 0.8rem 1rem;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: white;
-      outline: none;
-      transition: border-color 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    .track-input-group input:focus {
-      border-color: var(--cyan-light);
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
-    }
-
-    .btn-track {
-      background: var(--orange-accent);
-      color: white;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    .btn-track:hover {
-      background: #c2410c;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+    .card ul li {
+      margin-bottom: 0.4rem;
     }
 
     footer {
@@ -355,12 +299,21 @@
     <h1 class="page-title"><span class="icon">📦</span> Rastreo de Encomiendas</h1>
 
     <div class="card">
-      <h3><span>🔍</span> Consulta el Estado de tu Encomienda</h3>
-      <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Ingresa tu número de guía de envío para ver la ubicación actual de tu carga:</p>
-      <div class="track-input-group">
-        <input type="text" placeholder="Ejemplo: TA-2026-9874">
-        <button class="btn-track" onclick="alert('Consultando guía...')">Rastrear</button>
-      </div>
+      <h3><span>🔍</span> Rastrear Encomienda</h3>
+      <ul>
+        <li>Ingresa el código de guía asignado en tu comprobante de envío.</li>
+        <li>Sigue en tiempo real el trayecto de tus paquetes y carga pesada.</li>
+        <li>Verifica el estado de entrega en la agencia de destino.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span>📋</span> Estados de Envío</h3>
+      <ul>
+        <li><strong>En Recepción:</strong> La encomienda ha sido recepcionada en la agencia de origen.</li>
+        <li><strong>En Tránsito:</strong> El paquete se encuentra viajando en una de nuestras unidades.</li>
+        <li><strong>Listo para Entrega:</strong> Disponible para recojo en el terminal de destino.</li>
+      </ul>
     </div>
   </main>
 
