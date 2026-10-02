@@ -48,7 +48,7 @@ async function cargarTodosLosPasajes() {
           </select>
         </td>
         <td>
-          <button class="btn-action btn-update" onclick="actualizarRegistro(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', ${asiento}, ${item.precio || 0})">Actualizar</button>
+          <button class="btn-action btn-update" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asiento}', ${item.precio || 0})">Editar Registro</button>
           <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
         </td>
       `;
@@ -110,7 +110,7 @@ async function crearNuevoPasaje() {
   if (!fecha) return;
 
   const hora = prompt('Hora de viaje:', '09:00 AM');
-  const asiento = prompt('Número de asiento:', '1');
+  const asiento = prompt('Número de asiento (1-40):', '1');
   const precio = prompt('Precio (S/):', '60');
   const idUsuario = prompt('ID de Usuario:', '1');
 
@@ -161,15 +161,15 @@ async function cambiarEstado(id, nuevoEstado) {
   }
 }
 
-async function actualizarRegistro(id, origenActual, destinoActual, fechaActual, horaActual, asientoActual, precioActual) {
+async function actualizarRegistroCompleto(id, origenActual, destinoActual, fechaActual, horaActual, asientoActual, precioActual) {
   const nuevoOrigen = prompt('Editar Origen:', origenActual);
   const nuevoDestino = prompt('Editar Destino:', destinoActual);
   const nuevaFecha = prompt('Editar Fecha (AAAA-MM-DD):', fechaActual);
   const nuevaHora = prompt('Editar Hora:', horaActual || '09:00 AM');
-  const nuevoAsiento = prompt('Editar Asiento:', asientoActual);
+  const nuevoAsiento = prompt('Editar Asiento (1 al 40):', asientoActual);
   const nuevoPrecio = prompt('Editar Precio (S/):', precioActual);
 
-  if (nuevoOrigen && nuevoDestino && nuevaFecha) {
+  if (nuevoOrigen && nuevoDestino && nuevaFecha && nuevoAsiento) {
     try {
       const res = await fetch(`/api/compras?id=${id}`, {
         method: 'PUT',
@@ -185,9 +185,11 @@ async function actualizarRegistro(id, origenActual, destinoActual, fechaActual, 
       });
 
       if (res.ok) {
-        alert('Pasaje actualizado con éxito.');
+        alert('Registro y número de asiento actualizados con éxito.');
         cargarTodosLosPasajes();
         cargarTablaAsientos();
+      } else {
+        alert('Ocurrió un error al intentar actualizar el registro.');
       }
     } catch (error) {
       console.error('Error al editar registro:', error);
