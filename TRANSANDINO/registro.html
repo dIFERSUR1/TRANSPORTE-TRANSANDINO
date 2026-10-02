@@ -291,17 +291,41 @@
   <script>
     document.getElementById('register-form').addEventListener('submit', function(e) {
       e.preventDefault();
+
       const nombre = document.getElementById('nombre').value.trim();
+      const dni = document.getElementById('dni').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
       const email = document.getElementById('email').value.trim().toLowerCase();
 
+      // Determinar si es Administrador o Empleado según el correo
+      let rol = 'cliente';
+      if (email === 'axlperez183@gmail.com') {
+        rol = 'admin';
+      } else if (email.includes('empleado')) {
+        rol = 'empleado';
+      }
+
+      // 1. Guardar objeto de usuario
       const nuevoUsuario = {
         nombre: nombre,
+        dni: dni,
+        telefono: telefono,
         email: email,
-        rol: 'cliente'
+        rol: rol
       };
-
       localStorage.setItem('user', JSON.stringify(nuevoUsuario));
-      window.location.href = 'index.html';
+
+      // 2. Guardar claves de sesión individuales para compatibilidad directa con index.html
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userRole', rol);
+
+      // 3. Redirigir según el rol
+      if (rol === 'admin' || rol === 'empleado') {
+        window.location.href = 'panel.html';
+      } else {
+        window.location.href = 'index.html';
+      }
     });
   </script>
 
