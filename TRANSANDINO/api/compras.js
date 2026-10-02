@@ -1,60 +1,29 @@
-async function cargarAsientosOcupados(origen, destino, fecha) {
-  try {
-    const res = await fetch('/api/compras');
-    if (!res.ok) return;
-
-    const compras = await res.json();
-
-    const ocupados = compras
-      .filter(item => 
-        item.origen === origen && 
-        item.destino === destino && 
-        (item.fecha_viaje === fecha || item.fecha === fecha) &&
-        item.estado !== 'cancelado'
-      )
-      .map(item => parseInt(item.num_asiento || item.asiento));
-
-    document.querySelectorAll('.asiento-btn').forEach(btn => {
-      const numAsiento = parseInt(btn.dataset.asiento);
-      if (ocupados.includes(numAsiento)) {
-        btn.classList.add('ocupado');
-        btn.disabled = true;
-        btn.style.backgroundColor = '#ef4444'; // Rojo para ocupado
-        btn.style.cursor = 'not-allowed';
-      } else {
-        btn.classList.remove('ocupado');
-        btn.disabled = false;
-      }
-    });
-  } catch (error) {
-    console.error('Error al consultar asientos ocupados:', error);
-  }
-}
-
-async function guardarReservaBD(datosReserva) {
+async function procesarReserva(datosCompra) {
   try {
     const res = await fetch('/api/compras', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id_usuario: datosReserva.id_usuario || 1,
-        origen: datosReserva.origen,
-        destino: datosReserva.destino,
-        fecha_viaje: datosReserva.fecha_viaje,
-        hora_viaje: datosReserva.hora_viaje,
-        num_asiento: datosReserva.num_asiento,
-        precio: datosReserva.precio,
+        id_usuario: datosCompra.id_usuario || 1,
+        origen: datosCompra.origen,
+        destino: datosCompra.destino,
+        fecha_viaje: datosCompra.fecha_viaje,
+        hora_viaje: datosCompra.hora_viaje || '08:00 AM',
+        num_asiento: datosCompra.num_asiento,
+        precio: datosCompra.precio,
         estado: 'registrado'
       })
     });
 
     if (res.ok) {
-      alert('¡Reserva realizada con éxito!');
-      window.location.href = 'panel.html';
+      alert('¡Reserva realizada con éxito en el sistema!');
+      window.location.href = 'panel.html'; // o mis-compras.html
     } else {
-      alert('Hubo un problema al guardar la reserva.');
+      const err = await res.json();
+      alert('Error al guardar la reserva: ' + (err.message || 'Intente nuevamente'));
     }
   } catch (error) {
-    console.error('Error al guardar la compra:', error);
+    console.error('Error enviando la reserva:', error);
+    alert('Error de conexión al procesar la reserva.');
   }
 }
