@@ -212,24 +212,31 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      const userEmail = localStorage.getItem('userEmail');
+      const userEmail = localStorage.getItem('userEmail') || '';
+      const userName = localStorage.getItem('userName') || '';
       let userRole = localStorage.getItem('userRole');
       const authContainer = document.getElementById('auth-container');
 
-      if (isLoggedIn && userEmail && authContainer) {
-        if (!userRole) {
+      // CORRECCIÓN: Se comprueba únicamente si la sesión está activa (isLoggedIn)
+      if (isLoggedIn && authContainer) {
+        if (!userRole && userEmail) {
           const lower = userEmail.toLowerCase();
           if (lower.includes('axperez') || lower.includes('axlperez')) userRole = 'admin';
           else if (lower.includes('transandinoempleado')) userRole = 'empleado';
           else userRole = 'cliente';
         }
 
-        const rawName = userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
-        const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        let displayName = userName;
+        if (!displayName && userEmail) {
+          const rawName = userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
+          displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        }
+        if (!displayName) displayName = 'Usuario';
+
         const panelLabel = userRole === 'admin' ? '⚙️ Panel Admin' : (userRole === 'empleado' ? '⚙️ Panel Empleado' : '⚙️ Mi Panel');
 
         authContainer.innerHTML = `
-          <span class="user-greeting">👋 Hola, ${formattedName}</span>
+          <span class="user-greeting">👋 Hola, ${displayName}</span>
           ${(userRole === 'admin' || userRole === 'empleado') 
             ? `<a href="../panel.html" class="btn-panel-admin">${panelLabel}</a>` 
             : ''}
