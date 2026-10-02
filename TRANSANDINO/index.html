@@ -30,8 +30,9 @@
       flex-direction: column;
     }
 
+    /* Navbar Unificado */
     .navbar {
-      background: #030710;
+      background-color: #030710 !important;
       padding: 0.8rem 2rem;
       display: flex;
       justify-content: space-between;
@@ -51,31 +52,43 @@
 
     .nav-links {
       display: flex;
-      gap: 0.6rem;
+      gap: 0.5rem;
       list-style: none;
       align-items: center;
     }
 
-    .nav-item {
+    .nav-links .nav-item {
       color: var(--text-color);
       text-decoration: none;
       font-size: 0.88rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
       padding: 0.5rem 0.9rem;
       border-radius: 8px;
-      transition: background 0.2s;
+      background: transparent;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .nav-item:hover {
+    .nav-links .nav-item span.icon {
+      display: inline-block;
+      transition: transform 0.25s ease;
+    }
+
+    .nav-links .nav-item:hover {
       background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
     }
 
-    .nav-item.active {
-      background: var(--orange-accent);
-      color: #ffffff;
+    .nav-links .nav-item:hover span.icon {
+      transform: scale(1.25) rotate(-5deg);
+    }
+
+    .nav-links .nav-item.active {
+      background: var(--orange-accent) !important;
+      color: #ffffff !important;
       font-weight: 600;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
     }
 
     .auth-buttons {
@@ -199,24 +212,20 @@
 <body>
 
   <header class="navbar">
-    <a href="index.html" class="brand">
-      🚌 TransAndino Perú
-    </a>
-    
+    <a href="index.html" class="brand"><span class="icon">🚌</span> TransAndino Perú</a>
     <nav>
       <ul class="nav-links">
-        <li><a href="index.html" class="nav-item active">🏡 Inicio</a></li>
-        <li><a href="pages/servicios.html" class="nav-item">📘 Servicios</a></li>
-        <li><a href="pages/requisitos.html" class="nav-item">📜 Requisitos</a></li>
-        <li><a href="pages/compra-pasajes.html" class="nav-item">🎟️ Reserva / Horarios</a></li>
-        <li><a href="pages/encomiendas.html" class="nav-item">📦 Encomiendas</a></li>
-        <li><a href="pages/ubicacion.html" class="nav-item">📍 Ubicación y Sedes</a></li>
+        <li><a href="index.html" class="nav-item active"><span class="icon">🏡</span> Inicio</a></li>
+        <li><a href="pages/servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
+        <li><a href="pages/requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
+        <li><a href="pages/compra-pasajes.html" class="nav-item"><span class="icon">🎟️</span> Reserva / Horarios</a></li>
+        <li><a href="pages/seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
+        <li><a href="pages/ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación y Sedes</a></li>
       </ul>
     </nav>
-
     <div class="auth-buttons">
-      <a href="pages/login.html" class="btn-login">🔑 Iniciar Sesión</a>
-      <a href="pages/registro.html" class="btn-register">✍️ Registrarse</a>
+      <a href="pages/login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
+      <a href="pages/registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
     </div>
   </header>
 
@@ -233,7 +242,7 @@
         <p>Consulta nuestras salidas diarias, rutas interprovinciales disponibles y asegura tu boleto en línea.</p>
       </a>
 
-      <a href="pages/encomiendas.html" class="card">
+      <a href="pages/seguimiento.html" class="card">
         <h3>📦 Rastreo de Encomiendas</h3>
         <p>Monitorea el estado y la llegada de tus envíos o paquetería en tiempo real con tu número de guía.</p>
       </a>
