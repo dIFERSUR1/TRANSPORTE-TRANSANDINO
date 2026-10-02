@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TransAndino Perú - Pasajes</title>
   <style>
+    /* RESET Y ESTILOS BASE CON TRANSICIONES DE MOVIMIENTO */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
@@ -18,8 +20,10 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
+    /* HEADER CON MOVIMIENTO Y EFECTOS EN MENÚ */
     header {
       background-color: #0b0f19;
       padding: 0.8rem 2rem;
@@ -27,6 +31,10 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #1e293b;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
     }
 
     .logo {
@@ -39,32 +47,42 @@
       gap: 0.5rem;
     }
 
+    .logo:hover {
+      transform: scale(1.05);
+      color: #60a5fa;
+    }
+
     nav {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.8rem;
     }
 
     nav a {
       color: #94a3b8;
       text-decoration: none;
       font-size: 0.9rem;
-      padding: 0.4rem 0.8rem;
-      border-radius: 6px;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      transition: all 0.2s;
+      position: relative;
     }
 
+    /* ANIMACIÓN Y EFECTO DE ELEVACIÓN AL PASAR EL CURSOR SOBRE EL MENÚ */
     nav a:hover {
       color: #ffffff;
+      background-color: #1e293b;
+      transform: translateY(-2px);
     }
 
     nav a.active {
       background-color: #ea580c;
       color: #ffffff !important;
       font-weight: bold;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+      transform: translateY(-1px);
     }
 
     .user-section {
@@ -73,7 +91,6 @@
       gap: 0.8rem;
     }
 
-    /* Estilos para estado desconectado (botones de Login / Registro) */
     .btn-outline-blue {
       border: 1px solid #0284c7;
       color: #38bdf8;
@@ -86,6 +103,12 @@
       display: flex;
       align-items: center;
       gap: 0.3rem;
+    }
+
+    .btn-outline-blue:hover {
+      background-color: rgba(2, 132, 199, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
     }
 
     .btn-solid-blue {
@@ -101,7 +124,12 @@
       gap: 0.3rem;
     }
 
-    /* Estilos para estado con sesión iniciada */
+    .btn-solid-blue:hover {
+      background-color: #0369a1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+    }
+
     .user-greeting {
       color: #38bdf8;
       font-size: 0.9rem;
@@ -109,6 +137,7 @@
       display: flex;
       align-items: center;
       gap: 0.3rem;
+      animation: fadeIn 0.3s ease-in-out;
     }
 
     .btn-logout {
@@ -122,12 +151,20 @@
       font-size: 0.85rem;
     }
 
+    .btn-logout:hover {
+      background-color: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+    }
+
+    /* MAIN Y CARDS CON ENTRADA ANIMADA */
     main {
       flex: 1;
       max-width: 900px;
       width: 100%;
       margin: 2rem auto;
       padding: 0 1rem;
+      animation: fadeInUp 0.4s ease-out;
     }
 
     h1 {
@@ -145,6 +182,12 @@
       border-radius: 12px;
       padding: 1.8rem;
       margin-bottom: 2rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .card:hover {
+      border-color: #2b3d59;
+      transform: translateY(-3px);
     }
 
     .form-grid {
@@ -184,6 +227,8 @@
 
     .form-group select:focus, .form-group input:focus {
       border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+      transform: scale(1.01);
     }
 
     .btn-search {
@@ -200,10 +245,18 @@
 
     .btn-search:hover {
       background-color: #c2410c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4);
     }
 
+    .btn-search:active {
+      transform: translateY(0);
+    }
+
+    /* SECCIÓN ASIENTOS Y ANIMACIONES AL INTERACTUAR */
     #seccion-asientos {
       display: none;
+      animation: fadeIn 0.4s ease-in;
     }
 
     .bus-title {
@@ -268,10 +321,18 @@
       color: white;
     }
 
+    .seat-btn.disponible:hover {
+      transform: scale(1.12);
+      box-shadow: 0 0 10px rgba(22, 163, 74, 0.6);
+      z-index: 2;
+    }
+
     .seat-btn.seleccionado {
       background-color: #ea580c;
       color: white;
-      box-shadow: 0 0 6px rgba(234, 88, 12, 0.8);
+      transform: scale(1.08);
+      box-shadow: 0 0 12px rgba(234, 88, 12, 0.8);
+      animation: pulse 1.2s infinite alternate;
     }
 
     .seat-btn.ocupado {
@@ -302,9 +363,32 @@
       cursor: pointer;
     }
 
+    .btn-reserve:not(:disabled):hover {
+      background-color: #15803d;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4);
+    }
+
     .btn-reserve:disabled {
       background-color: #475569;
       cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    /* KEYFRAMES PARA ANIMACIONES */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1.05); }
+      to { transform: scale(1.12); }
     }
 
     footer {
@@ -319,11 +403,11 @@
 </head>
 <body>
 
-  <!-- HEADER ORIGINAL -->
+  <!-- HEADER ORIGINAL CON TODOS SUS EMOJIS Y SECCIÓN DE SESIÓN -->
   <header>
     <a href="../index.html" class="logo">🚌 TransAndino Perú</a>
     <nav>
-      <a href="../index.html">👏 Inicio</a>
+      <a href="../index.html">🍋 Inicio</a>
       <a href="servicios.html">📘 Servicios</a>
       <a href="requisitos.html">📜 Requisitos</a>
       <a href="compra-pasajes.html" class="active">📌 Pasajes</a>
@@ -331,15 +415,15 @@
       <a href="ubicacion.html">📍 Ubicación</a>
     </nav>
     <div class="user-section" id="auth-buttons">
-      <!-- Se autocompleta con JS según si el usuario inició sesión o no -->
+      <!-- Mantiene los botones por defecto y se reemplazan si hay sesión activa -->
+      <a href="../login.html" class="btn-outline-blue">🔑 Iniciar Sesión</a>
+      <a href="../register.html" class="btn-solid-blue">✍️ Registrarse</a>
     </div>
   </header>
 
-  <!-- CONTENIDO -->
   <main>
-    <h1>✏️ Reserva y Salidas de Pasajes</h1>
+    <h1>🚀 Reserva y Salidas de Pasajes</h1>
 
-    <!-- FORMULARIO DE BÚSQUEDA -->
     <div class="card">
       <form id="form-busqueda">
         <div class="form-grid">
@@ -375,7 +459,6 @@
       </form>
     </div>
 
-    <!-- SECCIÓN DE ASIENTOS -->
     <div class="card" id="seccion-asientos">
       <div class="bus-title">🚌 Selección de Asientos (Bus 40 Pasajeros)</div>
 
@@ -416,7 +499,7 @@
     const PRECIO_PASAJE = 50.00;
     let seleccionados = [];
 
-    // DETECCIÓN DE SESIÓN Y USUARIO AL CARGAR LA PÁGINA
+    // VERIFICA LA SESIÓN ACTIVA Y MANTIENE EL ENCABEZADO CORRECTO
     function actualizarHeaderSesion() {
       const authContainer = document.getElementById('auth-buttons');
       if (!authContainer) return;
@@ -439,19 +522,11 @@
           <span class="user-greeting">👋 Hola, ${nombreUsuario}</span>
           <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
         `;
-      } else {
-        authContainer.innerHTML = `
-          <a href="../login.html" class="btn-outline-blue">🔑 Iniciar Sesión</a>
-          <a href="../register.html" class="btn-solid-blue">✍️ Registrarse</a>
-        `;
       }
     }
 
     function cerrarSesion() {
-      localStorage.removeItem('usuario');
-      localStorage.removeItem('usuarioLogueado');
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
+      localStorage.clear();
       window.location.reload();
     }
 
