@@ -1,115 +1,60 @@
-import { neon } from '@neondatabase/serverless';
+async function cargarAsientosOcupados(origen, destino, fecha) {
+  try {
+    const res = await fetch('/api/compras');
+    if (!res.ok) return;
 
-function generarCodigoSeguimiento() {
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let codigo = 'TA-';
-  for (let i = 0; i < 7; i++) {
-    codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    const compras = await res.json();
+
+    const ocupados = compras
+      .filter(item => 
+        item.origen === origen && 
+        item.destino === destino && 
+        (item.fecha_viaje === fecha || item.fecha === fecha) &&
+        item.estado !== 'cancelado'
+      )
+      .map(item => parseInt(item.num_asiento || item.asiento));
+
+    document.querySelectorAll('.asiento-btn').forEach(btn => {
+      const numAsiento = parseInt(btn.dataset.asiento);
+      if (ocupados.includes(numAsiento)) {
+        btn.classList.add('ocupado');
+        btn.disabled = true;
+        btn.style.backgroundColor = '#ef4444'; // Rojo para ocupado
+        btn.style.cursor = 'not-allowed';
+      } else {
+        btn.classList.remove('ocupado');
+        btn.disabled = false;
+      }
+    });
+  } catch (error) {
+    console.error('Error al consultar asientos ocupados:', error);
   }
-  return codigo;
 }
 
-export default async function handler(req, res) {
-  const sql = neon(process.env.DATABASE_URL);
-  const { method } = req;
-
+async function guardarReservaBD(datosReserva) {
   try {
-    if (method === 'GET') {
-      const { id_usuario } = req.query;
-      if (id_usuario) {
-        const pasajes = await sql`
-          SELECT * FROM compras_pasajes 
-          WHERE id_usuario = ${parseInt(id_usuario)} 
-          ORDER BY id DESC;
-        `;
-        return res.status(200).json(pasajes);
-      } else {
-        const pasajes = await sql`SELECT * FROM compras_pasajes ORDER BY id DESC;`;
-        return res.status(200).json(pasajes);
-      }
+    const res = await fetch('/api/compras', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id_usuario: datosReserva.id_usuario || 1,
+        origen: datosReserva.origen,
+        destino: datosReserva.destino,
+        fecha_viaje: datosReserva.fecha_viaje,
+        hora_viaje: datosReserva.hora_viaje,
+        num_asiento: datosReserva.num_asiento,
+        precio: datosReserva.precio,
+        estado: 'registrado'
+      })
+    });
+
+    if (res.ok) {
+      alert('¡Reserva realizada con éxito!');
+      window.location.href = 'panel.html';
+    } else {
+      alert('Hubo un problema al guardar la reserva.');
     }
-
-    if (method === 'POST') {
-      const { id_usuario, nombre_pasajero, origen, destino, fecha, precio, estado } = req.body;
-      const codigo_seguimiento = generarCodigoSeguimiento();
-      const estadoFinal = estado || 'registrado';
-      const fechaFinal = fecha || new Date().toISOString().split('T')[0];
-
-      const nuevo = await sql`
-        INSERT INTO compras_pasajes (
-          id_usuario, codigo_seguimiento, nombre_pasajero, origen, destino, fecha, fecha_viaje, precio, estado
-        )
-        VALUES (
-          ${id_usuario ? parseInt(id_usuario) : null}, 
-          ${codigo_seguimiento}, 
-          ${nombre_pasajero || ''}, 
-          ${origen}, 
-          ${destino}, 
-          ${fechaFinal}, 
-          ${fechaFinal}, 
-          ${precio || 0}, 
-          ${estadoFinal}
-        )
-        RETURNING *;
-      `;
-      return res.status(201).json({
-        success: true,
-        codigo_seguimiento,
-        data: nuevo[0]
-      });
-    }
-
-    if (method === 'PUT') {
-      const { id } = req.query;
-      const { origen, destino, fecha, precio, estado } = req.body;
-
-      if (!id) return res.status(400).json({ message: 'El ID es requerido.' });
-
-      if (estado) {
-        const resultado = await sql`
-          UPDATE compras_pasajes 
-          SET origen = COALESCE(${origen || null}, origen),
-              destino = COALESCE(${destino || null}, destino),
-              fecha = COALESCE(${fecha || null}, fecha),
-              fecha_viaje = COALESCE(${fecha || null}, fecha_viaje),
-              precio = COALESCE(${precio || null}, precio),
-              estado = ${estado}
-          WHERE id = ${parseInt(id)}
-          RETURNING *;
-        `;
-        if (resultado.length === 0) {
-          return res.status(404).json({ message: 'Registro no encontrado.' });
-        }
-      } else {
-        const resultado = await sql`
-          UPDATE compras_pasajes 
-          SET origen = COALESCE(${origen || null}, origen),
-              destino = COALESCE(${destino || null}, destino),
-              fecha = COALESCE(${fecha || null}, fecha),
-              fecha_viaje = COALESCE(${fecha || null}, fecha_viaje)
-          WHERE id = ${parseInt(id)} AND estado = 'registrado'
-          RETURNING *;
-        `;
-
-        if (resultado.length === 0) {
-          return res.status(400).json({ 
-            message: "No se pudo actualizar. El pasaje no existe o su estado ya no es 'registrado'." 
-          });
-        }
-      }
-      return res.status(200).json({ message: 'Registro actualizado con éxito.' });
-    }
-
-    if (method === 'DELETE') {
-      const { id } = req.query;
-      if (!id) return res.status(400).json({ message: 'El ID es requerido.' });
-      await sql`DELETE FROM compras_pasajes WHERE id = ${parseInt(id)};`;
-      return res.status(200).json({ message: 'Registro eliminado con éxito.' });
-    }
-
-    return res.status(405).json({ message: 'Método no permitido.' });
   } catch (error) {
-    console.error('Error DB:', error);
-    return res.status(500).json({ message: error.message || 'Error interno en la base de datos.' });
+    console.error('Error al guardar la compra:', error);
   }
 }
