@@ -17,12 +17,7 @@
       --text-muted: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
 
     body {
       background-color: var(--bg-dark);
@@ -32,7 +27,6 @@
       flex-direction: column;
     }
 
-    /* Navbar Oscuro Unificado */
     header {
       background: var(--header-bg);
       padding: 0.8rem 2rem;
@@ -52,9 +46,7 @@
       text-decoration: none;
     }
 
-    .logo span {
-      color: var(--cyan-light);
-    }
+    .logo span { color: var(--cyan-light); }
 
     .bus-emoji {
       display: inline-block;
@@ -97,17 +89,12 @@
       font-weight: 600;
     }
 
-    .btn-login:hover {
-      background: rgba(2, 132, 199, 0.2) !important;
-    }
-
     .btn-register-active {
       background: var(--blue-accent);
       color: #ffffff !important;
       font-weight: 600;
     }
 
-    /* Contenido Principal */
     main {
       flex: 1;
       display: flex;
@@ -147,13 +134,8 @@
       gap: 1rem;
     }
 
-    .form-group {
-      margin-bottom: 1.2rem;
-    }
-
-    .form-group.full-width {
-      grid-column: span 2;
-    }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group.full-width { grid-column: span 2; }
 
     .form-group label {
       display: block;
@@ -175,9 +157,7 @@
       transition: border-color 0.2s;
     }
 
-    .form-group input:focus {
-      border-color: var(--cyan-light);
-    }
+    .form-group input:focus { border-color: var(--cyan-light); }
 
     .btn-submit {
       width: 100%;
@@ -193,9 +173,7 @@
       transition: background 0.2s;
     }
 
-    .btn-submit:hover {
-      background: #0369a1;
-    }
+    .btn-submit:hover { background: #0369a1; }
 
     .auth-footer {
       text-align: center;
@@ -208,10 +186,6 @@
       color: var(--cyan-light);
       text-decoration: none;
       font-weight: 600;
-    }
-
-    .auth-footer a:hover {
-      text-decoration: underline;
     }
 
     footer {
@@ -231,12 +205,12 @@
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="index.html">🏡 Inicio</a>
+      <a href="index.html">🍊 Inicio</a>
       <a href="pages/servicios.html">📘 Servicios</a>
       <a href="pages/requisitos.html">📜 Requisitos</a>
-      <a href="pages/compra-pasajes.html">🎟 Reserva / Horarios</a>
+      <a href="pages/compra-pasajes.html">🎟 Pasajes</a>
       <a href="pages/seguimiento.html">📦 Encomiendas</a>
-      <a href="pages/ubicacion.html">📍 Ubicación y Sedes</a>
+      <a href="pages/ubicacion.html">📍 Ubicación</a>
       <a href="login.html" class="btn-login">🔑 Iniciar Sesión</a>
       <a href="registro.html" class="btn-register-active">✍️ Registrarse</a>
     </nav>
@@ -297,37 +271,26 @@
       const telefono = document.getElementById('telefono').value.trim();
       const email = document.getElementById('email').value.trim().toLowerCase();
 
-      // Lista de correos de empleados
       const empleadosAutorizados = [
         'transandinoempleado001@gmail.com',
         'transandinoempleado002@gmail.com',
         'transandinoempleado003@gmail.com'
       ];
 
-      // Determinar Rol
       let rol = 'cliente';
-      if (email === 'axperez' || email.startsWith('axperez@') || email.includes('axperez')) {
+      if (email === 'axperez' || email.includes('axperez') || email.includes('axlperez')) {
         rol = 'admin';
       } else if (empleadosAutorizados.includes(email) || email.includes('transandinoempleado')) {
         rol = 'empleado';
       }
 
-      // Guardar objeto de usuario
-      const nuevoUsuario = {
-        nombre: nombre,
-        dni: dni,
-        telefono: telefono,
-        email: email,
-        rol: rol
-      };
+      const nuevoUsuario = { nombre, dni, telefono, email, rol };
       localStorage.setItem('user', JSON.stringify(nuevoUsuario));
 
-      // Guardar claves de sesión individuales para sincronizar con index.html
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userRole', rol);
 
-      // Redirección directa por rol
       if (rol === 'admin' || rol === 'empleado') {
         window.location.href = 'panel.html';
       } else {
