@@ -9,17 +9,14 @@
       --bg-color: #050b14;
       --card-bg: #0d1626;
       --border-color: rgba(255, 255, 255, 0.08);
-      --orange-accent: #f97316;
+      --orange-accent: #ea580c;
       --blue-accent: #0284c7;
+      --cyan-light: #38bdf8;
       --text-color: #f8fafc;
       --text-muted: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -30,7 +27,6 @@
       flex-direction: column;
     }
 
-    /* Navbar Oscuro Unificado */
     .navbar {
       background: #030710;
       padding: 0.8rem 2rem;
@@ -43,88 +39,48 @@
     .brand {
       font-size: 1.2rem;
       font-weight: 700;
-      color: #38bdf8;
+      color: var(--cyan-light);
       display: flex;
       align-items: center;
       gap: 0.5rem;
       text-decoration: none;
     }
 
-    .brand .bus-icon {
-      display: inline-block;
-      animation: busDrive 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes busDrive {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(6px); }
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 0.5rem;
-      list-style: none;
-      align-items: center;
-    }
+    .nav-links { display: flex; gap: 0.4rem; list-style: none; align-items: center; }
 
     .nav-item {
-      color: var(--text-color);
+      color: #cbd5e1;
       text-decoration: none;
       font-size: 0.88rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.5rem 0.9rem;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
       border-radius: 8px;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.25s ease;
+      font-weight: 500;
     }
 
-    .nav-item span.icon,
-    .btn-login span.icon,
-    .btn-register span.icon {
-      display: inline-block;
-      transition: transform 0.25s ease;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateY(-2px);
-    }
-
-    .nav-item:hover span.icon,
-    .btn-login:hover span.icon,
-    .btn-register:hover span.icon {
-      transform: scale(1.25) rotate(-5deg);
-    }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
 
     .nav-item.active {
       background: var(--orange-accent);
       color: #ffffff;
       font-weight: 600;
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
-    .auth-buttons {
-      display: flex;
-      gap: 0.6rem;
-    }
+    .auth-buttons { display: flex; gap: 0.6rem; align-items: center; }
 
     .btn-login {
       border: 1px solid var(--blue-accent);
-      color: #38bdf8;
+      color: var(--cyan-light);
       background: transparent;
       padding: 0.5rem 1rem;
       border-radius: 8px;
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn-login:hover {
-      background: rgba(2, 132, 199, 0.2);
     }
 
     .btn-register {
@@ -135,198 +91,85 @@
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
     }
 
-    .btn-register:hover {
-      background: #0369a1;
+    .user-greeting { color: var(--cyan-light); font-weight: bold; font-size: 0.88rem; }
+
+    .btn-panel-admin {
+      background: var(--orange-accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.85rem;
     }
 
-    /* Contenido Principal */
+    .btn-logout-red {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
     .main-container {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       padding: 2.5rem 1.5rem;
-      max-width: 950px;
+      max-width: 900px;
       margin: 0 auto;
       width: 100%;
     }
 
-    .booking-card {
+    .page-title {
+      font-size: 2rem;
+      color: var(--cyan-light);
+      margin-bottom: 1.5rem;
+      font-weight: 800;
+    }
+
+    .search-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 2rem;
-      width: 100%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
-
-    .booking-title {
-      font-size: 1.8rem;
-      color: #38bdf8;
-      margin-bottom: 2rem;
-      font-weight: 800;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    
-    .filter-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
     }
 
     .form-group label {
-      font-size: 0.82rem;
-      color: var(--text-muted);
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      color: var(--text-color);
+      font-weight: 600;
     }
 
-    .form-group select,
-    .form-group input {
-      background: #050b14;
+    .form-group select, .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--bg-color);
       border: 1px solid var(--border-color);
-      color: var(--text-color);
-      padding: 0.65rem;
       border-radius: 8px;
-      font-size: 0.9rem;
+      color: white;
       outline: none;
     }
 
-    .form-group select:focus,
-    .form-group input:focus {
-      border-color: var(--blue-accent);
-    }
-
-    /* Leyenda y Distribución */
-    .seat-legend {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1.2rem;
-      margin-bottom: 1.5rem;
-      background: #050b14;
-      padding: 0.8rem 1.2rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      border: 1px solid var(--border-color);
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .box {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-    }
-
-    .box.free { background: #1e293b; border: 1px solid #334155; }
-    .box.selected { background: var(--orange-accent); }
-    .box.taken { background: #dc2626; }
-
-    /* Indicador de Cabecera del Bus */
-    .bus-header-indicator {
-      display: grid;
-      grid-template-columns: 1fr 1fr 40px 1fr 1fr;
-      max-width: 580px;
-      margin: 0 auto 0.6rem auto;
-      text-align: center;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #38bdf8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Mapa de 40 Asientos (4 columnas + Pasillo Central) */
-    .seats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 40px 1fr 1fr;
-      gap: 0.6rem;
-      max-width: 580px;
-      margin: 0 auto 2rem auto;
-      background: #050b14;
-      padding: 1.2rem;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-    }
-
-    .aisle-gap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.65rem;
-      color: rgba(255, 255, 255, 0.15);
-      writing-mode: vertical-lr;
-      user-select: none;
-    }
-
-    .seat-btn {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: var(--text-color);
-      padding: 0.65rem 0.3rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.15rem;
-    }
-
-    .seat-btn span.tag {
-      font-size: 0.62rem;
-      font-weight: 400;
-      opacity: 0.75;
-    }
-
-    .seat-btn:hover:not(.taken) {
-      border-color: var(--orange-accent);
-      background: #334155;
-      transform: scale(1.03);
-    }
-
-    .seat-btn.selected {
+    .btn-search {
+      grid-column: 1 / -1;
+      padding: 0.85rem;
       background: var(--orange-accent);
-      border-color: var(--orange-accent);
       color: white;
-    }
-
-    .seat-btn.taken {
-      background: #dc2626;
-      border-color: #dc2626;
-      color: white;
-      cursor: not-allowed;
-      opacity: 0.85;
-    }
-
-    .total-price {
-      text-align: center;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #22c55e;
-      margin-top: 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
     }
 
     footer {
@@ -335,99 +178,64 @@
       font-size: 0.8rem;
       color: var(--text-muted);
       border-top: 1px solid var(--border-color);
+      background: #030710;
     }
   </style>
 </head>
 <body>
 
   <header class="navbar">
-    <a href="/index.html" class="brand">
-      <span class="bus-icon">🚌</span> TransAndino Perú
+    <a href="../index.html" class="brand">
+      <span>🚌</span> TransAndino Perú
     </a>
     
     <nav>
       <ul class="nav-links">
-        <li><a href="/index.html" class="nav-item"><span class="icon">🏡</span> Inicio</a></li>
-        <li><a href="/pages/servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
-        <li><a href="/pages/requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
-        <li><a href="/pages/compra-pasajes.html" class="nav-item active"><span class="icon">🎟️</span> Reserva / Horarios</a></li>
-        <li><a href="/pages/seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
-        <li><a href="/pages/ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación y Sedes</a></li>
+        <li><a href="../index.html" class="nav-item"><span class="icon">🍊</span> Inicio</a></li>
+        <li><a href="servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
+        <li><a href="requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
+        <li><a href="compra-pasajes.html" class="nav-item active"><span class="icon">🎟</span> Pasajes</a></li>
+        <li><a href="seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
+        <li><a href="ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación</a></li>
       </ul>
     </nav>
 
-    <div class="auth-buttons">
-      <a href="/login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
-      <a href="/registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
+    <div class="auth-buttons" id="auth-container">
+      <a href="../login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
+      <a href="../registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
     </div>
   </header>
 
   <main class="main-container">
-    <div class="booking-card">
-      <h1 class="booking-title">Reserva de Pasajes de Viaje 🎟️</h1>
+    <h1 class="page-title">🎟 Reserva y Salidas de Pasajes</h1>
 
-      <div class="filter-grid">
-        <div class="form-group">
-          <label>Origen</label>
-          <select>
-            <option selected>Lima</option>
-            <option>Huancayo</option>
-            <option>Arequipa</option>
-            <option>Cusco</option>
-            <option>Ica</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Destino</label>
-          <select>
-            <option>Lima</option>
-            <option selected>Ica</option>
-            <option>Huancayo</option>
-            <option>Arequipa</option>
-            <option>Cusco</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Fecha de Viaje</label>
-          <input type="date" value="2026-10-02">
-        </div>
-
-        <div class="form-group">
-          <label>Hora de Salida</label>
-          <select>
-            <option selected>08:00 AM</option>
-            <option>01:00 PM</option>
-            <option>08:00 PM</option>
-            <option>10:30 PM</option>
-          </select>
-        </div>
+    <div class="search-card">
+      <div class="form-group">
+        <label>Origen</label>
+        <select>
+          <option>Lima</option>
+          <option>Huancayo</option>
+          <option>Arequipa</option>
+          <option>Cusco</option>
+        </select>
       </div>
 
-      <p style="text-align: center; color: #38bdf8; font-weight: 600; margin-bottom: 1rem;">Selecciona tus Asientos (Capacidad: 40 Pasajeros)</p>
-
-      <div class="seat-legend">
-        <div class="legend-item"><div class="box free"></div> Libre</div>
-        <div class="legend-item"><div class="box selected"></div> Seleccionado</div>
-        <div class="legend-item"><div class="box taken"></div> Comprado</div>
+      <div class="form-group">
+        <label>Destino</label>
+        <select>
+          <option>Huancayo</option>
+          <option>Lima</option>
+          <option>Arequipa</option>
+          <option>Cusco</option>
+        </select>
       </div>
 
-      <!-- Indicadores de Tipo de Asiento -->
-      <div class="bus-header-indicator">
-        <div>🪟 Ventana</div>
-        <div>🚶 Pasillo</div>
-        <div></div>
-        <div>🚶 Pasillo</div>
-        <div>🪟 Ventana</div>
+      <div class="form-group">
+        <label>Fecha de Viaje</label>
+        <input type="date">
       </div>
 
-      <!-- Mapa de Asientos del Bus (40 Asientos) -->
-      <div class="seats-grid" id="busSeatsContainer"></div>
-
-      <div class="total-price">
-        Precio Total: S/ 0.00
-      </div>
+      <button class="btn-search" onclick="alert('Buscando itinerarios disponibles...')">🔍 Buscar Pasajes</button>
     </div>
   </main>
 
@@ -436,48 +244,37 @@
   </footer>
 
   <script>
-    const pricePerSeat = 50;
-    const seatsContainer = document.getElementById('busSeatsContainer');
-    const totalPriceEl = document.querySelector('.total-price');
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const userEmail = localStorage.getItem('userEmail');
+      let userRole = localStorage.getItem('userRole');
+      const authContainer = document.getElementById('auth-container');
 
-    // Lista de asientos ocupados por defecto (simulación)
-    const takenSeats = [3, 8, 14, 22, 27, 35];
-
-    // Generar 40 asientos dinámicamente con Pasillo Central (10 filas x 4 asientos)
-    let seatNumber = 1;
-    for (let row = 1; row <= 10; row++) {
-      for (let col = 1; col <= 4; col++) {
-        const isWindow = (col === 1 || col === 4);
-        const isTaken = takenSeats.includes(seatNumber);
-
-        const btn = document.createElement('button');
-        btn.className = `seat-btn ${isTaken ? 'taken' : ''}`;
-        btn.disabled = isTaken;
-        btn.innerHTML = `N° ${seatNumber} <span class="tag">${isWindow ? 'Ventana' : 'Pasillo'}</span>`;
-
-        if (!isTaken) {
-          btn.addEventListener('click', () => {
-            btn.classList.toggle('selected');
-            updateTotal();
-          });
+      if (isLoggedIn && userEmail && authContainer) {
+        if (!userRole) {
+          const lower = userEmail.toLowerCase();
+          if (lower.includes('axperez') || lower.includes('axlperez')) userRole = 'admin';
+          else if (lower.includes('transandinoempleado')) userRole = 'empleado';
+          else userRole = 'cliente';
         }
 
-        seatsContainer.appendChild(btn);
+        const rawName = userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
+        const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        const panelLabel = userRole === 'admin' ? '⚙️ Panel Admin' : (userRole === 'empleado' ? '⚙️ Panel Empleado' : '⚙️ Mi Panel');
 
-        if (col === 2) {
-          const aisle = document.createElement('div');
-          aisle.className = 'aisle-gap';
-          aisle.textContent = '';
-          seatsContainer.appendChild(aisle);
-        }
-
-        seatNumber++;
+        authContainer.innerHTML = `
+          <span class="user-greeting">👋 Hola, ${formattedName}</span>
+          ${(userRole === 'admin' || userRole === 'empleado') 
+            ? `<a href="../panel.html" class="btn-panel-admin">${panelLabel}</a>` 
+            : ''}
+          <button onclick="cerrarSesion()" class="btn-logout-red">Cerrar Sesión</button>
+        `;
       }
-    }
+    });
 
-    function updateTotal() {
-      const selectedCount = document.querySelectorAll('.seat-btn.selected').length;
-      totalPriceEl.textContent = `Precio Total: S/ ${(selectedCount * pricePerSeat).toFixed(2)}`;
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.reload();
     }
   </script>
 
