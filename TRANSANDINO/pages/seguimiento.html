@@ -94,8 +94,8 @@
       box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
-    /* ANIMACIÓN CONTINUA DE EMOJIS */
-    .icon, .brand span, .page-title span {
+    /* ANIMACIÓN CONTINUA DE EMOJIS (COPIADO DE REQUISITOS) */
+    .icon, .brand span, .card h3 span {
       display: inline-block;
     }
 
@@ -104,8 +104,17 @@
       50% { transform: translateY(-4px); }
     }
 
-    .icon, .brand span, .page-title span {
+    @keyframes pulseEmoji {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .icon, .brand span {
       animation: floatEmoji 2.5s ease-in-out infinite;
+    }
+
+    .card h3 span {
+      animation: pulseEmoji 2s ease-in-out infinite;
     }
 
     .nav-item:hover .icon {
@@ -194,7 +203,7 @@
     .main-container {
       flex: 1;
       padding: 2.5rem 1.5rem;
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
       width: 100%;
       animation: fadeInUp 0.4s ease-out;
@@ -215,24 +224,35 @@
       gap: 0.5rem;
     }
 
-    /* TRACKING CARD INTERACTIVA */
-    .tracking-card {
+    /* CARDS INTERACTIVAS */
+    .card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 2rem;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
 
-    .tracking-card:hover {
+    .card:hover {
       transform: translateY(-6px);
       border-color: var(--cyan-light);
       box-shadow: 0 12px 25px rgba(56, 189, 248, 0.15);
     }
 
+    .card h3 { 
+      color: var(--orange-accent); 
+      margin-bottom: 0.8rem; 
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     .track-input-group {
       display: flex;
       gap: 0.8rem;
+      margin-top: 1rem;
     }
 
     .track-input-group input {
@@ -247,7 +267,6 @@
 
     .track-input-group input:focus {
       border-color: var(--cyan-light);
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
     }
 
     .btn-track {
@@ -263,7 +282,6 @@
     .btn-track:hover {
       background: #c2410c;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
     }
 
     footer {
@@ -302,10 +320,11 @@
   </header>
 
   <main class="main-container">
-    <h1 class="page-title"><span>📦</span> Rastreo de Encomiendas</h1>
+    <h1 class="page-title"><span class="icon">📦</span> Rastreo de Encomiendas</h1>
 
-    <div class="tracking-card">
-      <p style="margin-bottom: 1rem; color: var(--text-muted);">Ingresa tu número de guía de envío para ver el estado de tu carga:</p>
+    <div class="card">
+      <h3><span>🔍</span> Consulta el Estado de tu Encomienda</h3>
+      <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Ingresa tu número de guía de envío para ver la ubicación actual de tu carga:</p>
       <div class="track-input-group">
         <input type="text" placeholder="Ejemplo: TA-2026-9874">
         <button class="btn-track" onclick="alert('Consultando guía...')">Rastrear</button>
