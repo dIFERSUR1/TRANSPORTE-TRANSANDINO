@@ -28,6 +28,7 @@ export default async function handler(req, res) {
         return res.status(200).json(pasajes);
       }
     }
+
     if (method === 'POST') {
       const { id_usuario, nombre_pasajero, origen, destino, fecha, precio, estado } = req.body;
       const codigo_seguimiento = generarCodigoSeguimiento();
@@ -39,7 +40,15 @@ export default async function handler(req, res) {
           id_usuario, codigo_seguimiento, nombre_pasajero, origen, destino, fecha, fecha_viaje, precio, estado
         )
         VALUES (
-          ${id_usuario || null}, ${codigo_seguimiento}, ${nombre_pasajero || ''}, ${origen}, ${destino}, ${fechaFinal}, ${fechaFinal}, ${precio || 0}, ${estadoFinal}
+          ${id_usuario ? parseInt(id_usuario) : null}, 
+          ${codigo_seguimiento}, 
+          ${nombre_pasajero || ''}, 
+          ${origen}, 
+          ${destino}, 
+          ${fechaFinal}, 
+          ${fechaFinal}, 
+          ${precio || 0}, 
+          ${estadoFinal}
         )
         RETURNING *;
       `;
@@ -49,6 +58,7 @@ export default async function handler(req, res) {
         data: nuevo[0]
       });
     }
+
     if (method === 'PUT') {
       const { id } = req.query;
       const { origen, destino, fecha, precio, estado } = req.body;
@@ -56,24 +66,44 @@ export default async function handler(req, res) {
       if (!id) return res.status(400).json({ message: 'El ID es requerido.' });
 
       if (estado) {
-        await sql`
+        const resultado = await sql`
           UPDATE compras_pasajes 
-          SET origen = ${origen}, destino = ${destino}, fecha = ${fecha}, fecha_viaje = ${fecha}, precio = ${precio}, estado = ${estado}
-          WHERE id = ${id};
+          SET origen = COALESCE(${origen || null}, origen),
+              destino = COALESCE(${destino || null}, destino),
+              fecha = COALESCE(${fecha || null}, fecha),
+              fecha_viaje = COALESCE(${fecha || null}, fecha_viaje),
+              precio = COALESCE(${precio || null}, precio),
+              estado = ${estado}
+          WHERE id = ${parseInt(id)}
+          RETURNING *;
         `;
+        if (resultado.length === 0) {
+          return res.status(404).json({ message: 'Registro no encontrado.' });
+        }
       } else {
-        await sql`
+        const resultado = await sql`
           UPDATE compras_pasajes 
-          SET origen = ${origen}, destino = ${destino}, fecha = ${fecha}, fecha_viaje = ${fecha}
-          WHERE id = ${id} AND estado = 'registrado';
+          SET origen = COALESCE(${origen || null}, origen),
+              destino = COALESCE(${destino || null}, destino),
+              fecha = COALESCE(${fecha || null}, fecha),
+              fecha_viaje = COALESCE(${fecha || null}, fecha_viaje)
+          WHERE id = ${parseInt(id)} AND estado = 'registrado'
+          RETURNING *;
         `;
+
+        if (resultado.length === 0) {
+          return res.status(400).json({ 
+            message: "No se pudo actualizar. El pasaje no existe o su estado ya no es 'registrado'." 
+          });
+        }
       }
       return res.status(200).json({ message: 'Registro actualizado con éxito.' });
     }
+
     if (method === 'DELETE') {
       const { id } = req.query;
       if (!id) return res.status(400).json({ message: 'El ID es requerido.' });
-      await sql`DELETE FROM compras_pasajes WHERE id = ${id};`;
+      await sql`DELETE FROM compras_pasajes WHERE id = ${parseInt(id)};`;
       return res.status(200).json({ message: 'Registro eliminado con éxito.' });
     }
 
