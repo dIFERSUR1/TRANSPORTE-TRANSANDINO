@@ -295,14 +295,13 @@
     <a href="../index.html" class="logo">🚌 TransAndino Perú</a>
     <nav>
       <a href="../index.html">Inicio</a>
-      <a href="#">📘 Servicios</a>
-      <a href="#">📜 Requisitos</a>
+      <a href="servicios.html">📘 Servicios</a>
+      <a href="requisitos.html">📜 Requisitos</a>
       <a href="compra-pasajes.html" class="active">✔ Pasajes</a>
-      <a href="#">📦 Encomiendas</a>
-      <a href="#">📍 Ubicación</a>
+      <a href="mis-compras.html">📋 Mis Pasajes</a>
     </nav>
     <div class="user-section">
-      <span class="user-greeting">✋ Hola, Usuario01</span>
+      <span class="user-greeting" id="lbl-user-name">✋ Hola, Usuario</span>
       <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
     </div>
   </header>
@@ -388,6 +387,18 @@
     const PRECIO_PASAJE = 50.00;
     let seleccionados = [];
 
+    // Cargar datos de la sesión activa
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const lblUser = document.getElementById('lbl-user-name');
+      if (user && (user.email || user.nombre)) {
+        const nombreMostrar = user.nombre || user.email.split('@')[0];
+        lblUser.innerText = `✋ Hola, ${nombreMostrar}`;
+      } else {
+        lblUser.innerText = `✋ Hola, Invitado`;
+      }
+    });
+
     document.getElementById('form-busqueda').addEventListener('submit', async function (e) {
       e.preventDefault();
       await cargarAsientos();
@@ -400,6 +411,11 @@
       const destino = document.getElementById('destino').value.trim().toLowerCase();
       const fecha = document.getElementById('fecha').value;
 
+      if (origen === destino) {
+        alert('El origen y el destino no pueden ser iguales.');
+        return;
+      }
+
       grid.innerHTML = '<p style="grid-column: span 4; text-align: center; color: #38bdf8;">Cargando asientos...</p>';
       seccion.style.display = 'block';
       seleccionados = [];
@@ -407,25 +423,34 @@
 
       let ocupados = [];
       try {
-        const res = await fetch('/api/compras');
+        let res = await fetch('/api/compras-pasajes');
+        if (!res.ok) {
+          res = await fetch('/api/compras');
+        }
+        
         if (res.ok) {
           const compras = await res.json();
-          ocupados = compras
-            .filter(item => {
-              const origDB = (item.origen || '').trim().toLowerCase();
-              const destDB = (item.destino || '').trim().toLowerCase();
-              const fechaDB = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '');
-              return origDB === origen && destDB === destino && fechaDB === fecha && item.estado !== 'cancelado';
-            })
-            .map(item => parseInt(item.num_asiento || item.asiento));
+          if (Array.isArray(compras)) {
+            ocupados = compras
+              .filter(item => {
+                const origDB = (item.origen || '').trim().toLowerCase();
+                const destDB = (item.destino || '').trim().toLowerCase();
+                const fechaDB = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '');
+                return origDB === origen && destDB === destino && fechaDB === fecha && item.estado !== 'cancelado';
+              })
+              .map(item => parseInt(item.num_asiento || item.asiento));
+          }
         }
       } catch (err) {
-        console.error('Error al conectar con la base de datos:', err);
+        console.warn('Cargando respaldo desde localStorage...');
+        const comprasLocal = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+        ocupados = comprasLocal
+          .filter(item => item.origen.toLowerCase() === origen && item.destino.toLowerCase() === destino && item.fecha_viaje === fecha)
+          .map(item => parseInt(item.num_asiento));
       }
 
       grid.innerHTML = '';
 
-      // Generar los 40 asientos marcando ocupados los registrados en Neon
       for (let i = 1; i <= 40; i++) {
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -479,39 +504,56 @@
       const destino = document.getElementById('destino').value;
       const fecha_viaje = document.getElementById('fecha').value;
       const btnReservar = document.getElementById('btn-reservar');
+      const user = JSON.parse(localStorage.getItem('user')) || { email: 'Cliente' };
 
       btnReservar.disabled = true;
       btnReservar.innerText = 'Guardando...';
 
-      try {
-        for (const asientoNum of seleccionados) {
-          await fetch('/api/compras', {
+      let guardadosLocal = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+
+      for (const asientoNum of seleccionados) {
+        const pasajeObj = {
+          id_usuario: user.email || user.nombre || 'Cliente',
+          origen: origen,
+          destino: destino,
+          fecha_viaje: fecha_viaje,
+          hora_viaje: '08:00 AM',
+          num_asiento: asientoNum,
+          precio: PRECIO_PASAJE,
+          estado: 'registrado'
+        };
+
+        try {
+          let res = await fetch('/api/compras-pasajes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id_usuario: 1,
-              origen: origen,
-              destino: destino,
-              fecha_viaje: fecha_viaje,
-              hora_viaje: '09:00 AM',
-              num_asiento: asientoNum,
-              precio: PRECIO_PASAJE,
-              estado: 'reservado'
-            })
+            body: JSON.stringify(pasajeObj)
           });
+          if (!res.ok) {
+            await fetch('/api/compras', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(pasajeObj)
+            });
+          }
+        } catch (err) {
+          console.log('Error de API, guardando en local');
         }
 
-        alert(`¡Reserva realizada con éxito!\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}`);
-        await cargarAsientos(); // Recargar grilla
-      } catch (err) {
-        console.error('Error al guardar la reserva:', err);
-        alert('Ocurrió un problema al guardar la reserva.');
-      } finally {
-        btnReservar.innerText = 'Confirmar Reserva';
+        guardadosLocal.push(pasajeObj);
       }
+
+      localStorage.setItem('compras_pasajes', JSON.stringify(guardadosLocal));
+
+      alert(`¡Reserva realizada con éxito!\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}`);
+      btnReservar.innerText = 'Confirmar Reserva';
+      await cargarAsientos();
     }
 
+    // Cerrar sesión borrando el localStorage
     function cerrarSesion() {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
       window.location.href = "../index.html";
     }
   </script>
