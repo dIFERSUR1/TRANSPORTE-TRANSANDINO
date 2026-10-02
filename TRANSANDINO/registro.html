@@ -3,41 +3,225 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar Sesión - TransAndino Perú</title>
+  <title>Registrarse - TransAndino Perú</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .logo span { color: #38bdf8; }
-    .bus-emoji { display: inline-block; animation: rodar 2s infinite ease-in-out; }
-    @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
-    
-    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
-    nav a:hover { color: #ffffff; background: #1e293b; }
-    
-    .btn-login { border: 1px solid #38bdf8; color: #ffffff !important; background: #38bdf8; margin-left: 0.5rem; font-weight: bold; }
-    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
-    .btn-register:hover { background: #0369a1 !important; }
-    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem; }
-    .login-card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    .login-card h2 { text-align: center; font-size: 1.8rem; margin-bottom: 0.5rem; color: #ffffff; font-weight: 700; }
-    .login-card p { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+    :root {
+      --bg-dark: #050b14;
+      --header-bg: #030710;
+      --card-bg: #0d1626;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --orange-accent: #f97316;
+      --blue-accent: #0284c7;
+      --cyan-light: #38bdf8;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+    }
 
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: #cbd5e1; font-weight: 500; }
-    .form-group input { width: 100%; padding: 0.75rem 1rem; background: #0b192c; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 0.95rem; outline: none; }
-    .form-group input:focus { border-color: #38bdf8; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
 
-    .btn-submit { width: 100%; padding: 0.8rem; background: #ea580c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 1rem; }
-    .btn-submit:hover { background: #c2410c; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-    .form-footer { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: #94a3b8; }
-    .form-footer a { color: #38bdf8; text-decoration: none; font-weight: 600; }
-    .form-footer a:hover { text-decoration: underline; }
+    /* Navbar Oscuro Unificado */
+    header {
+      background: var(--header-bg);
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
 
-    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; }
+    .logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .logo span {
+      color: var(--cyan-light);
+    }
+
+    .bus-emoji {
+      display: inline-block;
+      animation: rodar 2s infinite ease-in-out;
+    }
+
+    @keyframes rodar {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(6px) translateY(-2px); }
+    }
+
+    nav {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.88rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      transition: all 0.25s ease;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    nav a:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-login {
+      border: 1px solid var(--blue-accent);
+      color: var(--cyan-light) !important;
+      font-weight: 600;
+    }
+
+    .btn-login:hover {
+      background: rgba(2, 132, 199, 0.2) !important;
+    }
+
+    .btn-register-active {
+      background: var(--blue-accent);
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+
+    /* Contenido Principal */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .register-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .register-card h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    .register-card p {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      color: var(--text-color);
+      font-weight: 600;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-color);
+      outline: none;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--cyan-light);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--blue-accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.8rem;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: #0369a1;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .auth-footer a {
+      color: var(--cyan-light);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      background: var(--header-bg);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+    }
   </style>
 </head>
 <body>
@@ -47,88 +231,76 @@
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="index.html">Inicio</a>
-      <a href="pages/servicios.html">Servicios</a>
-      <a href="pages/requisitos.html">Requisitos</a>
-      <a href="pages/compra-pasajes.html">Reserva / Horarios</a>
-      <a href="pages/seguimiento.html">Encomiendas</a>
-      <a href="pages/ubicacion.html">Ubicación y Sedes</a>
-
-      <div style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="login.html" class="btn-login">Iniciar Sesión</a>
-        <a href="registro.html" class="btn-register">Registrarse</a>
-      </div>
+      <a href="index.html">🏡 Inicio</a>
+      <a href="pages/servicios.html">📘 Servicios</a>
+      <a href="pages/requisitos.html">📜 Requisitos</a>
+      <a href="pages/compra-pasajes.html">🎟 Reserva / Horarios</a>
+      <a href="pages/seguimiento.html">📦 Encomiendas</a>
+      <a href="pages/ubicacion.html">📍 Ubicación y Sedes</a>
+      <a href="login.html" class="btn-login">🔑 Iniciar Sesión</a>
+      <a href="registro.html" class="btn-register-active">✍️ Registrarse</a>
     </nav>
   </header>
 
   <main>
-    <div class="login-card">
-      <h2>Iniciar Sesión</h2>
-      <p>Ingresa a tu cuenta de TransAndino Perú</p>
+    <div class="register-card">
+      <h2>Crear Cuenta ✍️</h2>
+      <p>Regístrate para gestionar tus pasajes y encomiendas</p>
 
-      <form id="login-form">
-        <div class="form-group">
+      <form id="register-form">
+        <div class="form-group full-width">
+          <label for="nombre">Nombre Completo</label>
+          <input type="text" id="nombre" placeholder="Ej: Julius Axl" required>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="dni">DNI / Documento</label>
+            <input type="text" id="dni" placeholder="12345678" required>
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" placeholder="987654321" required>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
           <label for="email">Correo Electrónico</label>
           <input type="email" id="email" placeholder="correo@ejemplo.com" required>
         </div>
 
-        <div class="form-group">
+        <div class="form-group full-width">
           <label for="password">Contraseña</label>
           <input type="password" id="password" placeholder="••••••••" required>
         </div>
 
-        <button type="submit" class="btn-submit">Ingresar</button>
+        <button type="submit" class="btn-submit">Registrarse</button>
       </form>
 
-      <div class="form-footer">
-        ¿No tienes una cuenta? <a href="registro.html">Regístrate aquí</a>
+      <div class="auth-footer">
+        ¿Ya tienes una cuenta? <a href="login.html">Inicia sesión</a>
       </div>
     </div>
   </main>
 
   <footer>
-    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+    © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
 
   <script>
-    const ADMIN_EMAIL = "axlperez183@gmail.com";
-    const EMPLEADOS = [
-      "transandinoempleado001@gmail.com",
-      "transandinoempleado002@gmail.com",
-      "transandinoempleado003@gmail.com"
-    ];
-
-    document.getElementById('login-form').addEventListener('submit', (e) => {
+    document.getElementById('register-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      const emailInput = document.getElementById('email').value.trim().toLowerCase();
-      let usuarioSesion = {};
+      const nombre = document.getElementById('nombre').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
 
-      if (emailInput === ADMIN_EMAIL) {
-        usuarioSesion = { nombre: "Julius Axl Nickolai Perez Huamani", email: emailInput, rol: "admin" };
-        localStorage.setItem('user', JSON.stringify(usuarioSesion));
-        window.location.href = 'panel.html';
-        return;
-      }
+      const nuevoUsuario = {
+        nombre: nombre,
+        email: email,
+        rol: 'cliente'
+      };
 
-      if (EMPLEADOS.includes(emailInput)) {
-        usuarioSesion = { nombre: "Empleado TransAndino", email: emailInput, rol: "empleado" };
-        localStorage.setItem('user', JSON.stringify(usuarioSesion));
-        window.location.href = 'panel-empleado.html';
-        return;
-      }
-
-      const registrados = JSON.parse(localStorage.getItem('usuarios_registrados')) || [];
-      const clienteReg = registrados.find(u => u.email === emailInput);
-
-      if (clienteReg) {
-        usuarioSesion = { nombre: clienteReg.nombre, email: clienteReg.email, rol: "cliente" };
-      } else {
-        const nombreExtraido = emailInput.split('@')[0];
-        const nombreFormateado = nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1);
-        usuarioSesion = { nombre: nombreFormateado, email: emailInput, rol: "cliente" };
-      }
-
-      localStorage.setItem('user', JSON.stringify(usuarioSesion));
+      localStorage.setItem('user', JSON.stringify(nuevoUsuario));
       window.location.href = 'index.html';
     });
   </script>
