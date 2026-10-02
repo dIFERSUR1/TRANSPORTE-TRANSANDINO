@@ -5,49 +5,230 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iniciar Sesión - TransAndino Perú</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .logo span { color: #38bdf8; }
-    .bus-emoji { display: inline-block; animation: rodar 2s infinite ease-in-out; }
-    @keyframes rodar { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(6px) translateY(-2px); } }
+    :root {
+      --bg-dark: #050b14;
+      --header-bg: #030710;
+      --card-bg: #0d1626;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --orange-accent: #f97316;
+      --blue-accent: #0284c7;
+      --cyan-light: #38bdf8;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+    }
 
-    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; font-weight: 500; }
-    nav a:hover { color: #ffffff; background: #1e293b; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
 
-    .btn-login { border: 1px solid #38bdf8; color: #ffffff !important; background: #38bdf8; margin-left: 0.5rem; font-weight: bold; }
-    .btn-register { background: #0284c7; color: #ffffff !important; font-weight: bold; }
-    .btn-register:hover { background: #0369a1 !important; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem; }
-    .login-card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-    .login-card h2 { text-align: center; font-size: 1.8rem; margin-bottom: 0.5rem; color: #ffffff; }
-    .login-card p { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: #cbd5e1; }
-    .form-group input { width: 100%; padding: 0.75rem 1rem; background: #0b192c; border: 1px solid #1e293b; border-radius: 6px; color: #ffffff; outline: none; font-size: 0.9rem; }
-    .form-group input:focus { border-color: #38bdf8; }
-    .btn-submit { width: 100%; padding: 0.8rem; background: #ea580c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; transition: background 0.2s; }
-    .btn-submit:hover { background: #c2410c; }
-    footer { background: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid #1e293b; }
+    /* Navbar Oscuro Unificado */
+    header {
+      background: var(--header-bg);
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .logo span {
+      color: var(--cyan-light);
+    }
+
+    .bus-emoji {
+      display: inline-block;
+      animation: rodar 2s infinite ease-in-out;
+    }
+
+    @keyframes rodar {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(6px) translateY(-2px); }
+    }
+
+    nav {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.88rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      transition: all 0.25s ease;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    nav a:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-login-active {
+      background: var(--blue-accent);
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+
+    .btn-register {
+      border: 1px solid var(--blue-accent);
+      color: var(--cyan-light) !important;
+      font-weight: 600;
+    }
+
+    .btn-register:hover {
+      background: rgba(2, 132, 199, 0.2) !important;
+    }
+
+    /* Contenido Principal */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .login-card h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    .login-card p {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      color: var(--text-color);
+      font-weight: 600;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-color);
+      outline: none;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--cyan-light);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--orange-accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.8rem;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: #ea580c;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .auth-footer a {
+      color: var(--cyan-light);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      background: var(--header-bg);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <a href="index.html" class="logo">
+    <a href="../index.html" class="logo">
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="index.html">🏡 Inicio</a>
-      <a href="pages/servicios.html">📘 Servicios</a>
-      <a href="pages/requisitos.html">📜 Requisitos</a>
-      <a href="pages/compra-pasajes.html">🎟 Pasajes</a>
-      <a href="pages/seguimiento.html">📦 Encomiendas</a>
-      <a href="pages/ubicacion.html">📍 Ubicación</a>
-      <a href="login.html" class="btn-login">🔑 Iniciar Sesión</a>
+      <a href="../index.html">🏡 Inicio</a>
+      <a href="servicios.html">📘 Servicios</a>
+      <a href="requisitos.html">📜 Requisitos</a>
+      <a href="compra-pasajes.html">🎟 Reserva / Horarios</a>
+      <a href="seguimiento.html">📦 Encomiendas</a>
+      <a href="ubicacion.html">📍 Ubicación y Sedes</a>
+      <a href="login.html" class="btn-login-active">🔑 Iniciar Sesión</a>
+      <a href="registro.html" class="btn-register">✍️ Registrarse</a>
     </nav>
   </header>
 
@@ -67,6 +248,10 @@
         </div>
         <button type="submit" class="btn-submit">Ingresar</button>
       </form>
+
+      <div class="auth-footer">
+        ¿No tienes una cuenta? <a href="registro.html">Regístrate aquí</a>
+      </div>
     </div>
   </main>
 
@@ -93,7 +278,7 @@
       }
 
       localStorage.setItem('user', JSON.stringify(usuarioSesion));
-      window.location.href = 'index.html';
+      window.location.href = '../index.html';
     });
   </script>
 
