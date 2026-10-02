@@ -17,12 +17,7 @@
       --text-muted: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
 
     body {
       background-color: var(--bg-dark);
@@ -128,9 +123,7 @@
       margin-bottom: 2rem;
     }
 
-    .form-group {
-      margin-bottom: 1.2rem;
-    }
+    .form-group { margin-bottom: 1.2rem; }
 
     .form-group label {
       display: block;
@@ -152,9 +145,7 @@
       transition: border-color 0.2s;
     }
 
-    .form-group input:focus {
-      border-color: var(--cyan-light);
-    }
+    .form-group input:focus { border-color: var(--cyan-light); }
 
     .btn-submit {
       width: 100%;
@@ -170,9 +161,7 @@
       transition: background 0.2s;
     }
 
-    .btn-submit:hover {
-      background: #0369a1;
-    }
+    .btn-submit:hover { background: #0369a1; }
 
     .auth-footer {
       text-align: center;
@@ -204,12 +193,12 @@
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="index.html">🏡 Inicio</a>
+      <a href="index.html">🍊 Inicio</a>
       <a href="pages/servicios.html">📘 Servicios</a>
       <a href="pages/requisitos.html">📜 Requisitos</a>
-      <a href="pages/compra-pasajes.html">🎟 Reserva / Horarios</a>
+      <a href="pages/compra-pasajes.html">🎟 Pasajes</a>
       <a href="pages/seguimiento.html">📦 Encomiendas</a>
-      <a href="pages/ubicacion.html">📍 Ubicación y Sedes</a>
+      <a href="pages/ubicacion.html">📍 Ubicación</a>
       <a href="login.html" class="btn-login-active">🔑 Iniciar Sesión</a>
       <a href="registro.html">✍️ Registrarse</a>
     </nav>
@@ -263,7 +252,7 @@
       ];
 
       let rol = 'cliente';
-      if (email === 'axperez' || email.startsWith('axperez@') || email.includes('axperez')) {
+      if (email === 'axperez' || email.includes('axperez') || email.includes('axlperez')) {
         rol = 'admin';
       } else if (empleadosAutorizados.includes(email) || email.includes('transandinoempleado')) {
         rol = 'empleado';
