@@ -32,7 +32,6 @@
       flex-direction: column;
     }
 
-    /* Navbar superior */
     .navbar {
       background: #030710;
       padding: 0.8rem 2rem;
@@ -81,15 +80,6 @@
       font-weight: 600;
     }
 
-    .nav-item.btn-box {
-      background: #111e33;
-      border: 1px solid var(--border-color);
-    }
-
-    .nav-item.btn-box:hover {
-      background: #1a2c47;
-    }
-
     .auth-buttons {
       display: flex;
       gap: 0.6rem;
@@ -130,7 +120,6 @@
       background: #0369a1;
     }
 
-    /* Contenedor Principal */
     .main-container {
       flex: 1;
       display: flex;
@@ -157,7 +146,6 @@
       font-weight: 700;
     }
 
-    /* Controles de Filtro */
     .controls-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -192,7 +180,6 @@
       border-color: #38bdf8;
     }
 
-    /* Leyenda de Asientos */
     .section-subtitle {
       font-size: 0.95rem;
       color: #38bdf8;
@@ -226,7 +213,6 @@
     .dot.selected { background: var(--orange-accent); }
     .dot.occupied { background: var(--red-seat); }
 
-    /* Grilla de Asientos */
     .seats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -267,18 +253,24 @@
       opacity: 0.8;
     }
 
-    /* Pie de Compra */
     .total-price {
       text-align: center;
       font-size: 1.3rem;
       font-weight: 800;
       color: var(--green-seat);
     }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navbar idéntico para mantener la navegación -->
   <header class="navbar">
     <a href="../index.html" class="brand">
       🚌 TransAndino Perú
@@ -287,11 +279,11 @@
     <nav>
       <ul class="nav-links">
         <li><a href="../index.html" class="nav-item">🏡 Inicio</a></li>
-        <li><a href="servicios.html" class="nav-item btn-box">📘 Servicios</a></li>
+        <li><a href="servicios.html" class="nav-item">📘 Servicios</a></li>
         <li><a href="requisitos.html" class="nav-item">📜 Requisitos</a></li>
-        <li><a href="compra-pasajes.html" class="nav-item active">🩹 Pasajes</a></li>
+        <li><a href="compra-pasajes.html" class="nav-item active">🎟️ Reserva / Horarios</a></li>
         <li><a href="encomiendas.html" class="nav-item">📦 Encomiendas</a></li>
-        <li><a href="ubicacion.html" class="nav-item">📍 Ubicación</a></li>
+        <li><a href="ubicacion.html" class="nav-item">📍 Ubicación y Sedes</a></li>
       </ul>
     </nav>
 
@@ -349,9 +341,7 @@
         <div class="legend-item"><span class="dot occupied"></span> Comprado</div>
       </div>
 
-      <div class="seats-grid" id="seatsGrid">
-        <!-- Generado dinámicamente -->
-      </div>
+      <div class="seats-grid" id="seatsGrid"></div>
 
       <div class="total-price" id="totalDisplay">
         Precio Total: S/ 0.00
@@ -359,9 +349,13 @@
     </div>
   </main>
 
+  <footer>
+    © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
+  </footer>
+
   <script>
-    const TICKET_PRICE = 45.00; // Precio por pasaje
-    const occupiedSeats = [2, 10]; // Asientos ocupados según tu diseño
+    const TICKET_PRICE = 45.00;
+    const occupiedSeats = [2, 10]; // Asientos comprados en rojo
 
     const seatsGrid = document.getElementById('seatsGrid');
     const totalDisplay = document.getElementById('totalDisplay');
