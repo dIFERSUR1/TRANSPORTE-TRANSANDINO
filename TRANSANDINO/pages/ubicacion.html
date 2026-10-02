@@ -1,9 +1,9 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Requisitos de Viaje - TransAndino Perú</title>
+  <title>Ubicación y Sedes - TransAndino Perú</title>
   <style>
     :root {
       --bg-color: #050b14;
@@ -94,14 +94,15 @@
       box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
-    /* ANIMACIÓN CONTINUA DE EMOJIS */
-    .icon, .brand span, .card h3 span {
-      display: inline-block;
+    /* ANIMACIÓN CONTINUA DE EMOJIS Y FLOTACIÓN */
+    .icon {
+      display: inline-block !important;
+      animation: floatEmoji 2.5s ease-in-out infinite;
     }
 
     @keyframes floatEmoji {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+      50% { transform: translateY(-5px); }
     }
 
     @keyframes pulseEmoji {
@@ -109,15 +110,12 @@
       50% { transform: scale(1.2); }
     }
 
-    .icon, .brand span {
-      animation: floatEmoji 2.5s ease-in-out infinite;
+    .card h3 .icon {
+      animation: floatEmoji 2.5s ease-in-out infinite, pulseEmoji 2s ease-in-out infinite;
     }
 
-    .card h3 span {
-      animation: pulseEmoji 2s ease-in-out infinite;
-    }
-
-    .nav-item:hover .icon {
+    .nav-item:hover .icon,
+    .brand:hover .icon {
       transform: scale(1.3) rotate(10deg);
     }
 
@@ -224,13 +222,18 @@
       gap: 0.5rem;
     }
 
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
     /* CARDS INTERACTIVAS */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 1.8rem;
-      margin-bottom: 1.5rem;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
 
@@ -249,14 +252,10 @@
       gap: 0.5rem;
     }
 
-    .card ul { 
-      list-style-position: inside; 
+    .card p { 
       color: var(--text-muted); 
-      line-height: 1.8; 
       font-size: 0.95rem; 
-    }
-
-    .card ul li {
+      line-height: 1.6; 
       margin-bottom: 0.4rem;
     }
 
@@ -275,17 +274,17 @@
 
   <header class="navbar">
     <a href="../index.html" class="brand">
-      <span>🚌</span> TransAndino Perú
+      <span class="icon">🚌</span> TransAndino Perú
     </a>
     
     <nav>
       <ul class="nav-links">
         <li><a href="../index.html" class="nav-item"><span class="icon">🍊</span> Inicio</a></li>
         <li><a href="servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
-        <li><a href="requisitos.html" class="nav-item active"><span class="icon">📜</span> Requisitos</a></li>
+        <li><a href="requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
         <li><a href="compra-pasajes.html" class="nav-item"><span class="icon">🎟</span> Pasajes</a></li>
         <li><a href="seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
-        <li><a href="ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación</a></li>
+        <li><a href="ubicacion.html" class="nav-item active"><span class="icon">📍</span> Ubicación</a></li>
       </ul>
     </nav>
 
@@ -296,23 +295,26 @@
   </header>
 
   <main class="main-container">
-    <h1 class="page-title"><span class="icon">📜</span> Requisitos para Embarque</h1>
+    <h1 class="page-title"><span class="icon">📍</span> Agencias y Terminales</h1>
 
-    <div class="card">
-      <h3><span>👤</span> Pasajeros Adultos</h3>
-      <ul>
-        <li>Presentar DNI o Pasaporte físico vigente al momento del abordaje.</li>
-        <li>Presentar el boleto impreso o en formato digital en el celular.</li>
-        <li>Llegar al terminal con 30 minutos de anticipación.</li>
-      </ul>
-    </div>
+    <div class="grid">
+      <div class="card">
+        <h3><span class="icon">🏢</span> Sede Central Lima</h3>
+        <p>Av. Javier Prado Este 1120, La Victoria, Lima.</p>
+        <p>📞 Contacto: (01) 456-7890</p>
+      </div>
 
-    <div class="card">
-      <h3><span>👶</span> Menores de Edad</h3>
-      <ul>
-        <li>DNI físico del menor obligatorio.</li>
-        <li>Si viaja solo o con un tercero, presentar Autorización Notarial firmada por los padres según norma del MTC.</li>
-      </ul>
+      <div class="card">
+        <h3><span class="icon">🏢</span> Sede Huancayo</h3>
+        <p>Av. Ferrocarril 850, Huancayo, Junín.</p>
+        <p>📞 Contacto: (064) 234-567</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">🏢</span> Sede Arequipa</h3>
+        <p>Terminal Terrestre de Arequipa, Stand 14.</p>
+        <p>📞 Contacto: (054) 890-123</p>
+      </div>
     </div>
   </main>
 
