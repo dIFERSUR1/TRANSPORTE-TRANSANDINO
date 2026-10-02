@@ -27,7 +27,6 @@ async function cargarMisPasajes(idUsuario) {
     pasajes.forEach(p => {
       const puedeEditar = p.estado === 'registrado';
       const codigo = p.codigo_seguimiento || `#${p.id}`;
-
       const colorEstado = p.estado === 'registrado' ? '#0284c7' : p.estado === 'atendido' ? '#16a34a' : '#dc2626';
 
       contenedor.innerHTML += `
@@ -39,11 +38,16 @@ async function cargarMisPasajes(idUsuario) {
             </span>
           </div>
           <p style="margin-bottom:0.3rem;"><strong>Origen:</strong> ${p.origen} ➔ <strong>Destino:</strong> ${p.destino}</p>
-          <p style="margin-bottom:0.8rem; color:#cbd5e1;"><strong>Fecha:</strong> ${p.fecha} | <strong>Precio:</strong> S/ ${p.precio || 0}</p>
+          <p style="margin-bottom:0.8rem; color:#cbd5e1;">
+            <strong>Fecha:</strong> ${p.fecha} | 
+            <strong>Hora:</strong> ${p.hora || '09:00 AM'} | 
+            <strong>Asiento:</strong> ${p.asiento} | 
+            <strong>Precio:</strong> S/ ${p.precio || 0}
+          </p>
           
           <div>
             ${puedeEditar 
-              ? `<button onclick="editarMiPasaje(${p.id}, '${p.origen}', '${p.destino}', '${p.fecha}')" style="background:#ea580c; color:white; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer; font-weight:bold;">✏️ Actualizar Registro</button>`
+              ? `<button onclick="editarMiPasaje(${p.id}, '${p.origen}', '${p.destino}', '${p.fecha}', '${p.hora \vert{}\vert{} ''}',${p.asiento})" style="background:#ea580c; color:white; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer; font-weight:bold;">✏️️ Actualizar Registro</button>`
               : `<small style="color:#64748b;">🔒 No editable (Estado no es 'registrado')</small>`
             }
           </div>
@@ -55,16 +59,23 @@ async function cargarMisPasajes(idUsuario) {
   }
 }
 
-function editarMiPasaje(id, origenActual, destinoActual, fechaActual) {
+function editarMiPasaje(id, origenActual, destinoActual, fechaActual, horaActual, asientoActual) {
   const nuevoOrigen = prompt("Nuevo Origen:", origenActual);
   const nuevoDestino = prompt("Nuevo Destino:", destinoActual);
   const nuevaFecha = prompt("Nueva Fecha (AAAA-MM-DD):", fechaActual);
+  const nuevaHora = prompt("Nueva Hora (ej. 09:00 AM):", horaActual || "09:00 AM");
+  const nuevoAsiento = prompt("Nuevo Asiento:", asientoActual);
 
-  if (nuevoOrigen && nuevoDestino && nuevaFecha) {
+  if (nuevoOrigen && nuevoDestino && nuevaFecha && nuevaHora && nuevoAsiento) {
+    const user = JSON.parse(localStorage.getItem('usuario')) || JSON.parse(localStorage.getItem('user'));
+    
     actualizarPasajePropio(id, {
+      id_usuario: user ? user.id : null,
       origen: nuevoOrigen,
       destino: nuevoDestino,
-      fecha: nuevaFecha
+      fecha: nuevaFecha,
+      hora: nuevaHora,
+      asiento: parseInt(nuevoAsiento)
     });
   }
 }
