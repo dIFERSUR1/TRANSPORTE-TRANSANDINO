@@ -30,7 +30,6 @@
       flex-direction: column;
     }
 
-    /* Barra de Navegación */
     .navbar {
       background: rgba(11, 19, 41, 0.8);
       backdrop-filter: blur(10px);
@@ -67,7 +66,6 @@
       color: #38bdf8;
     }
 
-    /* Sección Hero */
     .hero {
       flex: 1;
       display: flex;
@@ -83,10 +81,6 @@
       color: #38bdf8;
       margin-bottom: 0.8rem;
       font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
     }
 
     .hero p {
@@ -95,7 +89,6 @@
       margin-bottom: 2.5rem;
     }
 
-    /* Card Buscador Centrado */
     .card-buscador {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -153,7 +146,7 @@
       font-size: 1.1rem;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.3s ease, transform 0.1s ease;
+      transition: background 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -163,10 +156,6 @@
 
     .btn-buscar:hover {
       background: #0369a1;
-    }
-
-    .btn-buscar:active {
-      transform: scale(0.99);
     }
 
     footer {
@@ -179,25 +168,23 @@
 </head>
 <body>
 
-  <!-- Navegación -->
   <nav class="navbar">
     <a href="index.html" class="logo">
       🚌 Transporte Transandino
     </a>
     <ul class="nav-links">
       <li><a href="index.html">Inicio</a></li>
-      <li><a href="compra-pasajes.html">Reserva de Pasajes</a></li>
-      <li><a href="panel-admin.html">Intranet / Empleados</a></li>
+      <li><a href="pages/compra-pasajes.html">Reserva de Pasajes</a></li>
+      <li><a href="pages/panel-empleados.html">Intranet / Empleados</a></li>
     </ul>
   </nav>
 
-  <!-- Contenido Principal -->
   <main class="hero">
     <h1>Viaja por el Perú con Transporte Transandino</h1>
     <p>Reserva tus pasajes de forma rápida, segura y desde cualquier dispositivo.</p>
 
     <div class="card-buscador">
-      <form action="compra-pasajes.html" method="GET">
+      <form action="pages/compra-pasajes.html" method="GET">
         <div class="form-grid">
           <div class="form-group">
             <label for="origen">Origen</label>
