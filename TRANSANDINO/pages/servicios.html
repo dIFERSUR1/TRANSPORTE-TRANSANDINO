@@ -5,140 +5,221 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nuestros Servicios - TransAndino Perú</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    
-    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .logo span { color: #38bdf8; }
-    
-    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; }
-    nav a:hover { transform: translateY(-2px); color: #ffffff; }
-
-    /* Botones de Auth */
-    .btn-login { border: 1px solid #0284c7; color: #38bdf8; border-radius: 6px; font-weight: bold; text-decoration: none; }
-    .btn-login:hover { background: #0284c7; color: white; }
-
-    .btn-register { background: #0284c7; color: white; border-radius: 6px; font-weight: bold; text-decoration: none; }
-    .btn-register:hover { background: #0369a1; transform: translateY(-2px); }
-
-    .btn-admin { background: #ea580c; color: white; border-radius: 6px; font-weight: bold; text-decoration: none; }
-    .btn-admin:hover { background: #c2410c; }
-
-    .btn-logout { background: #ef4444; color: white; border: none; padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: all 0.3s ease; }
-    .btn-logout:hover { background: #dc2626; transform: translateY(-2px); }
-
-    main { max-width: 1100px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-    h1 { text-align: center; color: #38bdf8; margin-bottom: 2.5rem; font-size: 2.2rem; }
-
-    /* Grid y Tarjetas con Movimiento (Hover) */
-    .grid-servicios { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    
-    .card-servicio { 
-      background: #132238; 
-      border: 1px solid #1e293b; 
-      border-radius: 12px; 
-      padding: 2rem; 
-      text-align: left; 
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-      cursor: pointer;
+    :root {
+      --bg-color: #050b14;
+      --card-bg: #0d1626;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --orange-accent: #f97316;
+      --blue-accent: #0284c7;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
     }
 
-    /* EFECTO DE MOVIMIENTO */
-    .card-servicio:hover { 
-      transform: translateY(-8px); 
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4); 
-      border-color: #ea580c; 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    .card-servicio h3 { color: #ea580c; margin-bottom: 0.8rem; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
-    .card-servicio p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; margin-top: auto; }
+    .navbar {
+      background: #030710;
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.6rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-item {
+      color: var(--text-color);
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-item.active {
+      background: var(--orange-accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .btn-login {
+      border: 1px solid var(--blue-accent);
+      color: #38bdf8;
+      background: transparent;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-login:hover {
+      background: rgba(2, 132, 199, 0.2);
+    }
+
+    .btn-register {
+      background: var(--blue-accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-register:hover {
+      background: #0369a1;
+    }
+
+    .main-content {
+      flex: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1rem;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1.page-title {
+      font-size: 2.2rem;
+      color: #38bdf8;
+      margin-bottom: 2.5rem;
+      font-weight: 800;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      text-align: left;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.8rem;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      color: var(--orange-accent);
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <a href="../index.html" class="logo">🚌 <span>TransAndino Perú</span></a>
+  <header class="navbar">
+    <a href="../index.html" class="brand">
+      🚌 TransAndino Perú
+    </a>
+    
     <nav>
-      <a href="../index.html">🏠 Inicio</a>
-      <a href="servicios.html" style="background:#ea580c; color:white;">📘 Servicios</a>
-      <a href="requisitos.html">📙 Requisitos</a>
-      <a href="compra-pasajes.html">🎟️ Reserva / Horarios</a>
-      <a href="seguimiento.html">📦 Encomiendas</a>
-      <a href="ubicacion.html">📍 Ubicación y Sedes</a>
-
-      <!-- Botones sin sesión -->
-      <a href="../login.html" id="btn-login" class="btn-login">🔑 Iniciar Sesión</a>
-      <a href="../register.html" id="btn-register" class="btn-register">✍️ Registrarse</a>
-
-      <!-- Sesión activa -->
-      <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem; display:none;"></span>
-      <a href="../panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;">⚙️ Panel Admin</a>
-      <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;">Cerrar Sesión</button>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="nav-item">🏡 Inicio</a></li>
+        <li><a href="servicios.html" class="nav-item active">📘 Servicios</a></li>
+        <li><a href="requisitos.html" class="nav-item">📜 Requisitos</a></li>
+        <li><a href="compra-pasajes.html" class="nav-item">🎟️ Reserva / Horarios</a></li>
+        <li><a href="encomiendas.html" class="nav-item">📦 Encomiendas</a></li>
+        <li><a href="ubicacion.html" class="nav-item">📍 Ubicación y Sedes</a></li>
+      </ul>
     </nav>
+
+    <div class="auth-buttons">
+      <a href="login.html" class="btn-login">🔑 Iniciar Sesión</a>
+      <a href="registro.html" class="btn-register">✍️ Registrarse</a>
+    </div>
   </header>
 
-  <main>
-    <h1>Nuestros Servicios 🌼</h1>
+  <main class="main-content">
+    <h1 class="page-title">Nuestros Servicios 🌸</h1>
 
-    <div class="grid-servicios">
-      <div class="card-servicio">
+    <section class="cards-grid">
+      <div class="card">
         <h3>🚌 Transporte Interprovincial</h3>
         <p>Viajes cómodos y seguros desde Ica a diferentes destinos nacionales en buses reacondicionados.</p>
       </div>
 
-      <div class="card-servicio">
+      <div class="card">
         <h3>📦 Envíos y Encomiendas</h3>
         <p>Servicio express de paquetería y carga pesada con seguimiento en tiempo real.</p>
       </div>
 
-      <div class="card-servicio">
+      <div class="card">
         <h3>💺 Asientos VIP</h3>
         <p>Buses con asientos reclinables 160°, conectores USB, aire acondicionado y entretenimiento a bordo.</p>
       </div>
-    </div>
+    </section>
   </main>
 
   <footer>
-    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+    © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const usuarioActual = JSON.parse(localStorage.getItem('user'));
-
-      if (usuarioActual) {
-        document.getElementById('btn-login').style.display = 'none';
-        document.getElementById('btn-register').style.display = 'none';
-
-        const userDisplay = document.getElementById('user-display');
-        userDisplay.innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
-        userDisplay.style.display = 'inline';
-
-        document.getElementById('btn-logout').style.display = 'inline-block';
-
-        if (usuarioActual.email === 'axlperez183@gmail.com') {
-          document.getElementById('btn-panel-admin').style.display = 'inline-block';
-        } else {
-          document.getElementById('btn-panel-admin').style.display = 'none';
-        }
-      } else {
-        document.getElementById('btn-login').style.display = 'inline-block';
-        document.getElementById('btn-register').style.display = 'inline-block';
-        document.getElementById('user-display').style.display = 'none';
-        document.getElementById('btn-logout').style.display = 'none';
-        document.getElementById('btn-panel-admin').style.display = 'none';
-      }
-    });
-
-    function cerrarSesion() {
-      localStorage.removeItem('user');
-      alert('Sesión cerrada correctamente.');
-      window.location.href = '../login.html';
-    }
-  </script>
 </body>
 </html>
