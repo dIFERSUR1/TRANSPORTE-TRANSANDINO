@@ -30,7 +30,6 @@
       flex-direction: column;
     }
 
-    /* Navbar Oscuro Unificado (#030710) */
     .navbar {
       background: #030710;
       padding: 0.8rem 2rem;
@@ -48,6 +47,20 @@
       align-items: center;
       gap: 0.5rem;
       text-decoration: none;
+    }
+
+    .brand .bus-icon {
+      display: inline-block;
+      animation: busDrive 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes busDrive {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(6px);
+      }
     }
 
     .nav-links {
@@ -69,8 +82,9 @@
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Movimiento animado en hover */
-    .nav-item span.icon {
+    .nav-item span.icon,
+    .btn-login span.icon,
+    .btn-register span.icon {
       display: inline-block;
       transition: transform 0.25s ease;
     }
@@ -80,7 +94,9 @@
       transform: translateY(-2px);
     }
 
-    .nav-item:hover span.icon {
+    .nav-item:hover span.icon,
+    .btn-login:hover span.icon,
+    .btn-register:hover span.icon {
       transform: scale(1.25) rotate(-5deg);
     }
 
@@ -131,7 +147,6 @@
       background: #0369a1;
     }
 
-    /* Contenido Principal y Sedes */
     .main-container {
       flex: 1;
       display: flex;
@@ -151,14 +166,14 @@
       text-align: center;
     }
 
-    .sedes-grid {
+    .locations-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
       width: 100%;
     }
 
-    .sede-card {
+    .location-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
@@ -169,13 +184,13 @@
       gap: 0.8rem;
     }
 
-    .sede-card:hover {
+    .location-card:hover {
       transform: translateY(-5px);
       border-color: var(--orange-accent);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
 
-    .sede-title {
+    .location-title {
       font-size: 1.2rem;
       color: var(--orange-accent);
       font-weight: 700;
@@ -185,15 +200,14 @@
       margin-bottom: 0.5rem;
     }
 
-    .sede-info {
+    .location-info {
       font-size: 0.9rem;
       color: var(--text-color);
       line-height: 1.5;
     }
 
-    .sede-info strong {
+    .location-info span {
       color: var(--text-muted);
-      font-weight: 600;
     }
 
     footer {
@@ -209,7 +223,7 @@
 
   <header class="navbar">
     <a href="../index.html" class="brand">
-      <span class="icon">🚌</span> TransAndino Perú
+      <span class="bus-icon">🚌</span> TransAndino Perú
     </a>
     
     <nav>
@@ -232,29 +246,35 @@
   <main class="main-container">
     <h1 class="page-title">Nuestras Sedes y Ubicación 📍</h1>
 
-    <div class="sedes-grid">
-      <!-- Terminal Ica -->
-      <div class="sede-card">
-        <h2 class="sede-title">📍 Terminal Ica (Principal)</h2>
-        <p class="sede-info"><strong>Dirección:</strong> Av. Municipalidad 123, Ica</p>
-        <p class="sede-info"><strong>Atención:</strong> Lunes a Domingo: 06:00 AM - 10:00 PM</p>
-        <p class="sede-info"><strong>Teléfono:</strong> (056) 212121</p>
+    <div class="locations-grid">
+
+      <div class="location-card">
+        <h2 class="location-title">📍 Terminal Ica (Principal)</h2>
+        <div class="location-info">
+          <p><strong>Dirección:</strong> <span>Av. Municipalidad 123, Ica</span></p>
+          <p style="margin-top: 0.5rem;"><strong>Atención:</strong> <span>Lunes a Domingo: 06:00 AM - 10:00 PM</span></p>
+          <p style="margin-top: 0.5rem;"><strong>Teléfono:</strong> <span>(056) 212121</span></p>
+        </div>
       </div>
 
-      <!-- Agencia Lima -->
-      <div class="sede-card">
-        <h2 class="sede-title">📍 Agencia Lima</h2>
-        <p class="sede-info"><strong>Dirección:</strong> Av. Javier Prado Este 456, Lima</p>
-        <p class="sede-info"><strong>Atención:</strong> Lunes a Domingo: 06:00 AM - 09:00 PM</p>
-        <p class="sede-info"><strong>Teléfono:</strong> (01) 4330000</p>
+
+      <div class="location-card">
+        <h2 class="location-title">📍 Agencia Lima</h2>
+        <div class="location-info">
+          <p><strong>Dirección:</strong> <span>Av. Javier Prado Este 456, Lima</span></p>
+          <p style="margin-top: 0.5rem;"><strong>Atención:</strong> <span>Lunes a Domingo: 06:00 AM - 09:00 PM</span></p>
+          <p style="margin-top: 0.5rem;"><strong>Teléfono:</strong> <span>(01) 4330000</span></p>
+        </div>
       </div>
 
-      <!-- Agencia Arequipa -->
-      <div class="sede-card">
-        <h2 class="sede-title">📍 Agencia Arequipa</h2>
-        <p class="sede-info"><strong>Dirección:</strong> Terminal Terrestre de Arequipa, Stand 12</p>
-        <p class="sede-info"><strong>Atención:</strong> Lunes a Domingo: 07:00 AM - 08:00 PM</p>
-        <p class="sede-info"><strong>Teléfono:</strong> (054) 383838</p>
+
+      <div class="location-card">
+        <h2 class="location-title">📍 Agencia Arequipa</h2>
+        <div class="location-info">
+          <p><strong>Dirección:</strong> <span>Terminal Terrestre de Arequipa, Stand 12</span></p>
+          <p style="margin-top: 0.5rem;"><strong>Atención:</strong> <span>Lunes a Domingo: 07:00 AM - 08:00 PM</span></p>
+          <p style="margin-top: 0.5rem;"><strong>Teléfono:</strong> <span>(054) 383838</span></p>
+        </div>
       </div>
     </div>
   </main>
