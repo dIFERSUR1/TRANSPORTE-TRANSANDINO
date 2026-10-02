@@ -15,12 +15,7 @@
       --text-muted: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
 
     body {
       background-color: var(--bg-color);
@@ -49,6 +44,16 @@
       text-decoration: none;
     }
 
+    .bus-emoji {
+      display: inline-block;
+      animation: rodar 2s infinite ease-in-out;
+    }
+
+    @keyframes rodar {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(6px) translateY(-2px); }
+    }
+
     .nav-links {
       display: flex;
       gap: 0.5rem;
@@ -68,18 +73,9 @@
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .nav-item span.icon {
-      display: inline-block;
-      transition: transform 0.25s ease;
-    }
-
     .nav-item:hover {
       background: rgba(255, 255, 255, 0.08);
       transform: translateY(-2px);
-    }
-
-    .nav-item:hover span.icon {
-      transform: scale(1.25) rotate(-5deg);
     }
 
     .auth-buttons {
@@ -95,13 +91,6 @@
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn-login:hover {
-      background: #0369a1;
     }
 
     .btn-register {
@@ -112,14 +101,9 @@
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
     }
 
-    .btn-register:hover {
-      background: #0369a1;
-    }
+    .btn-register:hover { background: #0369a1; }
 
     .main-container {
       flex: 1;
@@ -178,9 +162,7 @@
       transition: border-color 0.2s;
     }
 
-    .form-group input:focus {
-      border-color: #38bdf8;
-    }
+    .form-group input:focus { border-color: #38bdf8; }
 
     .btn-submit {
       width: 100%;
@@ -196,9 +178,7 @@
       margin-top: 0.8rem;
     }
 
-    .btn-submit:hover {
-      background: #ea580c;
-    }
+    .btn-submit:hover { background: #ea580c; }
 
     .form-footer {
       margin-top: 1.5rem;
@@ -212,9 +192,7 @@
       font-weight: 600;
     }
 
-    .form-footer a:hover {
-      text-decoration: underline;
-    }
+    .form-footer a:hover { text-decoration: underline; }
 
     footer {
       text-align: center;
@@ -228,18 +206,18 @@
 <body>
 
   <header class="navbar">
-    <a href="index.html" class="brand">
-      🚌 TransAndino Perú
+    <a href="../index.html" class="brand">
+      <span class="bus-emoji">🚌</span> TransAndino Perú
     </a>
     
     <nav>
       <ul class="nav-links">
-        <li><a href="index.html" class="nav-item">Inicio</a></li>
-        <li><a href="pages/servicios.html" class="nav-item">Servicios</a></li>
-        <li><a href="pages/requisitos.html" class="nav-item">Requisitos</a></li>
-        <li><a href="pages/compra-pasajes.html" class="nav-item">Reserva / Horarios</a></li>
-        <li><a href="pages/seguimiento.html" class="nav-item">Encomiendas</a></li>
-        <li><a href="pages/ubicacion.html" class="nav-item">Ubicación y Sedes</a></li>
+        <li><a href="../index.html" class="nav-item">Inicio</a></li>
+        <li><a href="servicios.html" class="nav-item">Servicios</a></li>
+        <li><a href="requisitos.html" class="nav-item">Requisitos</a></li>
+        <li><a href="compra-pasajes.html" class="nav-item">Reserva / Horarios</a></li>
+        <li><a href="seguimiento.html" class="nav-item">Encomiendas</a></li>
+        <li><a href="ubicacion.html" class="nav-item">Ubicación y Sedes</a></li>
       </ul>
     </nav>
 
@@ -282,63 +260,44 @@
     const ADMIN_EMAIL = "axlperez183@gmail.com";
     
     const EMPLEADOS = [
-      { email: "transandinoempleado001@gmail.com", nombre: "Empleado 001", cargo: "Atención y Reservas" },
-      { email: "transandinoempleado002@gmail.com", nombre: "Empleado 002", cargo: "Despacho de Encomiendas" },
-      { email: "transandinoempleado003@gmail.com", nombre: "Empleado 003", cargo: "Gestión de Sedes y Turnos" }
+      "transandinoempleado001@gmail.com",
+      "transandinoempleado002@gmail.com",
+      "transandinoempleado003@gmail.com"
     ];
 
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
       const emailInput = document.getElementById('email').value.trim().toLowerCase();
       let usuarioSesion = {};
 
       if (emailInput === ADMIN_EMAIL) {
-        usuarioSesion = {
-          nombre: "Julius Axl Nickolai Perez Huamani",
-          email: emailInput,
-          rol: "admin"
-        };
+        usuarioSesion = { nombre: "Julius Axl Nickolai Perez Huamani", email: emailInput, rol: "admin" };
         localStorage.setItem('user', JSON.stringify(usuarioSesion));
-        window.location.href = 'admin.html';
+        window.location.href = '../admin.html';
         return;
       } 
-
-      const empleadoEncontrado = EMPLEADOS.find(emp => emp.email === emailInput);
-      if (empleadoEncontrado) {
-        usuarioSesion = {
-          nombre: empleadoEncontrado.nombre,
-          email: empleadoEncontrado.email,
-          cargo: empleadoEncontrado.cargo,
-          rol: "empleado"
-        };
+      
+      if (EMPLEADOS.includes(emailInput)) {
+        usuarioSesion = { nombre: "Empleado TransAndino", email: emailInput, rol: "empleado" };
         localStorage.setItem('user', JSON.stringify(usuarioSesion));
-        window.location.href = 'empleado.html';
+        window.location.href = '../empleado.html';
         return;
-      }
-
-      // 3. Clientes generales -> Redirige al inicio o perfil
+      } 
+      
       const registrados = JSON.parse(localStorage.getItem('usuarios_registrados')) || [];
       const clienteReg = registrados.find(u => u.email === emailInput);
 
       if (clienteReg) {
-        usuarioSesion = {
-          nombre: clienteReg.nombre,
-          email: clienteReg.email,
-          rol: "cliente"
-        };
+        usuarioSesion = { nombre: clienteReg.nombre, email: clienteReg.email, rol: "cliente" };
       } else {
         const nombreExtraido = emailInput.split('@')[0];
         const nombreFormateado = nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1);
-        usuarioSesion = {
-          nombre: nombreFormateado,
-          email: emailInput,
-          rol: "cliente"
-        };
+        usuarioSesion = { nombre: nombreFormateado, email: emailInput, rol: "cliente" };
       }
 
       localStorage.setItem('user', JSON.stringify(usuarioSesion));
-      window.location.href = 'index.html';
+      window.location.href = '../index.html';
     });
   </script>
 
