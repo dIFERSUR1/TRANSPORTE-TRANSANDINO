@@ -25,9 +25,11 @@ async function cargarTodosLosPasajes() {
 
     pasajes.forEach((item) => {
       const tr = document.createElement('tr');
-      const fechaViaje = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '-');
-      const horaViaje = item.hora_viaje || item.hora || '08:00 AM';
-      const asiento = item.num_asiento || item.asiento || '1';
+      
+      // Mapeo exacto con la tabla compras_pasajes de Neon
+      const fechaViaje = item.fecha ? (typeof item.fecha === 'string' ? item.fecha.split('T')[0] : item.fecha) : (item.fecha_viaje || '-');
+      const horaViaje = item.hora || item.hora_viaje || '09:00 AM';
+      const asiento = item.asiento || item.num_asiento || '1';
 
       tr.innerHTML = `
         <td>#${item.id}</td>
@@ -46,7 +48,7 @@ async function cargarTodosLosPasajes() {
           </select>
         </td>
         <td>
-          <button class="btn-action btn-update" onclick="actualizarRegistro(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', ${item.precio || 0})">Actualizar</button>
+          <button class="btn-action btn-update" onclick="actualizarRegistro(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', ${asiento}, ${item.precio || 0})">Actualizar</button>
           <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
         </td>
       `;
@@ -79,8 +81,10 @@ async function cargarTablaAsientos() {
     pasajes.forEach((item) => {
       const tr = document.createElement('tr');
       const esCancelado = item.estado === 'cancelado';
+      const asiento = item.asiento || item.num_asiento || '-';
+
       tr.innerHTML = `
-        <td style="color:#ea580c; font-weight:bold;">Asiento ${item.num_asiento || item.asiento || '-'}</td>
+        <td style="color:#ea580c; font-weight:bold;">Asiento ${asiento}</td>
         <td>Usuario #${item.id_usuario || '1'}</td>
         <td>${item.origen} ➔ ${item.destino}</td>
         <td><span style="color:${esCancelado ? '#ef4444' : '#22c55e'}; font-weight:bold;">${esCancelado ? 'Disponible (Cancelado)' : 'Ocupado'}</span></td>
@@ -105,9 +109,9 @@ async function crearNuevoPasaje() {
   const fecha = prompt('Fecha (AAAA-MM-DD):', '2026-10-15');
   if (!fecha) return;
 
-  const hora = prompt('Hora de viaje:', '08:00 AM');
+  const hora = prompt('Hora de viaje:', '09:00 AM');
   const asiento = prompt('Número de asiento:', '1');
-  const precio = prompt('Precio (S/):', '50');
+  const precio = prompt('Precio (S/):', '60');
   const idUsuario = prompt('ID de Usuario:', '1');
 
   try {
@@ -118,9 +122,9 @@ async function crearNuevoPasaje() {
         id_usuario: parseInt(idUsuario) || 1,
         origen: origen,
         destino: destino,
-        fecha_viaje: fecha,
-        hora_viaje: hora || '08:00 AM',
-        num_asiento: parseInt(asiento) || 1,
+        fecha: fecha,
+        hora: hora || '09:00 AM',
+        asiento: parseInt(asiento) || 1,
         precio: parseFloat(precio) || 0,
         estado: 'registrado'
       })
@@ -157,10 +161,12 @@ async function cambiarEstado(id, nuevoEstado) {
   }
 }
 
-async function actualizarRegistro(id, origenActual, destinoActual, fechaActual, precioActual) {
+async function actualizarRegistro(id, origenActual, destinoActual, fechaActual, horaActual, asientoActual, precioActual) {
   const nuevoOrigen = prompt('Editar Origen:', origenActual);
   const nuevoDestino = prompt('Editar Destino:', destinoActual);
   const nuevaFecha = prompt('Editar Fecha (AAAA-MM-DD):', fechaActual);
+  const nuevaHora = prompt('Editar Hora:', horaActual || '09:00 AM');
+  const nuevoAsiento = prompt('Editar Asiento:', asientoActual);
   const nuevoPrecio = prompt('Editar Precio (S/):', precioActual);
 
   if (nuevoOrigen && nuevoDestino && nuevaFecha) {
@@ -171,7 +177,9 @@ async function actualizarRegistro(id, origenActual, destinoActual, fechaActual, 
         body: JSON.stringify({
           origen: nuevoOrigen,
           destino: nuevoDestino,
-          fecha_viaje: nuevaFecha,
+          fecha: nuevaFecha,
+          hora: nuevaHora,
+          asiento: parseInt(nuevoAsiento) || 1,
           precio: parseFloat(nuevoPrecio) || 0
         })
       });
