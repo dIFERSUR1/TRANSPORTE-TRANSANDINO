@@ -46,7 +46,7 @@
 
     .logo span { color: #38bdf8; }
 
-    .emoji, .bus-emoji {
+    .bus-emoji {
       display: inline-flex;
       justify-content: center;
       align-items: center;
@@ -99,7 +99,52 @@
       gap: 10px;
     }
 
-    /* MÉTICAS / SUMMARY CARDS */
+    /* FORMULARIO DE ASIGNACIÓN PARA EMPLEADO */
+    .form-asignar {
+      background: #15233b;
+      border: 1px solid #1e293b;
+      padding: 1.2rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .form-asignar h3 {
+      color: #ea580c;
+      font-size: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .form-asignar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .form-asignar input, .form-asignar select {
+      background: #070f1e;
+      border: 1px solid #1e293b;
+      color: white;
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .btn-create {
+      background: #22c55e;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-create:hover { background: #16a34a; }
+
+    /* MÉTRICAS / SUMMARY CARDS */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -263,6 +308,35 @@
   <main>
     <h1>Panel de Gestión de Empleado 👨‍💼</h1>
 
+    <!-- FORMULARIO DE VENTA / ASIGNACIÓN RÁPIDA -->
+    <div class="form-asignar">
+      <h3>➕ Asignar / Vender Pasaje Rápidamente</h3>
+      <form id="form-empleado-asignar" onsubmit="asignarPasajeEmpleado(event)">
+        <div class="form-asignar-grid">
+          <select id="emp-origen" required>
+            <option value="Lima">Origen: Lima</option>
+            <option value="Huancayo">Origen: Huancayo</option>
+            <option value="Ica">Origen: Ica</option>
+            <option value="Arequipa">Origen: Arequipa</option>
+            <option value="Cusco">Origen: Cusco</option>
+          </select>
+
+          <select id="emp-destino" required>
+            <option value="Huancayo">Destino: Huancayo</option>
+            <option value="Lima">Destino: Lima</option>
+            <option value="Ica">Destino: Ica</option>
+            <option value="Arequipa">Destino: Arequipa</option>
+            <option value="Cusco">Destino: Cusco</option>
+          </select>
+
+          <input type="date" id="emp-fecha" value="2026-10-15" required>
+          <input type="number" id="emp-asiento" min="1" max="40" placeholder="N° Asiento (1-40)" required>
+          <input type="number" id="emp-precio" value="50" placeholder="Precio (S/)" required>
+          <button type="submit" class="btn-create">📌 Vender / Asignar</button>
+        </div>
+      </form>
+    </div>
+
     <!-- Métricas -->
     <div class="stats-grid">
       <div class="stat-card">
@@ -296,7 +370,7 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Usuario ID</th>
+            <th>Usuario / Ref</th>
             <th>Ruta</th>
             <th>Fecha / Hora</th>
             <th>Asiento</th>
@@ -326,7 +400,6 @@
 
     function verificarRolEmpleado() {
       const user = JSON.parse(localStorage.getItem('user'));
-      // Permitir acceso a roles admin o empleado, o al correo asignado
       if (!user) {
         alert('Acceso restringido. Debes iniciar sesión.');
         window.location.href = '../login.html';
@@ -340,7 +413,13 @@
         if (res.ok) {
           todosLosPasajes = await res.json();
         } else {
-          todosLosPasajes = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+          // Intentar endpoint secundario o fallback a localStorage
+          const res2 = await fetch('/api/compras');
+          if (res2.ok) {
+            todosLosPasajes = await res2.json();
+          } else {
+            todosLosPasajes = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+          }
         }
       } catch (err) {
         todosLosPasajes = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
@@ -348,6 +427,55 @@
 
       actualizarMetricas(todosLosPasajes);
       renderizarTabla(todosLosPasajes);
+    }
+
+    /* FUNCIÓN PARA QUE EL EMPLEADO ASIGNE O VENDA UN PASAJE */
+    async function asignarPasajeEmpleado(e) {
+      e.preventDefault();
+
+      const origen = document.getElementById('emp-origen').value;
+      const destino = document.getElementById('emp-destino').value;
+      const fecha = document.getElementById('emp-fecha').value;
+      const asiento = parseInt(document.getElementById('emp-asiento').value);
+      const precio = parseFloat(document.getElementById('emp-precio').value);
+
+      const nuevoPasaje = {
+        id: Date.now(),
+        id_usuario: 'Venta Presencial',
+        origen: origen,
+        destino: destino,
+        fecha_viaje: fecha,
+        hora_viaje: '09:00 AM',
+        num_asiento: asiento,
+        precio: precio,
+        estado: 'registrado'
+      };
+
+      try {
+        const res = await fetch('/api/compras-pasajes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nuevoPasaje)
+        });
+
+        if (!res.ok) {
+          await fetch('/api/compras', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevoPasaje)
+          });
+        }
+      } catch (err) {
+        console.log('Guardando en localStorage...');
+      }
+
+      todosLosPasajes.push(nuevoPasaje);
+      localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
+
+      alert(`¡Pasaje N° ${asiento} para la ruta ${origen} ➔ ${destino} asignado con éxito!`);
+      document.getElementById('emp-asiento').value = '';
+      
+      cargarPasajesGlobales();
     }
 
     function actualizarMetricas(pasajes) {
@@ -360,7 +488,7 @@
       document.getElementById('stat-atendidos').textContent = atendidos;
 
       const totalDinero = pasajes.reduce((acc, curr) => acc + (Number(curr.precio) || 0), 0);
-      document.getElementById('stat-dinero').textContent = `S/ ${totalDinero}.00`;
+      document.getElementById('stat-dinero').textContent = `S/ ${totalDinero.toFixed(2)}`;
     }
 
     function renderizarTabla(lista) {
@@ -375,14 +503,17 @@
       lista.forEach(item => {
         const tr = document.createElement('tr');
         const esRegistrado = item.estado === 'registrado';
+        const numAsiento = item.num_asiento || item.asiento;
+        const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || 'N/A');
+        const hora = item.hora_viaje || item.hora || '08:00 AM';
 
         tr.innerHTML = `
           <td>#${item.id}</td>
-          <td><strong style="color:#38bdf8;">${item.id_usuario || 'Cliente'}</strong></td>
+          <td><strong style="color:#38bdf8;">${item.id_usuario || item.pasajero || 'Cliente'}</strong></td>
           <td>${item.origen} ➔ ${item.destino}</td>
-          <td>${item.fecha_viaje} (${item.hora_viaje})</td>
-          <td>N° ${item.num_asiento}</td>
-          <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio}.00</td>
+          <td>${fecha} (${hora})</td>
+          <td>N° ${numAsiento}</td>
+          <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 0).toFixed(2)}</td>
           <td><span class="status-badge ${esRegistrado ? 'status-registrado' : 'status-atendido'}">${item.estado}</span></td>
           <td>
             <button class="btn-status" onclick="cambiarEstado(${item.id})">
@@ -402,7 +533,6 @@
         const nuevoEstado = todosLosPasajes[index].estado === 'registrado' ? 'atendido' : 'registrado';
         todosLosPasajes[index].estado = nuevoEstado;
 
-        // Intentar actualizar servidor
         try {
           await fetch(`/api/compras-pasajes/${id}`, {
             method: 'PUT',
@@ -420,7 +550,7 @@
 
     function editarPasaje(id) {
       const nuevoOrigen = prompt('Editar Origen:', 'Lima');
-      const nuevoDestino = prompt('Editar Destino:', 'Ica');
+      const nuevoDestino = prompt('Editar Destino:', 'Huancayo');
 
       if (nuevoOrigen && nuevoDestino) {
         let index = todosLosPasajes.findIndex(p => String(p.id) === String(id));
@@ -453,9 +583,9 @@
       const texto = document.getElementById('input-buscar').value.toLowerCase();
       const filtrados = todosLosPasajes.filter(p => 
         String(p.id).toLowerCase().includes(texto) ||
-        String(p.id_usuario).toLowerCase().includes(texto) ||
-        p.origen.toLowerCase().includes(texto) ||
-        p.destino.toLowerCase().includes(texto)
+        String(p.id_usuario || '').toLowerCase().includes(texto) ||
+        (p.origen && p.origen.toLowerCase().includes(texto)) ||
+        (p.destino && p.destino.toLowerCase().includes(texto))
       );
       renderizarTabla(filtrados);
     }
