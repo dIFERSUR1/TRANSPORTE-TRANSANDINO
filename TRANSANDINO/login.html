@@ -91,45 +91,78 @@
   </footer>
 
   <script>
+    if (!localStorage.getItem('empleados_db')) {
+      const empleadosIniciales = [
+        { id: 1, nombre: "Empleado TransAndino 01", email: "transandinoempleado001@gmail.com", cargo: "Taquillero" },
+        { id: 2, nombre: "Empleado TransAndino 02", email: "transandinoempleado002@gmail.com", cargo: "Despachador" },
+        { id: 3, nombre: "Empleado TransAndino 03", email: "transandinoempleado003@gmail.com", cargo: "Atención al Cliente" }
+      ];
+      localStorage.setItem('empleados_db', JSON.stringify(empleadosIniciales));
+    }
+
     const ADMIN_EMAIL = "axlperez183@gmail.com";
-    const EMPLEADOS = [
-      "transandinoempleado001@gmail.com",
-      "transandinoempleado002@gmail.com",
-      "transandinoempleado003@gmail.com"
-    ];
 
     document.getElementById('login-form').addEventListener('submit', (e) => {
       e.preventDefault();
+      
       const emailInput = document.getElementById('email').value.trim().toLowerCase();
-      let usuarioSesion = {};
+      const passwordInput = document.getElementById('password').value.trim();
+
+      if (!emailInput) {
+        alert("Por favor, ingresa tu correo electrónico.");
+        return;
+      }
+
+      let usuarioSesion = null;
+      let destinoRedireccion = 'index.html';
 
       if (emailInput === ADMIN_EMAIL) {
-        usuarioSesion = { nombre: "Julius Axl Nickolai Perez Huamani", email: emailInput, rol: "admin" };
-        localStorage.setItem('user', JSON.stringify(usuarioSesion));
-        window.location.href = 'panel.html';
-        return;
-      }
+        usuarioSesion = { 
+          nombre: "Julius Axl Nickolai Perez Huamani", 
+          email: emailInput, 
+          rol: "admin" 
+        };
+        destinoRedireccion = 'panel.html';
+      } 
+      else {
+        const empleadosDB = JSON.parse(localStorage.getItem('empleados_db')) || [];
+        const empleadoEncontrado = empleadosDB.find(emp => emp.email.toLowerCase() === emailInput);
 
-      if (EMPLEADOS.includes(emailInput)) {
-        usuarioSesion = { nombre: "Empleado TransAndino", email: emailInput, rol: "empleado" };
-        localStorage.setItem('user', JSON.stringify(usuarioSesion));
-        window.location.href = 'panel-empleado.html';
-        return;
-      }
+        if (empleadoEncontrado) {
+          usuarioSesion = { 
+            nombre: empleadoEncontrado.nombre, 
+            email: empleadoEncontrado.email, 
+            rol: "empleado" 
+          };
+          destinoRedireccion = 'panel-empleado.html';
+        } 
+        else {
+          // 3. ROL CLIENTE (Registrado o libre)
+          const registrados = JSON.parse(localStorage.getItem('usuarios_registrados')) || [];
+          const clienteReg = registrados.find(u => u.email.toLowerCase() === emailInput);
 
-      const registrados = JSON.parse(localStorage.getItem('usuarios_registrados')) || [];
-      const clienteReg = registrados.find(u => u.email === emailInput);
-
-      if (clienteReg) {
-        usuarioSesion = { nombre: clienteReg.nombre, email: clienteReg.email, rol: "cliente" };
-      } else {
-        const nombreExtraido = emailInput.split('@')[0];
-        const nombreFormateado = nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1);
-        usuarioSesion = { nombre: nombreFormateado, email: emailInput, rol: "cliente" };
+          if (clienteReg) {
+            usuarioSesion = { 
+              nombre: clienteReg.nombre, 
+              email: clienteReg.email, 
+              rol: "cliente" 
+            };
+          } else {
+            const nombreExtraido = emailInput.split('@')[0];
+            const nombreFormateado = nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1);
+            usuarioSesion = { 
+              nombre: nombreFormateado, 
+              email: emailInput, 
+              rol: "cliente" 
+            };
+          }
+          destinoRedireccion = 'pages/compra-pasajes.html';
+        }
       }
 
       localStorage.setItem('user', JSON.stringify(usuarioSesion));
-      window.location.href = 'index.html';
+      alert(`¡Sesión iniciada con éxito! Bienvenido(a) ${usuarioSesion.nombre}`);
+      window.location.href = destinoRedireccion;
     });
   </script>
 
