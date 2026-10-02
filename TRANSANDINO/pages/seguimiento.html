@@ -5,320 +5,245 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seguimiento de Encomiendas - TransAndino Perú</title>
   <style>
+    :root {
+      --bg-color: #050b14;
+      --card-bg: #0d1626;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --orange-accent: #f97316;
+      --blue-accent: #0284c7;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    /* FIX: MANTIENE LA BARRA DE SCROLL ESTABLE PARA EVITAR EL SALTO A LA DERECHA */
-    html {
-      scrollbar-gutter: stable;
     }
 
     body {
-      background-color: #0b192c;
-      color: #ffffff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* HEADER Y NAVEGACIÓN */
-    header {
-      background-color: #070f1e;
-      padding: 1rem 2rem;
+    /* Navbar Unificado */
+    .navbar {
+      background-color: #030710 !important;
+      padding: 0.8rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #1e293b;
+      border-bottom: 1px solid var(--border-color);
     }
 
-    .logo {
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: #ffffff;
+    .brand {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #38bdf8;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.5rem;
       text-decoration: none;
     }
 
-    .logo span {
-      color: #38bdf8;
-    }
-
-    /* ESTILOS Y ANIMACIONES DE EMOJIS CON ANCHO FIJO */
-    .emoji, .bus-emoji {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 24px;
-      text-align: center;
-      transition: transform 0.3s ease;
-    }
-
-    .bus-emoji, .emoji-roll {
-      animation: rodar 2s infinite ease-in-out;
-    }
-
-    @keyframes rodar {
-      0%, 100% { transform: translateX(0) translateY(0); }
-      50% { transform: translateX(4px) translateY(-2px); }
-    }
-
-    .emoji-bounce {
-      animation: rebotar 2.5s infinite ease-in-out;
-    }
-
-    @keyframes rebotar {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-    }
-
-    .emoji-pulse {
-      animation: pulso 2s infinite ease-in-out;
-    }
-
-    @keyframes pulso {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.15); }
-    }
-
-    nav {
+    .nav-links {
       display: flex;
       gap: 0.5rem;
+      list-style: none;
       align-items: center;
-      flex-wrap: wrap;
     }
 
-    nav a {
-      color: #cbd5e1;
+    .nav-links .nav-item {
+      color: var(--text-color);
       text-decoration: none;
-      font-size: 0.9rem;
-      padding: 0.5rem 0.9rem;
-      border-radius: 6px;
-      transition: background 0.3s ease, color 0.3s ease;
-      font-weight: 500;
+      font-size: 0.88rem;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      outline: none;
+      gap: 0.45rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      background: transparent;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    nav a:hover {
-      color: #ffffff;
-      background: #1e293b;
+    .nav-links .nav-item span.icon {
+      display: inline-block;
+      transition: transform 0.25s ease;
     }
 
-    nav a:hover .emoji {
-      transform: scale(1.2) rotate(8deg);
+    .nav-links .nav-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
     }
 
-    nav a.active {
-      background-color: #ea580c;
-      color: #ffffff;
-      font-weight: bold;
+    .nav-links .nav-item:hover span.icon {
+      transform: scale(1.25) rotate(-5deg);
     }
 
-    /* BOTONES LOGIN Y REGISTRO */
+    .nav-links .nav-item.active {
+      background: var(--orange-accent) !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 0.6rem;
+    }
+
     .btn-login {
-      border: 1px solid #38bdf8;
-      color: #38bdf8 !important;
-      margin-left: 0.5rem;
+      border: 1px solid var(--blue-accent);
+      color: #38bdf8;
+      background: transparent;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .btn-login:hover {
-      background: #38bdf8 !important;
-      color: #0b192c !important;
+      background: rgba(2, 132, 199, 0.2);
     }
 
     .btn-register {
-      background: #0284c7;
-      color: #ffffff !important;
-      font-weight: bold;
+      background: var(--blue-accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .btn-register:hover {
-      background: #0369a1 !important;
+      background: #0369a1;
     }
 
-    .btn-admin {
-      background: #ea580c;
-      color: #ffffff !important;
-      font-weight: bold;
-    }
-
-    /* CONTENIDO PRINCIPAL CENTRADO */
-    main {
-      max-width: 1100px;
-      margin: 3rem auto;
-      padding: 0 1.5rem;
+    .main-container {
       flex: 1;
-      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 2.2rem;
-      margin-bottom: 2rem;
-      color: #38bdf8;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      gap: 10px;
+      padding: 3rem 1rem;
     }
 
-    /* TARJETA DE BÚSQUEDA DE ENCOMIENDAS */
-    .tracking-card {
-      background: #15233b;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      padding: 2.5rem 2rem;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-      width: 100%;
-      max-width: 650px;
+    h1.page-title {
+      font-size: 2.2rem;
+      color: #38bdf8;
+      margin-bottom: 2rem;
+      font-weight: 800;
       text-align: center;
     }
 
-    .tracking-card p {
-      color: #94a3b8;
-      font-size: 0.95rem;
-      margin-bottom: 1.8rem;
+    .search-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
     }
 
-    .tracking-form {
+    .search-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-form {
       display: flex;
       gap: 0.8rem;
-      justify-content: center;
     }
 
-    .tracking-form input {
+    .search-input {
       flex: 1;
-      max-width: 380px;
-      background: #070f1e;
-      border: 1px solid #1e293b;
-      color: #ffffff;
+      background: #081120;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       padding: 0.75rem 1rem;
-      border-radius: 6px;
-      font-size: 0.95rem;
+      color: var(--text-color);
+      font-size: 0.9rem;
       outline: none;
     }
 
-    .tracking-form input:focus {
+    .search-input:focus {
       border-color: #38bdf8;
     }
 
-    .tracking-form button {
-      background: #ea580c;
-      color: #ffffff;
+    .btn-search {
+      background: var(--orange-accent);
+      color: white;
       border: none;
-      padding: 0.75rem 1.8rem;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      font-weight: bold;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background 0.2s;
     }
 
-    .tracking-form button:hover {
-      background: #c2410c;
+    .btn-search:hover {
+      background: #ea580c;
     }
 
     footer {
-      background-color: #070f1e;
       text-align: center;
       padding: 1.5rem;
-      font-size: 0.85rem;
-      color: #64748b;
-      border-top: 1px solid #1e293b;
-      margin-top: auto;
-    }
-
-    @media (max-width: 600px) {
-      .tracking-form {
-        flex-direction: column;
-      }
-      .tracking-form input {
-        max-width: 100%;
-      }
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <a href="../index.html" class="logo">
-      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
-    </a>
+  <header class="navbar">
+    <a href="../index.html" class="brand"><span class="icon">🚌</span> TransAndino Perú</a>
     <nav>
-      <a href="../index.html"><span class="emoji emoji-roll">🏠</span> Inicio</a>
-      <a href="servicios.html"><span class="emoji emoji-bounce">📘</span> Servicios</a>
-      <a href="requisitos.html"><span class="emoji emoji-pulse">📜</span> Requisitos</a>
-      <a href="compra-pasajes.html"><span class="emoji emoji-bounce">🎟</span> Reserva / Horarios</a>
-      <a href="seguimiento.html" class="active"><span class="emoji emoji-bounce">📦</span> Encomiendas</a>
-      <a href="ubicacion.html"><span class="emoji emoji-pulse">📍</span> Ubicación y Sedes</a>
-
-      <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="../login.html" class="btn-login"><span class="emoji">🔑</span> Iniciar Sesión</a>
-        <a href="../registro.html" class="btn-register"><span class="emoji">✍️</span> Registrarse</a>
-      </div>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="nav-item"><span class="icon">🏡</span> Inicio</a></li>
+        <li><a href="servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
+        <li><a href="requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
+        <li><a href="compra-pasajes.html" class="nav-item"><span class="icon">🎟️</span> Reserva / Horarios</a></li>
+        <li><a href="seguimiento.html" class="nav-item active"><span class="icon">📦</span> Encomiendas</a></li>
+        <li><a href="ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación y Sedes</a></li>
+      </ul>
     </nav>
+    <div class="auth-buttons">
+      <a href="login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
+      <a href="registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
+    </div>
   </header>
 
-  <main>
-    <h1>Seguimiento de Encomiendas <span class="emoji emoji-bounce">📦</span></h1>
+  <main class="main-container">
+    <h1 class="page-title">Seguimiento de Encomiendas 📦</h1>
 
-    <div class="tracking-card">
+    <div class="search-card">
       <p>Ingresa el código de rastreo de tu encomienda para conocer su estado en tiempo real.</p>
       
-      <form class="tracking-form" onsubmit="event.preventDefault();">
-        <input type="text" placeholder="Ej: ENC-12345" required>
-        <button type="submit">Buscar</button>
+      <form class="search-form" onsubmit="event.preventDefault();">
+        <input type="text" class="search-input" placeholder="Ej: ENC-12345" required>
+        <button type="submit" class="btn-search">Buscar</button>
       </form>
     </div>
   </main>
 
   <footer>
-    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+    © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const authContainer = document.getElementById('auth-buttons');
-      const user = JSON.parse(localStorage.getItem('user'));
-      
-      if (user) {
-        const nombreUsuario = user.nombre || user.email;
-        let htmlContent = `<span style="color: #38bdf8; font-weight: bold; margin-left: 0.5rem;">👋 Hola, ${nombreUsuario}</span>`;
-
-        if (user.email === 'axlperez183@gmail.com') {
-          htmlContent += `
-            <a href="../panel.html" class="btn-admin" style="padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; text-decoration: none; margin-left: 0.5rem; display: inline-flex; align-items: center; gap: 4px;">
-              <span class="emoji">⚙️</span> Panel Admin
-            </a>
-          `;
-        }
-
-        htmlContent += `
-          <button id="logout-btn" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">
-            Cerrar Sesión
-          </button>
-        `;
-
-        authContainer.innerHTML = htmlContent;
-
-        document.getElementById('logout-btn').addEventListener('click', () => {
-          localStorage.removeItem('user');
-          window.location.reload();
-        });
-      }
-    });
-  </script>
 
 </body>
 </html>
