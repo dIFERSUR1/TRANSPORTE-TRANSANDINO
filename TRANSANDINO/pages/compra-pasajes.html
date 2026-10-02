@@ -13,8 +13,6 @@
       --blue-accent: #0284c7;
       --text-color: #f8fafc;
       --text-muted: #94a3b8;
-      --red-seat: #dc2626;
-      --green-seat: #16a34a;
     }
 
     * {
@@ -51,6 +49,20 @@
       text-decoration: none;
     }
 
+    .brand .bus-icon {
+      display: inline-block;
+      animation: busDrive 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes busDrive {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(6px);
+      }
+    }
+
     .nav-links {
       display: flex;
       gap: 0.5rem;
@@ -70,7 +82,9 @@
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .nav-item span.icon {
+    .nav-item span.icon,
+    .btn-login span.icon,
+    .btn-register span.icon {
       display: inline-block;
       transition: transform 0.25s ease;
     }
@@ -80,7 +94,9 @@
       transform: translateY(-2px);
     }
 
-    .nav-item:hover span.icon {
+    .nav-item:hover span.icon,
+    .btn-login:hover span.icon,
+    .btn-register:hover span.icon {
       transform: scale(1.25) rotate(-5deg);
     }
 
@@ -134,9 +150,12 @@
     .main-container {
       flex: 1;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 2rem 1rem;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     .booking-card {
@@ -145,67 +164,65 @@
       border-radius: 16px;
       padding: 2rem;
       width: 100%;
-      max-width: 680px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
 
-    .page-title {
-      color: #38bdf8;
+    .booking-title {
       font-size: 1.8rem;
+      color: #38bdf8;
+      margin-bottom: 2rem;
+      font-weight: 800;
       text-align: center;
-      margin-bottom: 1.5rem;
-      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
-
-    .controls-grid {
+    
+    .filter-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.8rem;
-      margin-bottom: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
 
-    .control-group {
+    .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
+      gap: 0.4rem;
     }
 
-    .control-group label {
-      font-size: 0.75rem;
+    .form-group label {
+      font-size: 0.82rem;
       color: var(--text-muted);
     }
 
-    .control-group select, 
-    .control-group input {
-      background: #081120;
+    .form-group select,
+    .form-group input {
+      background: #050b14;
       border: 1px solid var(--border-color);
       color: var(--text-color);
-      padding: 0.5rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      padding: 0.65rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
       outline: none;
     }
 
-    .control-group select:focus, 
-    .control-group input:focus {
-      border-color: #38bdf8;
+    .form-group select:focus,
+    .form-group input:focus {
+      border-color: var(--blue-accent);
     }
 
-    .section-subtitle {
-      font-size: 0.95rem;
-      color: #38bdf8;
-      margin-bottom: 0.8rem;
-    }
-
-    .legend-bar {
-      background: #081120;
-      padding: 0.6rem;
-      border-radius: 8px;
+    /* Leyenda de Asientos */
+    .seat-legend {
       display: flex;
       justify-content: center;
       gap: 1.5rem;
-      margin-bottom: 1.2rem;
-      font-size: 0.8rem;
+      margin-bottom: 1.5rem;
+      background: #050b14;
+      padding: 0.8rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
     }
 
     .legend-item {
@@ -214,61 +231,63 @@
       gap: 0.4rem;
     }
 
-    .dot {
-      width: 12px;
-      height: 12px;
+    .box {
+      width: 14px;
+      height: 14px;
       border-radius: 3px;
     }
 
-    .dot.free { background: #1e293b; border: 1px solid #334155; }
-    .dot.selected { background: var(--orange-accent); }
-    .dot.occupied { background: var(--red-seat); }
+    .box.free { background: #1e293b; border: 1px solid #334155; }
+    .box.selected { background: var(--orange-accent); }
+    .box.taken { background: #dc2626; }
 
+    /* Mapa de Asientos */
     .seats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.75rem;
-      max-height: 320px;
-      overflow-y: auto;
-      padding-right: 0.3rem;
-      margin-bottom: 1.5rem;
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
     }
 
     .seat-btn {
       background: #1e293b;
-      border: 1px solid var(--border-color);
+      border: 1px solid #334155;
       color: var(--text-color);
-      padding: 0.75rem 0.5rem;
+      padding: 0.8rem 0.5rem;
       border-radius: 8px;
-      font-size: 0.85rem;
       font-weight: 600;
+      font-size: 0.85rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
+      text-align: center;
     }
 
-    .seat-btn:hover:not(.occupied) {
+    .seat-btn:hover:not(.taken) {
       border-color: var(--orange-accent);
       background: #334155;
     }
 
     .seat-btn.selected {
-      background: var(--orange-accent) !important;
-      border-color: #ea580c !important;
-      color: #ffffff;
+      background: var(--orange-accent);
+      border-color: var(--orange-accent);
+      color: white;
     }
 
-    .seat-btn.occupied {
-      background: var(--red-seat) !important;
-      border-color: #b91c1c !important;
+    .seat-btn.taken {
+      background: #dc2626;
+      border-color: #dc2626;
+      color: white;
       cursor: not-allowed;
-      opacity: 0.8;
+      opacity: 0.85;
     }
 
     .total-price {
       text-align: center;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: 800;
-      color: var(--green-seat);
+      color: #22c55e;
+      margin-top: 1rem;
     }
 
     footer {
@@ -284,7 +303,7 @@
 
   <header class="navbar">
     <a href="../index.html" class="brand">
-      <span class="icon">🚌</span> TransAndino Perú
+      <span class="bus-icon">🚌</span> TransAndino Perú
     </a>
     
     <nav>
@@ -306,55 +325,83 @@
 
   <main class="main-container">
     <div class="booking-card">
-      <h1 class="page-title">Reserva de Pasajes de Viaje 🎟️</h1>
+      <h1 class="booking-title">Reserva de Pasajes de Viaje 🎟️</h1>
 
-      <div class="controls-grid">
-        <div class="control-group">
-          <label for="origen">Origen</label>
-          <select id="origen">
+      <div class="filter-grid">
+        <div class="form-group">
+          <label>Origen</label>
+          <select>
+            <option selected>Lima</option>
+            <option>Huancayo</option>
+            <option>Arequipa</option>
+            <option>Cusco</option>
+            <option>Ica</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Destino</label>
+          <select>
             <option>Lima</option>
+            <option selected>Ica</option>
             <option>Huancayo</option>
             <option>Arequipa</option>
             <option>Cusco</option>
           </select>
         </div>
 
-        <div class="control-group">
-          <label for="destino">Destino</label>
-          <select id="destino">
-            <option>Ica</option>
-            <option>Lima</option>
-            <option>Huancayo</option>
-            <option>Ayacucho</option>
-          </select>
+        <div class="form-group">
+          <label>Fecha de Viaje</label>
+          <input type="date" value="2026-10-02">
         </div>
 
-        <div class="control-group">
-          <label for="fecha">Fecha de Viaje</label>
-          <input type="date" id="fecha" value="2026-10-02">
-        </div>
-
-        <div class="control-group">
-          <label for="hora">Hora de Salida</label>
-          <select id="hora">
-            <option>08:00 AM</option>
-            <option>02:00 PM</option>
-            <option>10:00 PM</option>
+        <div class="form-group">
+          <label>Hora de Salida</label>
+          <select>
+            <option selected>08:00 AM</option>
+            <option>01:00 PM</option>
+            <option>08:00 PM</option>
+            <option>10:30 PM</option>
           </select>
         </div>
       </div>
 
-      <div class="section-subtitle">Selecciona tu Asiento</div>
+      <p style="text-align: center; color: #38bdf8; font-weight: 600; margin-bottom: 1rem;">Selecciona tu Asiento</p>
 
-      <div class="legend-bar">
-        <div class="legend-item"><span class="dot free"></span> Libre</div>
-        <div class="legend-item"><span class="dot selected"></span> Seleccionado</div>
-        <div class="legend-item"><span class="dot occupied"></span> Comprado</div>
+      <div class="seat-legend">
+        <div class="legend-item"><div class="box free"></div> Libre</div>
+        <div class="legend-item"><div class="box selected"></div> Seleccionado</div>
+        <div class="legend-item"><div class="box taken"></div> Comprado</div>
       </div>
 
-      <div class="seats-grid" id="seatsGrid"></div>
+      <div class="seats-grid">
+        <button class="seat-btn">Asiento 1</button>
+        <button class="seat-btn taken">Asiento 2</button>
+        <button class="seat-btn">Asiento 3</button>
+        <button class="seat-btn">Asiento 4</button>
 
-      <div class="total-price" id="totalDisplay">
+        <button class="seat-btn">Asiento 5</button>
+        <button class="seat-btn">Asiento 6</button>
+        <button class="seat-btn">Asiento 7</button>
+        <button class="seat-btn">Asiento 8</button>
+
+        <button class="seat-btn">Asiento 9</button>
+        <button class="seat-btn taken">Asiento 10</button>
+        <button class="seat-btn">Asiento 11</button>
+        <button class="seat-btn">Asiento 12</button>
+
+        <button class="seat-btn">Asiento 13</button>
+        <button class="seat-btn">Asiento 14</button>
+        <button class="seat-btn">Asiento 15</button>
+        <button class="seat-btn">Asiento 16</button>
+
+        <button class="seat-btn">Asiento 17</button>
+        <button class="seat-btn">Asiento 18</button>
+        <button class="seat-btn">Asiento 19</button>
+        <button class="seat-btn">Asiento 20</button>
+      </div>
+
+      <div class="total-price">
         Precio Total: S/ 0.00
       </div>
     </div>
@@ -365,35 +412,18 @@
   </footer>
 
   <script>
-    const TICKET_PRICE = 45.00;
-    const occupiedSeats = [2, 10]; // Asientos comprados en rojo
+    const pricePerSeat = 50;
+    const seatButtons = document.querySelectorAll('.seat-btn:not(.taken)');
+    const totalPriceEl = document.querySelector('.total-price');
 
-    const seatsGrid = document.getElementById('seatsGrid');
-    const totalDisplay = document.getElementById('totalDisplay');
-    let selectedCount = 0;
-
-    for (let i = 1; i <= 20; i++) {
-      const btn = document.createElement('button');
-      btn.className = 'seat-btn';
-      btn.textContent = `Asiento ${i}`;
-
-      if (occupiedSeats.includes(i)) {
-        btn.classList.add('occupied');
-      } else {
-        btn.addEventListener('click', () => {
-          btn.classList.toggle('selected');
-          if (btn.classList.contains('selected')) {
-            selectedCount++;
-          } else {
-            selectedCount--;
-          }
-          const total = selectedCount * TICKET_PRICE;
-          totalDisplay.textContent = `Precio Total: S/ ${total.toFixed(2)}`;
-        });
-      }
-
-      seatsGrid.appendChild(btn);
-    }
+    seatButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const selectedCount = document.querySelectorAll('.seat-btn.selected').length;
+        totalPriceEl.textContent = `Precio Total: S/ ${(selectedCount * pricePerSeat).toFixed(2)}`;
+      });
+    });
   </script>
+
 </body>
 </html>
