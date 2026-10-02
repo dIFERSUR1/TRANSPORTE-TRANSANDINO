@@ -3,9 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarTablaAsientos();
 });
 
-// ==========================================
-// 1. PESTAÑA: PRECIOS Y PASAJES
-// ==========================================
 async function cargarTodosLosPasajes() {
   const tbody = document.getElementById('panel-tbody') || document.querySelector('table tbody');
   if (!tbody) return;
@@ -62,9 +59,6 @@ async function cargarTodosLosPasajes() {
   }
 }
 
-// ==========================================
-// 2. PESTAÑA: ASIENTOS DE BUS
-// ==========================================
 async function cargarTablaAsientos() {
   const tbodyAsientos = document.getElementById('asientos-tbody') || document.querySelector('table tbody');
   if (!tbodyAsientos) return;
@@ -108,9 +102,6 @@ async function cargarTablaAsientos() {
   }
 }
 
-// ==========================================
-// 3. FUNCIONES DE ACCIÓN Y EDICIÓN
-// ==========================================
 
 async function cambiarEstadoAsiento(id, estadoActual) {
   const nuevoEstado = prompt('Ingresa el nuevo estado (registrado, atendido, cancelado):', estadoActual);
