@@ -3,23 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nuestros Servicios - TransAndino Perú</title>
+  <title>Servicios - TransAndino Perú</title>
   <style>
     :root {
       --bg-color: #050b14;
       --card-bg: #0d1626;
       --border-color: rgba(255, 255, 255, 0.08);
-      --orange-accent: #f97316;
+      --orange-accent: #ea580c;
       --blue-accent: #0284c7;
+      --cyan-light: #38bdf8;
       --text-color: #f8fafc;
       --text-muted: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -30,7 +27,6 @@
       flex-direction: column;
     }
 
-    /* Navbar Oscuro Unificado (#030710) */
     .navbar {
       background: #030710;
       padding: 0.8rem 2rem;
@@ -43,88 +39,48 @@
     .brand {
       font-size: 1.2rem;
       font-weight: 700;
-      color: #38bdf8;
+      color: var(--cyan-light);
       display: flex;
       align-items: center;
       gap: 0.5rem;
       text-decoration: none;
     }
 
-    .brand .bus-icon {
-      display: inline-block;
-      animation: busDrive 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes busDrive {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(6px);
-      }
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 0.5rem;
-      list-style: none;
-      align-items: center;
-    }
+    .nav-links { display: flex; gap: 0.4rem; list-style: none; align-items: center; }
 
     .nav-item {
-      color: var(--text-color);
+      color: #cbd5e1;
       text-decoration: none;
       font-size: 0.88rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.5rem 0.9rem;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
       border-radius: 8px;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.25s ease;
+      font-weight: 500;
     }
 
-    .nav-item span.icon {
-      display: inline-block;
-      transition: transform 0.25s ease;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateY(-2px);
-    }
-
-    .nav-item:hover span.icon {
-      transform: scale(1.25) rotate(-5deg);
-    }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
 
     .nav-item.active {
       background: var(--orange-accent);
       color: #ffffff;
       font-weight: 600;
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
-    .auth-buttons {
-      display: flex;
-      gap: 0.6rem;
-    }
+    .auth-buttons { display: flex; gap: 0.6rem; align-items: center; }
 
     .btn-login {
       border: 1px solid var(--blue-accent);
-      color: #38bdf8;
+      color: var(--cyan-light);
       background: transparent;
       padding: 0.5rem 1rem;
       border-radius: 8px;
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn-login:hover {
-      background: rgba(2, 132, 199, 0.2);
     }
 
     .btn-register {
@@ -135,74 +91,61 @@
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
     }
 
-    .btn-register:hover {
-      background: #0369a1;
+    .user-greeting { color: var(--cyan-light); font-weight: bold; font-size: 0.88rem; }
+
+    .btn-panel-admin {
+      background: var(--orange-accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.85rem;
     }
 
-    /* Contenido Principal y Servicios */
+    .btn-logout-red {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
     .main-container {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 3rem 1.5rem;
-      max-width: 1200px;
+      padding: 2.5rem 1.5rem;
+      max-width: 1100px;
       margin: 0 auto;
       width: 100%;
     }
 
     .page-title {
-      font-size: 2.2rem;
-      color: #38bdf8;
-      margin-bottom: 2.5rem;
+      font-size: 2rem;
+      color: var(--cyan-light);
+      margin-bottom: 1.5rem;
       font-weight: 800;
-      text-align: center;
     }
 
     .services-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
-      width: 100%;
     }
 
-    .service-card {
+    .card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 1.8rem;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
+      padding: 1.5rem;
     }
 
-    .service-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--orange-accent);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    }
-
-    .service-title {
-      font-size: 1.2rem;
-      color: var(--orange-accent);
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .service-info {
-      font-size: 0.9rem;
-      color: var(--text-color);
-      line-height: 1.5;
-    }
+    .card h3 { color: var(--orange-accent); margin-bottom: 0.6rem; font-size: 1.2rem; }
+    .card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
 
     footer {
       text-align: center;
@@ -210,53 +153,51 @@
       font-size: 0.8rem;
       color: var(--text-muted);
       border-top: 1px solid var(--border-color);
+      background: #030710;
     }
   </style>
 </head>
 <body>
 
   <header class="navbar">
-    <a href="/index.html" class="brand">
-      <span class="bus-icon">🚌</span> TransAndino Perú
+    <a href="../index.html" class="brand">
+      <span>🚌</span> TransAndino Perú
     </a>
     
     <nav>
       <ul class="nav-links">
-        <li><a href="/index.html" class="nav-item"><span class="icon">🏡</span> Inicio</a></li>
-        <li><a href="/pages/servicios.html" class="nav-item active"><span class="icon">📘</span> Servicios</a></li>
-        <li><a href="/pages/requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
-        <li><a href="/pages/compra-pasajes.html" class="nav-item"><span class="icon">🎟️</span> Reserva / Horarios</a></li>
-        <li><a href="/pages/seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
-        <li><a href="/pages/ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación y Sedes</a></li>
+        <li><a href="../index.html" class="nav-item"><span class="icon">🍊</span> Inicio</a></li>
+        <li><a href="servicios.html" class="nav-item active"><span class="icon">📘</span> Servicios</a></li>
+        <li><a href="requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
+        <li><a href="compra-pasajes.html" class="nav-item"><span class="icon">🎟</span> Pasajes</a></li>
+        <li><a href="seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
+        <li><a href="ubicacion.html" class="nav-item"><span class="icon">📍</span> Ubicación</a></li>
       </ul>
     </nav>
 
-    <div class="auth-buttons">
-      <a href="/login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
-      <a href="/registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
+    <div class="auth-buttons" id="auth-container">
+      <a href="../login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
+      <a href="../registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
     </div>
   </header>
 
   <main class="main-container">
-    <h1 class="page-title">Nuestros Servicios 🌸</h1>
-
+    <h1 class="page-title">📘 Nuestros Servicios</h1>
+    
     <div class="services-grid">
-      <!-- Servicio 1 -->
-      <div class="service-card">
-        <h2 class="service-title">🚌 Transporte Interprovincial</h2>
-        <p class="service-info">Viajes cómodos y seguros desde Ica a diferentes destinos nacionales en buses reacondicionados.</p>
+      <div class="card">
+        <h3>🚌 Transporte Interprovincial</h3>
+        <p>Viajes cómodos y seguros a las principales ciudades del Perú con buses de última generación, asientos reclinables y monitoreo GPS continuo.</p>
       </div>
 
-      <!-- Servicio 2 -->
-      <div class="service-card">
-        <h2 class="service-title">📦 Envíos y Encomiendas</h2>
-        <p class="service-info">Servicio express de paquetería y carga pesada con seguimiento en tiempo real.</p>
+      <div class="card">
+        <h3>📦 Envío de Encomiendas y Cargas</h3>
+        <p>Servicio expreso de paquetería y carga comercial con confirmación de entrega en tiempo real y número de seguimiento.</p>
       </div>
 
-      <!-- Servicio 3 -->
-      <div class="service-card">
-        <h2 class="service-title">💺 Asientos VIP</h2>
-        <p class="service-info">Buses con asientos reclinables 160°, conectores USB, aire acondicionado y entretenimiento a bordo.</p>
+      <div class="card">
+        <h3>⭐ Servicio VIP / Ejecutivo</h3>
+        <p>Unidades panorámicas con snacks a bordo, WiFi integrado, tomacorrientes en cada asiento y entretenimiento a bordo.</p>
       </div>
     </div>
   </main>
@@ -264,6 +205,41 @@
   <footer>
     © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const userEmail = localStorage.getItem('userEmail');
+      let userRole = localStorage.getItem('userRole');
+      const authContainer = document.getElementById('auth-container');
+
+      if (isLoggedIn && userEmail && authContainer) {
+        if (!userRole) {
+          const lower = userEmail.toLowerCase();
+          if (lower.includes('axperez') || lower.includes('axlperez')) userRole = 'admin';
+          else if (lower.includes('transandinoempleado')) userRole = 'empleado';
+          else userRole = 'cliente';
+        }
+
+        const rawName = userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
+        const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        const panelLabel = userRole === 'admin' ? '⚙️ Panel Admin' : (userRole === 'empleado' ? '⚙️ Panel Empleado' : '⚙️ Mi Panel');
+
+        authContainer.innerHTML = `
+          <span class="user-greeting">👋 Hola, ${formattedName}</span>
+          ${(userRole === 'admin' || userRole === 'empleado') 
+            ? `<a href="../panel.html" class="btn-panel-admin">${panelLabel}</a>` 
+            : ''}
+          <button onclick="cerrarSesion()" class="btn-logout-red">Cerrar Sesión</button>
+        `;
+      }
+    });
+
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.reload();
+    }
+  </script>
 
 </body>
 </html>
