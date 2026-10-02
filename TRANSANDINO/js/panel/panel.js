@@ -37,7 +37,7 @@ async function cargarTodosLosPasajes() {
         <td>${item.destino}</td>
         <td>${fechaViaje}</td>
         <td>${horaViaje}</td>
-        <td>${asientoNum}</td>
+        <td style="color:#f97316; font-weight:bold;">${asientoNum}</td>
         <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio || 0}.00</td>
         <td>
           <select onchange="cambiarEstado(${item.id}, this.value)" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.3rem; border-radius:4px;">
@@ -47,7 +47,8 @@ async function cargarTodosLosPasajes() {
           </select>
         </td>
         <td>
-          <button class="btn-action btn-update" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asientoNum}', ${item.precio || 0})">Editar Registro</button>
+          <button class="btn-action btn-update" style="background:#ea580c; color:white; margin-right:4px;" onclick="editarAsientoDirecto(${item.id}, ${asientoNum})">Editar Asiento</button>
+          <button class="btn-action btn-update" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asientoNum}', ${item.precio || 0})">Editar Precio</button>
           <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
         </td>
       `;
@@ -102,6 +103,35 @@ async function cargarTablaAsientos() {
   }
 }
 
+async function editarAsientoDirecto(id, asientoActual) {
+  const nuevoAsiento = prompt('Ingrese el nuevo número de asiento (1 al 40):', asientoActual);
+  
+  if (nuevoAsiento && !isNaN(nuevoAsiento)) {
+    const num = parseInt(nuevoAsiento);
+    if (num < 1 || num > 40) {
+      alert('El número de asiento debe estar entre 1 y 40.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/compras?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ asiento: num })
+      });
+
+      if (res.ok) {
+        alert(`Asiento actualizado a N° ${num} con éxito.`);
+        cargarTodosLosPasajes();
+        cargarTablaAsientos();
+      } else {
+        alert('Error al actualizar el asiento.');
+      }
+    } catch (error) {
+      console.error('Error al editar el asiento:', error);
+    }
+  }
+}
 
 async function cambiarEstadoAsiento(id, estadoActual) {
   const nuevoEstado = prompt('Ingresa el nuevo estado (registrado, atendido, cancelado):', estadoActual);
@@ -147,7 +177,7 @@ async function actualizarRegistroCompleto(id, origenActual, destinoActual, fecha
   const nuevoDestino = prompt('Editar Destino:', destinoActual);
   const nuevaFecha = prompt('Editar Fecha (AAAA-MM-DD):', fechaActual);
   const nuevaHora = prompt('Editar Hora:', horaActual || '09:00 AM');
-  const nuevoAsiento = prompt('Editar Número de Asiento (1 al 40):', asientoActual);
+  const nuevoAsiento = prompt('Editar Asiento (1 al 40):', asientoActual);
   const nuevoPrecio = prompt('Editar Precio (S/):', precioActual);
 
   if (nuevoOrigen && nuevoDestino && nuevaFecha && nuevoAsiento) {
