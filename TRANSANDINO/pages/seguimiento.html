@@ -16,7 +16,12 @@
       --text-muted: #94a3b8;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -25,8 +30,10 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
+    /* NAVBAR */
     .navbar {
       background: #030710;
       padding: 0.8rem 2rem;
@@ -34,6 +41,10 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
     }
 
     .brand {
@@ -46,7 +57,17 @@
       text-decoration: none;
     }
 
-    .nav-links { display: flex; gap: 0.4rem; list-style: none; align-items: center; }
+    .brand:hover {
+      transform: scale(1.05);
+      color: #60a5fa;
+    }
+
+    .nav-links { 
+      display: flex; 
+      gap: 0.4rem; 
+      list-style: none; 
+      align-items: center; 
+    }
 
     .nav-item {
       color: #cbd5e1;
@@ -57,11 +78,14 @@
       gap: 0.4rem;
       padding: 0.5rem 0.85rem;
       border-radius: 8px;
-      transition: all 0.25s ease;
       font-weight: 500;
     }
 
-    .nav-item:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+    .nav-item:hover { 
+      background: rgba(255, 255, 255, 0.08); 
+      color: #ffffff; 
+      transform: translateY(-2px);
+    }
 
     .nav-item.active {
       background: var(--orange-accent);
@@ -70,7 +94,30 @@
       box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
-    .auth-buttons { display: flex; gap: 0.6rem; align-items: center; }
+    /* ANIMACIÓN CONTINUA DE EMOJIS */
+    .icon, .brand span, .page-title span {
+      display: inline-block;
+    }
+
+    @keyframes floatEmoji {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .icon, .brand span, .page-title span {
+      animation: floatEmoji 2.5s ease-in-out infinite;
+    }
+
+    .nav-item:hover .icon {
+      transform: scale(1.3) rotate(10deg);
+    }
+
+    /* BOTONES DE AUTENTICACIÓN */
+    .auth-buttons { 
+      display: flex; 
+      gap: 0.6rem; 
+      align-items: center; 
+    }
 
     .btn-login {
       border: 1px solid var(--blue-accent);
@@ -83,6 +130,12 @@
       font-weight: 600;
     }
 
+    .btn-login:hover {
+      background: rgba(2, 132, 199, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
+    }
+
     .btn-register {
       background: var(--blue-accent);
       color: white;
@@ -93,7 +146,17 @@
       font-weight: 600;
     }
 
-    .user-greeting { color: var(--cyan-light); font-weight: bold; font-size: 0.88rem; }
+    .btn-register:hover {
+      background: #0369a1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+    }
+
+    .user-greeting { 
+      color: var(--cyan-light); 
+      font-weight: bold; 
+      font-size: 0.88rem; 
+    }
 
     .btn-panel-admin {
       background: var(--orange-accent);
@@ -101,8 +164,13 @@
       padding: 0.5rem 1rem;
       border-radius: 8px;
       text-decoration: none;
-      font-size: 0.85rem;
       font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    .btn-panel-admin:hover {
+      background: #c2410c;
+      transform: translateY(-2px);
     }
 
     .btn-logout-red {
@@ -116,12 +184,25 @@
       cursor: pointer;
     }
 
+    .btn-logout-red:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
     .main-container {
       flex: 1;
       padding: 2.5rem 1.5rem;
       max-width: 800px;
       margin: 0 auto;
       width: 100%;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .page-title {
@@ -129,13 +210,24 @@
       color: var(--cyan-light);
       margin-bottom: 1.5rem;
       font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
+    /* TRACKING CARD INTERACTIVA */
     .tracking-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 2rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .tracking-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--cyan-light);
+      box-shadow: 0 12px 25px rgba(56, 189, 248, 0.15);
     }
 
     .track-input-group {
@@ -153,6 +245,11 @@
       outline: none;
     }
 
+    .track-input-group input:focus {
+      border-color: var(--cyan-light);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+    }
+
     .btn-track {
       background: var(--orange-accent);
       color: white;
@@ -163,6 +260,12 @@
       cursor: pointer;
     }
 
+    .btn-track:hover {
+      background: #c2410c;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+    }
+
     footer {
       text-align: center;
       padding: 1.5rem;
@@ -170,6 +273,7 @@
       color: var(--text-muted);
       border-top: 1px solid var(--border-color);
       background: #030710;
+      margin-top: auto;
     }
   </style>
 </head>
@@ -198,7 +302,7 @@
   </header>
 
   <main class="main-container">
-    <h1 class="page-title">📦 Rastreo de Encomiendas</h1>
+    <h1 class="page-title"><span>📦</span> Rastreo de Encomiendas</h1>
 
     <div class="tracking-card">
       <p style="margin-bottom: 1rem; color: var(--text-muted);">Ingresa tu número de guía de envío para ver el estado de tu carga:</p>
