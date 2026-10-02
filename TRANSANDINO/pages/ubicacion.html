@@ -5,146 +5,263 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ubicación y Sedes - TransAndino Perú</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
-    
-    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .logo span { color: #38bdf8; }
-    
-    nav { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    nav a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.3s ease; }
-    nav a:hover { transform: translateY(-2px); color: #ffffff; }
-
-    /* Botones de Auth */
-    .btn-login { border: 1px solid #0284c7; color: #38bdf8; border-radius: 6px; font-weight: bold; text-decoration: none; }
-    .btn-login:hover { background: #0284c7; color: white; }
-
-    .btn-register { background: #0284c7; color: white; border-radius: 6px; font-weight: bold; text-decoration: none; }
-    .btn-register:hover { background: #0369a1; transform: translateY(-2px); }
-
-    .btn-admin { background: #ea580c; color: white; border-radius: 6px; font-weight: bold; text-decoration: none; }
-    .btn-admin:hover { background: #c2410c; }
-
-    .btn-logout { background: #ef4444; color: white; border: none; padding: 0.5rem 0.9rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: all 0.3s ease; }
-    .btn-logout:hover { background: #dc2626; transform: translateY(-2px); }
-
-    main { max-width: 1000px; margin: 3rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-    h1 { text-align: center; color: #38bdf8; margin-bottom: 2.5rem; font-size: 2.2rem; }
-
-    /* Grid y Tarjetas con Movimiento (Hover) */
-    .grid-sedes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    
-    .card-sede { 
-      background: #132238; 
-      border: 1px solid #1e293b; 
-      border-radius: 12px; 
-      padding: 2rem; 
-      text-align: left; 
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-      cursor: pointer;
+    :root {
+      --bg-color: #050b14;
+      --card-bg: #0d1626;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --orange-accent: #f97316;
+      --blue-accent: #0284c7;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
     }
 
-    /* EFECTO DE MOVIMIENTO */
-    .card-sede:hover { 
-      transform: translateY(-8px); 
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4); 
-      border-color: #ea580c; 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    .card-sede h3 { color: #ea580c; margin-bottom: 0.8rem; font-size: 1.2rem; }
-    .card-sede p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 0.5rem; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; margin-top: auto; }
+    /* Navbar Oscuro Unificado (#030710) */
+    .navbar {
+      background: #030710;
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.5rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-item {
+      color: var(--text-color);
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Movimiento animado en hover */
+    .nav-item span.icon {
+      display: inline-block;
+      transition: transform 0.25s ease;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .nav-item:hover span.icon {
+      transform: scale(1.25) rotate(-5deg);
+    }
+
+    .nav-item.active {
+      background: var(--orange-accent);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .btn-login {
+      border: 1px solid var(--blue-accent);
+      color: #38bdf8;
+      background: transparent;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-login:hover {
+      background: rgba(2, 132, 199, 0.2);
+    }
+
+    .btn-register {
+      background: var(--blue-accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-register:hover {
+      background: #0369a1;
+    }
+
+    /* Contenido Principal y Sedes */
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page-title {
+      font-size: 2.2rem;
+      color: #38bdf8;
+      margin-bottom: 2.5rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .sedes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .sede-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.8rem;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .sede-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--orange-accent);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .sede-title {
+      font-size: 1.2rem;
+      color: var(--orange-accent);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .sede-info {
+      font-size: 0.9rem;
+      color: var(--text-color);
+      line-height: 1.5;
+    }
+
+    .sede-info strong {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <a href="../index.html" class="logo">🚌 <span>TransAndino Perú</span></a>
+  <header class="navbar">
+    <a href="../index.html" class="brand">
+      <span class="icon">🚌</span> TransAndino Perú
+    </a>
+    
     <nav>
-      <a href="../index.html">🏠 Inicio</a>
-      <a href="servicios.html">📘 Servicios</a>
-      <a href="requisitos.html">📙 Requisitos</a>
-      <a href="compra-pasajes.html">🎟️ Reserva / Horarios</a>
-      <a href="seguimiento.html">📦 Encomiendas</a>
-      <a href="ubicacion.html" style="background:#ea580c; color:white;">📍 Ubicación y Sedes</a>
-
-      <!-- Botones sin sesión -->
-      <a href="../login.html" id="btn-login" class="btn-login">🔑 Iniciar Sesión</a>
-      <a href="../register.html" id="btn-register" class="btn-register">✍️ Registrarse</a>
-
-      <!-- Sesión activa -->
-      <span id="user-display" style="color:#38bdf8; font-weight:bold; margin-left:0.5rem; display:none;"></span>
-      <a href="../panel.html" id="btn-panel-admin" class="btn-admin" style="display:none;">⚙️ Panel Admin</a>
-      <button id="btn-logout" class="btn-logout" onclick="cerrarSesion()" style="display:none;">Cerrar Sesión</button>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="nav-item"><span class="icon">🏡</span> Inicio</a></li>
+        <li><a href="servicios.html" class="nav-item"><span class="icon">📘</span> Servicios</a></li>
+        <li><a href="requisitos.html" class="nav-item"><span class="icon">📜</span> Requisitos</a></li>
+        <li><a href="compra-pasajes.html" class="nav-item"><span class="icon">🎟️</span> Reserva / Horarios</a></li>
+        <li><a href="seguimiento.html" class="nav-item"><span class="icon">📦</span> Encomiendas</a></li>
+        <li><a href="ubicacion.html" class="nav-item active"><span class="icon">📍</span> Ubicación y Sedes</a></li>
+      </ul>
     </nav>
+
+    <div class="auth-buttons">
+      <a href="login.html" class="btn-login"><span class="icon">🔑</span> Iniciar Sesión</a>
+      <a href="registro.html" class="btn-register"><span class="icon">✍️</span> Registrarse</a>
+    </div>
   </header>
 
-  <main>
-    <h1>Nuestras Sedes y Ubicación 📍</h1>
+  <main class="main-container">
+    <h1 class="page-title">Nuestras Sedes y Ubicación 📍</h1>
 
-    <div class="grid-sedes">
-      <div class="card-sede">
-        <h3>📍 Terminal Ica (Principal)</h3>
-        <p><strong>Dirección:</strong> Av. Municipalidad 123, Ica</p>
-        <p><strong>Atención:</strong> Lunes a Domingo: 06:00 AM - 10:00 PM</p>
-        <p><strong>Teléfono:</strong> (056) 212121</p>
+    <div class="sedes-grid">
+      <!-- Terminal Ica -->
+      <div class="sede-card">
+        <h2 class="sede-title">📍 Terminal Ica (Principal)</h2>
+        <p class="sede-info"><strong>Dirección:</strong> Av. Municipalidad 123, Ica</p>
+        <p class="sede-info"><strong>Atención:</strong> Lunes a Domingo: 06:00 AM - 10:00 PM</p>
+        <p class="sede-info"><strong>Teléfono:</strong> (056) 212121</p>
       </div>
 
-      <div class="card-sede">
-        <h3>📍 Agencia Lima</h3>
-        <p><strong>Dirección:</strong> Av. Javier Prado Este 456, Lima</p>
-        <p><strong>Atención:</strong> Lunes a Domingo: 06:00 AM - 09:00 PM</p>
-        <p><strong>Teléfono:</strong> (01) 4330000</p>
+      <!-- Agencia Lima -->
+      <div class="sede-card">
+        <h2 class="sede-title">📍 Agencia Lima</h2>
+        <p class="sede-info"><strong>Dirección:</strong> Av. Javier Prado Este 456, Lima</p>
+        <p class="sede-info"><strong>Atención:</strong> Lunes a Domingo: 06:00 AM - 09:00 PM</p>
+        <p class="sede-info"><strong>Teléfono:</strong> (01) 4330000</p>
       </div>
 
-      <div class="card-sede">
-        <h3>📍 Agencia Arequipa</h3>
-        <p><strong>Dirección:</strong> Terminal Terrestre de Arequipa, Stand 12</p>
-        <p><strong>Atención:</strong> Lunes a Domingo: 07:00 AM - 08:00 PM</p>
-        <p><strong>Teléfono:</strong> (054) 383838</p>
+      <!-- Agencia Arequipa -->
+      <div class="sede-card">
+        <h2 class="sede-title">📍 Agencia Arequipa</h2>
+        <p class="sede-info"><strong>Dirección:</strong> Terminal Terrestre de Arequipa, Stand 12</p>
+        <p class="sede-info"><strong>Atención:</strong> Lunes a Domingo: 07:00 AM - 08:00 PM</p>
+        <p class="sede-info"><strong>Teléfono:</strong> (054) 383838</p>
       </div>
     </div>
   </main>
 
   <footer>
-    <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
+    © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const usuarioActual = JSON.parse(localStorage.getItem('user'));
-
-      if (usuarioActual) {
-        document.getElementById('btn-login').style.display = 'none';
-        document.getElementById('btn-register').style.display = 'none';
-
-        const userDisplay = document.getElementById('user-display');
-        userDisplay.innerText = `👋 Hola, ${usuarioActual.nombre || usuarioActual.email}`;
-        userDisplay.style.display = 'inline';
-
-        document.getElementById('btn-logout').style.display = 'inline-block';
-
-        if (usuarioActual.email === 'axlperez183@gmail.com') {
-          document.getElementById('btn-panel-admin').style.display = 'inline-block';
-        } else {
-          document.getElementById('btn-panel-admin').style.display = 'none';
-        }
-      } else {
-        document.getElementById('btn-login').style.display = 'inline-block';
-        document.getElementById('btn-register').style.display = 'inline-block';
-        document.getElementById('user-display').style.display = 'none';
-        document.getElementById('btn-logout').style.display = 'none';
-        document.getElementById('btn-panel-admin').style.display = 'none';
-      }
-    });
-
-    function cerrarSesion() {
-      localStorage.removeItem('user');
-      alert('Sesión cerrada correctamente.');
-      window.location.href = '../login.html';
-    }
-  </script>
 </body>
 </html>
