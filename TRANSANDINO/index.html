@@ -66,7 +66,6 @@
       padding: 0.5rem 0.9rem;
       border-radius: 8px;
       transition: background 0.2s;
-      cursor: pointer;
     }
 
     .nav-item:hover {
@@ -105,8 +104,6 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      transition: background 0.2s;
-      cursor: pointer;
     }
 
     .btn-login:hover {
@@ -124,8 +121,6 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      transition: background 0.2s;
-      cursor: pointer;
     }
 
     .btn-register:hover {
@@ -154,6 +149,10 @@
       overflow: hidden;
       border: 1px solid var(--border-color);
       margin-bottom: 2.5rem;
+      min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .banner-img {
@@ -179,7 +178,6 @@
       color: inherit;
       display: block;
       transition: transform 0.2s, border-color 0.2s;
-      cursor: pointer;
     }
 
     .card:hover {
@@ -231,7 +229,7 @@
     <h1 class="hero-title">Bienvenido a TransAndino Perú 🚌</h1>
 
     <div class="banner-container">
-      <img src="images.jpg" alt="Bus TransAndino" class="banner-img">
+      <img src="images.jpg" alt="Bus TransAndino" class="banner-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1000&auto=format&fit=crop';">
     </div>
 
     <section class="cards-grid">
