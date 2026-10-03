@@ -19,23 +19,13 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       const { id } = req.query;
-      
-      let result;
-      try {
-        if (id) {
-          result = await client.query('SELECT * FROM compras_pasajes WHERE id = $1', [id]);
-          return res.status(200).json(result.rows[0] || {});
-        }
-        result = await client.query('SELECT * FROM compras_pasajes ORDER BY CAST(NULLIF(regexp_replace(asiento, \'\\D\', \'\', \'g\'), \'\') AS INTEGER) ASC, id ASC');
-      } catch (err) {
-        // Fallback en caso la tabla se llame 'compras'
-        if (id) {
-          result = await client.query('SELECT * FROM compras WHERE id = $1', [id]);
-          return res.status(200).json(result.rows[0] || {});
-        }
-        result = await client.query('SELECT * FROM compras ORDER BY id DESC');
+
+      if (id) {
+        const result = await client.query('SELECT * FROM compras_pasajes WHERE id = $1', [id]);
+        return res.status(200).json(result.rows[0] || {});
       }
 
+      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id ASC');
       return res.status(200).json(result.rows);
     }
 
@@ -83,7 +73,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT') {
       const { id } = req.query;
-      const { estado, origen, destino, fecha_viaje, precio, asiento } = req.body;
+      const { estado, origen, destino, fecha, precio, asiento } = req.body;
 
       const targetId = id || req.body.id;
 
@@ -94,19 +84,18 @@ export default async function handler(req, res) {
       let result;
       if (targetId) {
         result = await client.query(
-          'UPDATE compras_pasajes SET estado = $1 WHERE id = $2 RETURNING *;',
-          [estado, targetId]
+          'UPDATE compras_pasajes SET estado = COALESCE($1, estado), precio = COALESCE($2, precio) WHERE id = $3 RETURNING *;',
+          [estado, precio, targetId]
         );
       } else if (asiento) {
         result = await client.query(
-          'UPDATE compras_pasajes SET estado = $1 WHERE asiento = $2 RETURNING *;',
+          'UPDATE compras_pasajes SET estado = COALESCE($1, estado) WHERE asiento = $2 RETURNING *;',
           [estado, String(asiento)]
         );
       }
 
       return res.status(200).json(result.rows[0] || { message: 'Actualizado correctamente' });
     }
-
     if (req.method === 'DELETE') {
       const { id } = req.query;
       if (!id) {
