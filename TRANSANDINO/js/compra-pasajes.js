@@ -47,7 +47,6 @@ function toggleAsiento(numero, boton) {
   actualizarResumen();
 }
 
-// Actualizar contadores y total a pagar
 function actualizarResumen() {
   const lblAsientos = document.getElementById('lbl-asientos');
   const lblTotal = document.getElementById('lbl-total');
@@ -67,6 +66,7 @@ function actualizarResumen() {
   }
 }
 
+// Enviar la reserva a la base de datos de Neon a través de la API
 async function confirmarReserva() {
   const origen = document.getElementById('origen')?.value || 'Ica';
   const destino = document.getElementById('destino')?.value || 'Lima';
