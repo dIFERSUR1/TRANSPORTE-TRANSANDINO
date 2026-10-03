@@ -120,7 +120,7 @@
     <!-- SECCIÓN 3: Gestión de Asientos (ADMIN Y EMPLEADOS) -->
     <section id="tab-asientos" class="tab-content">
       <div class="controls">
-        <span style="color: #94a3b8;">Estado y Asignación de Asientos (Ica - Lima)</span>
+        <span style="color: #94a3b8;">Estado y Asignación de Asientos</span>
         <button class="btn-action btn-update" onclick="cargarAsientos()">🔄 Recargar Tabla</button>
       </div>
 
@@ -148,23 +148,60 @@
 
   <script>
     const API_URL = '/api/compras';
-    const currentUserRole = localStorage.getItem('userRole') || 'empleado';
-    const currentUserEmail = localStorage.getItem('userEmail') || 'usuario@transandino.pe';
+    let currentUserRole = 'empleado';
+    let currentUserEmail = '';
+    let pasajesData = [];
 
     document.addEventListener('DOMContentLoaded', () => {
-      inicializarPermisos();
-      cargarPasajes();
-      cargarEmpleados();
-      cargarAsientos();
+      if (verificarSesion()) {
+        cargarPasajes();
+        cargarEmpleados();
+        cargarAsientos();
+      }
     });
 
-    function inicializarPermisos() {
+    function obtenerUsuarioActual() {
+      const userObj = JSON.parse(localStorage.getItem('user'));
+      if (userObj) {
+        return {
+          email: userObj.email || userObj.nombre || 'Usuario',
+          rol: userObj.rol || 'empleado'
+        };
+      }
+
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const userEmail = localStorage.getItem('userEmail');
+      const userRole = localStorage.getItem('userRole');
+
+      if (isLoggedIn && userEmail) {
+        return {
+          email: userEmail,
+          rol: userRole || 'empleado'
+        };
+      }
+
+      return null;
+    }
+
+    function verificarSesion() {
+      const user = obtenerUsuarioActual();
+      if (!user) {
+        alert('Debes iniciar sesión para acceder al panel.');
+        window.location.href = 'login.html';
+        return false;
+      }
+
+      currentUserEmail = user.email;
+      currentUserRole = user.rol;
+
       document.getElementById('user-info-badge').textContent = `${currentUserEmail} (${currentUserRole.toUpperCase()})`;
 
       if (currentUserRole !== 'admin') {
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
         switchTab('asientos');
       }
+
+      return true;
     }
 
     function switchTab(tabName) {
@@ -178,51 +215,63 @@
       if (targetBtn) targetBtn.classList.add('active');
     }
 
+    async function obtenerDatosPasajes() {
+      try {
+        const res = await fetch(API_URL);
+        if (res.ok) {
+          pasajesData = await res.json();
+        } else {
+          pasajesData = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+        }
+      } catch (err) {
+        pasajesData = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      }
+      return pasajesData;
+    }
+
     async function cargarPasajes() {
       const tbody = document.getElementById('panel-tbody');
       if (!tbody) return;
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Cargando pasajes...</td></tr>';
 
-      try {
-        const res = await fetch(API_URL);
-        const datos = await res.json();
+      const datos = await obtenerDatosPasajes();
+      tbody.innerHTML = '';
 
-        tbody.innerHTML = '';
-        if (!Array.isArray(datos) || datos.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8;">No hay pasajes registrados.</td></tr>';
-          return;
-        }
-
-        datos.forEach((item) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>#${item.id}</td>
-            <td><strong>ID: ${item.id_usuario || '1'}</strong></td>
-            <td>${item.origen || 'Ica'}</td>
-            <td>${item.destino || 'Lima'}</td>
-            <td>${item.fecha || item.fecha_viaje || '2026-10-15'}</td>
-            <td>${item.hora || item.hora_viaje || '09:00 AM'}</td>
-            <td>${item.asiento || item.num_asiento}</td>
-            <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio || 50}.00</td>
-            <td>
-              <select onchange="cambiarEstado(${item.id}, this.value)" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
-                <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
-                <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
-                <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
-                <option value="cancelado" ${item.estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
-              </select>
-            </td>
-            <td>
-              <button class="btn-action btn-update" onclick="editarPrecio(${item.id}, ${item.precio})">Editar Precio</button>
-              <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        console.error('Error al cargar pasajes:', err);
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#ef4444;">Error de conexión con el servidor.</td></tr>';
+      if (!Array.isArray(datos) || datos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8;">No hay pasajes registrados.</td></tr>';
+        return;
       }
+
+      datos.forEach((item) => {
+        const tr = document.createElement('tr');
+        const numAsiento = item.asiento || item.num_asiento || '-';
+        const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '2026-10-15');
+        const hora = item.hora_viaje || item.hora || '09:00 AM';
+
+        tr.innerHTML = `
+          <td>#${item.id}</td>
+          <td><strong>ID: ${item.id_usuario || '1'}</strong></td>
+          <td>${item.origen || 'Ica'}</td>
+          <td>${item.destino || 'Lima'}</td>
+          <td>${fecha}</td>
+          <td>${hora}</td>
+          <td>${numAsiento}</td>
+          <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 50).toFixed(2)}</td>
+          <td>
+            <select onchange="cambiarEstado(${item.id}, this.value)" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
+              <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
+              <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
+              <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
+              <option value="cancelado" ${item.estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn-action btn-update" onclick="editarPrecio(${item.id}, ${item.precio || 50})">Editar Precio</button>
+            <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     async function cargarAsientos() {
@@ -230,63 +279,59 @@
       if (!tbody) return;
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando asientos...</td></tr>';
 
+      const datos = await obtenerDatosPasajes();
+      tbody.innerHTML = '';
+
+      if (!Array.isArray(datos) || datos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay asientos cargados.</td></tr>';
+        return;
+      }
+
+      datos.forEach((item) => {
+        const tr = document.createElement('tr');
+        const nroAsiento = item.asiento || item.num_asiento || '-';
+        tr.innerHTML = `
+          <td><strong>Asiento N° ${nroAsiento}</strong></td>
+          <td>Usuario ID: ${item.id_usuario || '1'}</td>
+          <td>${item.origen || 'Ica'} - ${item.destino || 'Lima'}</td>
+          <td><span style="color:${item.estado === 'disponible' ? '#38bdf8' : '#22c55e'}; font-weight:bold;">${item.estado || 'disponible'}</span></td>
+          <td>
+            <button class="btn-action btn-update" onclick="modificarEstadoAsiento(${item.id}, '${nroAsiento}')">Cambiar Estado Asiento</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function actualizarServidorOLocal(id, nuevoObjeto) {
       try {
-        const res = await fetch(API_URL);
-        const datos = await res.json();
-
-        tbody.innerHTML = '';
-        if (!Array.isArray(datos) || datos.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay asientos cargados en la base de datos.</td></tr>';
-          return;
-        }
-
-        datos.forEach((item) => {
-          const tr = document.createElement('tr');
-          const nroAsiento = item.asiento || item.num_asiento;
-          tr.innerHTML = `
-            <td><strong>Asiento N° ${nroAsiento}</strong></td>
-            <td>Usuario ID: ${item.id_usuario || '1'}</td>
-            <td>${item.origen || 'Ica'} - ${item.destino || 'Lima'}</td>
-            <td><span style="color:${item.estado === 'disponible' ? '#38bdf8' : '#22c55e'}; font-weight:bold;">${item.estado || 'disponible'}</span></td>
-            <td>
-              <button class="btn-action btn-update" onclick="modificarEstadoAsiento(${item.id}, '${nroAsiento}')">Cambiar Estado Asiento</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
+        await fetch(`${API_URL}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nuevoObjeto)
         });
       } catch (err) {
-        console.error('Error al cargar asientos:', err);
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Error de conexión con la base de datos.</td></tr>';
+        console.log('Actualizando localmente...');
+      }
+
+      let index = pasajesData.findIndex(p => String(p.id) === String(id));
+      if (index !== -1) {
+        pasajesData[index] = { ...pasajesData[index], ...nuevoObjeto };
+        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
       }
     }
 
     async function cambiarEstado(id, nuevoEstado) {
-      try {
-        await fetch(`${API_URL}?id=${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ estado: nuevoEstado })
-        });
-        cargarAsientos();
-      } catch (err) {
-        alert('Error al actualizar el estado.');
-      }
+      await actualizarServidorOLocal(id, { estado: nuevoEstado });
+      cargarAsientos();
     }
 
     async function modificarEstadoAsiento(id, nroAsiento) {
-      const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / mantenimiento):`, 'atendido');
+      const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, 'atendido');
       if (nuevoEstado) {
-        try {
-          await fetch(`${API_URL}?id=${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ estado: nuevoEstado })
-          });
-          cargarAsientos();
-          if (currentUserRole === 'admin') cargarPasajes();
-        } catch (err) {
-          alert('Error al modificar asiento.');
-        }
+        await actualizarServidorOLocal(id, { estado: nuevoEstado });
+        cargarAsientos();
+        if (currentUserRole === 'admin') cargarPasajes();
       }
     }
 
@@ -297,16 +342,8 @@
       }
       const nuevoPrecio = prompt('Ingrese el nuevo precio (S/):', precioActual);
       if (nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
-        try {
-          await fetch(`${API_URL}?id=${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ precio: parseFloat(nuevoPrecio) })
-          });
-          cargarPasajes();
-        } catch (err) {
-          alert('Error al editar el precio.');
-        }
+        await actualizarServidorOLocal(id, { precio: parseFloat(nuevoPrecio) });
+        cargarPasajes();
       }
     }
 
@@ -317,35 +354,49 @@
       const asiento = prompt('Número de asiento:', '1');
 
       if (orig && dest && precio) {
+        const nuevoItem = {
+          id: Date.now(),
+          id_usuario: 'Admin-Manual',
+          origen: orig,
+          destino: dest,
+          precio: parseFloat(precio),
+          num_asiento: asiento,
+          estado: 'registrado',
+          fecha_viaje: '2026-10-15',
+          hora_viaje: '09:00 AM'
+        };
+
         try {
           await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              origen: orig,
-              destino: dest,
-              precio: parseFloat(precio),
-              asiento: asiento,
-              estado: 'registrado'
-            })
+            body: JSON.stringify(nuevoItem)
           });
-          cargarPasajes();
-          cargarAsientos();
         } catch (err) {
-          alert('Error al crear pasaje.');
+          console.log('Guardando pasaje en almacenamiento local...');
         }
+
+        pasajesData.push(nuevoItem);
+        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+
+        cargarPasajes();
+        cargarAsientos();
       }
     }
 
     async function eliminarRegistro(id) {
       if (confirm('¿Deseas eliminar este registro de la base de datos?')) {
         try {
-          await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
-          cargarPasajes();
-          cargarAsientos();
+          await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         } catch (err) {
-          alert('Error al eliminar registro.');
+          console.log('Eliminando localmente...');
         }
+
+        pasajesData = pasajesData.filter(p => String(p.id) !== String(id));
+        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+
+        cargarPasajes();
+        cargarAsientos();
       }
     }
 
@@ -353,8 +404,8 @@
       const tbody = document.getElementById('empleados-tbody');
       if (!tbody) return;
       tbody.innerHTML = `
-        <tr><td>1</td><td>Juan Pérez</td><td>transandinoempleado001@gmail.com</td><td>Empleado</td><td><button class="btn-action btn-delete">Desactivar</button></td></tr>
-        <tr><td>2</td><td>María López</td><td>transandinoempleado002@gmail.com</td><td>Empleado</td><td><button class="btn-action btn-delete">Desactivar</button></td></tr>
+        <tr><td>1</td><td>Juan Pérez</td><td>empleado1@transandino.pe</td><td>Empleado</td><td><button class="btn-action btn-delete">Desactivar</button></td></tr>
+        <tr><td>2</td><td>María López</td><td>empleado2@transandino.pe</td><td>Empleado</td><td><button class="btn-action btn-delete">Desactivar</button></td></tr>
       `;
     }
 
@@ -368,7 +419,7 @@
 
     function cerrarSesion() {
       localStorage.clear();
-      window.location.href = 'index.html';
+      window.location.href = 'login.html';
     }
   </script>
 
