@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+import { Client } from 'pg';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,8 +9,17 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  const dbUrl = process.env.DATABASE_URL;
+
+  if (!dbUrl) {
+    console.error('DATABASE_URL no está definida en las variables de entorno de Vercel.');
+    return res.status(500).json({ 
+      error: 'Error de configuración: Faltan las variables de entorno DATABASE_URL en Vercel.' 
+    });
+  }
+
   const client = new Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: dbUrl,
     ssl: { rejectUnauthorized: false }
   });
 
@@ -73,29 +82,25 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT') {
       const { id } = req.query;
-      const { estado, origen, destino, fecha, precio, asiento } = req.body;
-
+      const { estado, precio, id_usuario } = req.body;
       const targetId = id || req.body.id;
 
-      if (!targetId && !asiento) {
-        return res.status(400).json({ message: 'Falta el ID o Número de Asiento del registro.' });
+      if (!targetId) {
+        return res.status(400).json({ message: 'Falta el ID del registro a actualizar.' });
       }
 
-      let result;
-      if (targetId) {
-        result = await client.query(
-          'UPDATE compras_pasajes SET estado = COALESCE($1, estado), precio = COALESCE($2, precio) WHERE id = $3 RETURNING *;',
-          [estado, precio, targetId]
-        );
-      } else if (asiento) {
-        result = await client.query(
-          'UPDATE compras_pasajes SET estado = COALESCE($1, estado) WHERE asiento = $2 RETURNING *;',
-          [estado, String(asiento)]
-        );
-      }
+      const result = await client.query(
+        `UPDATE compras_pasajes 
+         SET estado = COALESCE($1, estado), 
+             precio = COALESCE($2, precio),
+             id_usuario = COALESCE($3, id_usuario)
+         WHERE id = $4 RETURNING *;`,
+        [estado, precio, id_usuario, targetId]
+      );
 
       return res.status(200).json(result.rows[0] || { message: 'Actualizado correctamente' });
     }
+
     if (req.method === 'DELETE') {
       const { id } = req.query;
       if (!id) {
@@ -107,8 +112,11 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ message: 'Método no permitido' });
   } catch (error) {
-    console.error('Error en API compras:', error);
-    return res.status(500).json({ message: 'Error interno de base de datos', error: error.message });
+    console.error('Error detallado en API compras:', error);
+    return res.status(500).json({ 
+      message: 'Error interno en servidor o base de datos', 
+      error: error.message 
+    });
   } finally {
     await client.end();
   }
