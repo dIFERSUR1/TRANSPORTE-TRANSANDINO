@@ -55,7 +55,6 @@ body {
     color: #ff9e00 !important;
 }
 
-/* Bus SVG animado */
 .bus-icon-animated {
     animation: busDrive 3s infinite ease-in-out;
 }
@@ -79,7 +78,6 @@ body {
     50% { transform: translateX(6px) translateY(-2px); }
 }
 
-/* Animación rebotar (encomiendas, pasajes, maletas) */
 .emoji-bounce {
     display: inline-block;
     animation: rebotar 2.5s infinite ease-in-out;
@@ -89,7 +87,6 @@ body {
     50% { transform: translateY(-4px); }
 }
 
-/* Animación pulso (ubicación, pines, alertas) */
 .emoji-pulse {
     display: inline-block;
     animation: pulso 2s infinite ease-in-out;
