@@ -219,21 +219,21 @@
 <body>
 
   <header>
-    <a href="../index.html" class="logo">
+    <a href="index.html" class="logo">
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="../index.html"><span class="emoji emoji-roll">🏠</span> Inicio</a>
+      <a href="index.html"><span class="emoji emoji-roll">🏠</span> Inicio</a>
       <a href="servicios.html"><span class="emoji emoji-bounce">📘</span> Servicios</a>
       <a href="requisitos.html"><span class="emoji emoji-pulse">📜</span> Requisitos</a>
-      <a href="compra-pasajes.html"><span class="emoji emoji-bounce">🎟</span> Reserva / Horarios</a>
+      <a href="compra-pasajes.html"><span class="emoji emoji-bounce">🎟</span> Pasajes</a>
       <a href="mis-compras.html" class="active"><span class="emoji emoji-bounce">📋</span> Mis Pasajes</a>
       <a href="seguimiento.html"><span class="emoji emoji-bounce">📦</span> Encomiendas</a>
-      <a href="ubicacion.html"><span class="emoji emoji-pulse">📍</span> Ubicación y Sedes</a>
+      <a href="ubicacion.html"><span class="emoji emoji-pulse">📍</span> Ubicación</a>
 
       <div id="auth-buttons" style="display: inline-flex; gap: 0.5rem; align-items: center;">
-        <a href="../login.html" class="btn-login"><span class="emoji">🔑</span> Iniciar Sesión</a>
-        <a href="../registro.html" class="btn-register"><span class="emoji">✍️</span> Registrarse</a>
+        <a href="login.html" class="btn-login"><span class="emoji">🔑</span> Iniciar Sesión</a>
+        <a href="registro.html" class="btn-register"><span class="emoji">✍️</span> Registrarse</a>
       </div>
     </nav>
   </header>
@@ -253,7 +253,7 @@
             <th>Asiento</th>
             <th>Precio</th>
             <th>Estado</th>
-            <th>Acción (RF-22.6)</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody id="mis-compras-tbody">
@@ -274,21 +274,37 @@
     });
 
     function getUsuarioActual() {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (!user) return null;
-      return {
-        id: user.id || user.dni || user.email,
-        nombre: user.nombre || user.email || user.dni,
-        rol: user.rol || 'cliente',
-        email: user.email
-      };
+      const userObj = JSON.parse(localStorage.getItem('user'));
+      if (userObj) {
+        return {
+          id: userObj.id || userObj.dni || userObj.email,
+          nombre: userObj.nombre || userObj.email,
+          rol: userObj.rol || 'cliente',
+          email: userObj.email
+        };
+      }
+
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const userEmail = localStorage.getItem('userEmail');
+      const userRole = localStorage.getItem('userRole') || 'cliente';
+
+      if (isLoggedIn && userEmail) {
+        return {
+          id: userEmail,
+          nombre: userEmail,
+          rol: userRole,
+          email: userEmail
+        };
+      }
+
+      return null;
     }
 
     async function cargarMisCompras() {
       const user = getUsuarioActual();
-      if (!user || !user.id) {
+      if (!user) {
         alert('Debes iniciar sesión para ver tus pasajes.');
-        window.location.href = '../login.html';
+        window.location.href = 'login.html';
         return;
       }
 
@@ -297,12 +313,15 @@
 
       let registros = [];
       try {
-        const res = await fetch(`/api/compras-pasajes/usuario/${user.id}`);
+        const res = await fetch('/api/compras');
         if (res.ok) {
-          registros = await res.json();
-        } else {
-          let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-          registros = local.filter(r => String(r.id_usuario) === String(user.id));
+          const compras = await res.json();
+          if (Array.isArray(compras)) {
+            registros = compras.filter(r => 
+              String(r.id_usuario) === String(user.id) || 
+              String(r.registrado_por).toLowerCase() === String(user.email).toLowerCase()
+            );
+          }
         }
       } catch (err) {
         let local = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
@@ -316,21 +335,25 @@
 
       registros.forEach(item => {
         const tr = document.createElement('tr');
-        const puedeAccionar = item.estado === 'registrado';
+        const estadoActual = item.estado || 'registrado';
+        const puedeAccionar = estadoActual === 'registrado';
+        const fechaMostrar = item.fecha_viaje || (item.fecha ? item.fecha.split('T')[0] : '');
+        const horaMostrar = item.hora_viaje || item.hora || '09:00 AM';
+        const asientoMostrar = item.num_asiento || item.asiento || '-';
 
         tr.innerHTML = `
           <td>#${item.id || '1'}</td>
           <td>${item.origen}</td>
           <td>${item.destino}</td>
-          <td>${item.fecha_viaje}</td>
-          <td>${item.hora_viaje}</td>
-          <td>${item.num_asiento} (${item.tipo_asiento || 'Estándar'})</td>
-          <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio}.00</td>
-          <td><span class="status-badge ${item.estado === 'registrado' ? 'status-registrado' : 'status-atendido'}">${item.estado}</span></td>
+          <td>${fechaMostrar}</td>
+          <td>${horaMostrar}</td>
+          <td>${asientoMostrar}</td>
+          <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio || '50'}.00</td>
+          <td><span class="status-badge ${estadoActual === 'registrado' ? 'status-registrado' : 'status-atendido'}">${estadoActual}</span></td>
           <td>
             ${puedeAccionar 
               ? `<button class="btn-edit" onclick="editarRegistro(${item.id})">✏️ Editar</button>
-                 <button class="btn-delete" onclick="eliminarRegistro(${item.id})">🗑️ Eliminar</button>`
+                 <button class="btn-delete" onclick="eliminarRegistro(${item.id})">🗑️️ Eliminar</button>`
               : `<span style="color:#64748b; font-size:0.8rem;">Atendido (No modificable)</span>`}
           </td>
         `;
@@ -359,7 +382,7 @@
       if (!confirm('¿Estás seguro de que deseas eliminar este pasaje?')) return;
 
       try {
-        await fetch(`/api/compras-pasajes/${id}`, { method: 'DELETE' });
+        await fetch(`/api/compras/${id}`, { method: 'DELETE' });
       } catch (err) {
         console.log('Eliminando localmente...');
       }
@@ -374,15 +397,20 @@
 
     function renderAuthHeader() {
       const authContainer = document.getElementById('auth-buttons');
-      const user = JSON.parse(localStorage.getItem('user'));
+      const user = getUsuarioActual();
       if (user) {
-        let html = `<span style="color:#38bdf8; font-weight:bold;">👋 ${user.nombre || user.dni || user.email}</span>`;
-        if (user.rol === 'admin' || user.rol === 'empleado' || user.email === 'axlperez183@gmail.com') {
-          html += `<a href="../panel.html" class="btn-admin" style="padding:0.4rem 0.8rem; border-radius:6px; text-decoration:none; margin-left:0.5rem;">⚙️ Panel</a>`;
+        let html = `<span style="color:#38bdf8; font-weight:bold;">👋 ${user.nombre}</span>`;
+        if (user.rol === 'admin' || user.rol === 'empleado') {
+          html += `<a href="panel.html" class="btn-admin" style="padding:0.4rem 0.8rem; border-radius:6px; text-decoration:none; margin-left:0.5rem;">⚙️ Panel</a>`;
         }
-        html += `<button onclick="localStorage.removeItem('user'); window.location.href='../login.html';" style="background:#ef4444; color:white; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; margin-left:0.5rem; font-weight:bold;">Cerrar Sesión</button>`;
+        html += `<button onclick="cerrarSesion()" style="background:#ef4444; color:white; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; margin-left:0.5rem; font-weight:bold;">Cerrar Sesión</button>`;
         authContainer.innerHTML = html;
       }
+    }
+
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.href = 'login.html';
     }
   </script>
 
