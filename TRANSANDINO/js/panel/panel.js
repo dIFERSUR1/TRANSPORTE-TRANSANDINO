@@ -4,12 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function cargarTodosLosPasajes() {
-  const tbody = document.getElementById('panel-tbody') || document.querySelector('table tbody');
+  const tbody = document.getElementById('panel-tbody') || document.querySelector('#tabla-pasajes-body');
   if (!tbody) return;
 
-  if (document.querySelector('th:nth-child(1)')?.textContent.includes('N° Asiento')) return;
-
-  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8; padding:1.5rem;">Cargando registros desde la base de datos...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8; padding:1.5rem;">Cargando registros desde Neon SQL...</td></tr>';
 
   try {
     const res = await fetch('/api/compras');
@@ -38,18 +36,19 @@ async function cargarTodosLosPasajes() {
         <td>${fechaViaje}</td>
         <td>${horaViaje}</td>
         <td style="color:#f97316; font-weight:bold;">${asientoNum}</td>
-        <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio || 0}.00</td>
+        <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 0).toFixed(2)}</td>
         <td>
           <select onchange="cambiarEstado(${item.id}, this.value)" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.3rem; border-radius:4px;">
+            <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
             <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
             <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
             <option value="cancelado" ${item.estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
           </select>
         </td>
         <td>
-          <button class="btn-action btn-update" style="background:#ea580c; color:white; margin-right:4px;" onclick="editarAsientoDirecto(${item.id}, ${asientoNum})">Editar Asiento</button>
-          <button class="btn-action btn-update" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asientoNum}', ${item.precio || 0})">Editar Precio</button>
-          <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
+          <button class="btn-action btn-update" style="background:#ea580c; color:white; margin-right:4px; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;" onclick="editarAsientoDirecto(${item.id}, '${asientoNum}')">Editar Asiento</button>
+          <button class="btn-action btn-update" style="background:#0284c7; color:white; margin-right:4px; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asientoNum}', ${item.precio || 0})">Editar Precio</button>
+          <button class="btn-action btn-delete" style="background:#ef4444; color:white; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;" onclick="eliminarRegistro(${item.id})">Eliminar</button>
         </td>
       `;
       tbody.appendChild(tr);
@@ -60,11 +59,14 @@ async function cargarTodosLosPasajes() {
   }
 }
 
+// =========================================================
+// 2. PESTAÑA: ASIENTOS DE BUS (VISTA COMPLETA 1 AL 40)
+// =========================================================
 async function cargarTablaAsientos() {
-  const tbodyAsientos = document.getElementById('asientos-tbody') || document.querySelector('table tbody');
+  const tbodyAsientos = document.getElementById('asientos-tbody') || document.querySelector('#tabla-asientos-body');
   if (!tbodyAsientos) return;
 
-  tbodyAsientos.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">Cargando asientos...</td></tr>';
+  tbodyAsientos.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">Cargando lista de asientos (1-40)...</td></tr>';
 
   try {
     const res = await fetch('/api/compras');
@@ -73,55 +75,112 @@ async function cargarTablaAsientos() {
     const pasajes = await res.json();
     tbodyAsientos.innerHTML = '';
 
-    if (!Array.isArray(pasajes) || pasajes.length === 0) {
-      tbodyAsientos.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay asientos asignados actualmente.</td></tr>`;
-      return;
+    // Mapear registros de la base de datos por número de asiento
+    const mapaAsientosBD = {};
+    if (Array.isArray(pasajes)) {
+      pasajes.forEach(item => {
+        const val = String(item.asiento || item.num_asiento || '');
+        // Manejar asientos múltiples guardados como "33, 34, 35, 36"
+        const numeros = val.split(',').map(s => s.trim());
+        numeros.forEach(numStr => {
+          if (numStr) mapaAsientosBD[numStr] = item;
+        });
+      });
     }
 
-    pasajes.forEach((item) => {
+    // Dibujar los 40 asientos obligatorios del bus
+    for (let i = 1; i <= 40; i++) {
+      const itemBD = mapaAsientosBD[String(i)];
       const tr = document.createElement('tr');
-      
-      const asientoNum = item.asiento || item.num_asiento || item.id;
-      const rolCreador = item.registrado_por || item.creado_por || (item.id_usuario === 1 ? 'Cliente Web' : 'Admin/Empleado');
-      const pasajeroTexto = `Usuario ID: ${item.id_usuario || '1'} (${rolCreador})`;
 
-      const colorEstado = item.estado === 'atendido' ? '#10b981' : item.estado === 'cancelado' ? '#ef4444' : '#38bdf8';
+      const estado = itemBD ? itemBD.estado : 'disponible';
+      const origenDestino = itemBD ? `${itemBD.origen} -> ${itemBD.destino}` : 'Lima -> Huancayo (Ruta General)';
+      const idRegistro = itemBD ? itemBD.id : null;
+      const pasajeroTexto = itemBD ? `Usuario ID: ${itemBD.id_usuario || '1'}` : 'Libre';
+
+      // Colores de estado
+      let colorEstado = '#22c55e'; // Verde (disponible)
+      if (estado === 'registrado') colorEstado = '#f97316'; // Naranja (pendiente)
+      if (estado === 'atendido') colorEstado = '#ef4444'; // Rojo (ocupado)
+      if (estado === 'cancelado') colorEstado = '#94a3b8'; // Gris
 
       tr.innerHTML = `
-        <td style="color:#ffffff; font-weight:bold;">Asiento N° ${asientoNum}</td>
+        <td style="color:#ffffff; font-weight:bold;">Asiento N° ${i}</td>
         <td style="color:#cbd5e1;">${pasajeroTexto}</td>
-        <td style="color:#cbd5e1;">${item.origen} - ${item.destino}</td>
-        <td style="color:${colorEstado}; font-weight:bold;">${item.estado}</td>
+        <td style="color:#cbd5e1;">${origenDestino}</td>
+        <td style="color:${colorEstado}; font-weight:bold; text-transform:uppercase;">${estado}</td>
         <td>
-          <button class="btn-action btn-update" style="background:#0284c7; color:white; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;" onclick="cambiarEstadoAsiento(${item.id}, '${item.estado}')">Cambiar Estado Asiento</button>
+          <button class="btn-action btn-update" style="background:#0284c7; color:white; border:none; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;" 
+                  onclick="gestionarEstadoAsientoIndividual(${i}, ${idRegistro}, '${estado}')">
+            Cambiar Estado
+          </button>
         </td>
       `;
       tbodyAsientos.appendChild(tr);
-    });
+    }
   } catch (error) {
     console.error('Error al cargar la tabla de asientos:', error);
   }
 }
 
-async function editarAsientoDirecto(id, asientoActual) {
-  const nuevoAsiento = prompt('Ingrese el nuevo número de asiento (1 al 40):', asientoActual);
-  
-  if (nuevoAsiento && !isNaN(nuevoAsiento)) {
-    const num = parseInt(nuevoAsiento);
-    if (num < 1 || num > 40) {
-      alert('El número de asiento debe estar entre 1 y 40.');
-      return;
+// =========================================================
+// 3. ACCIONES Y EDICIONES DIRECTAS
+// =========================================================
+
+// Cambiar estado individual de un asiento del 1 al 40
+async function gestionarEstadoAsientoIndividual(numeroAsiento, idRegistro, estadoActual) {
+  const nuevoEstado = prompt(`Asiento N° ${numeroAsiento}\nIngrese nuevo estado (disponible, registrado, atendido, cancelado):`, estadoActual);
+  if (!nuevoEstado) return;
+
+  const estadoLwr = nuevoEstado.toLowerCase().trim();
+
+  try {
+    if (idRegistro) {
+      // Si el registro ya existe en BD, actualizamos su estado
+      await fetch(`/api/compras?id=${idRegistro}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: estadoLwr })
+      });
+    } else {
+      // Si el asiento estaba disponible, creamos la fila en Neon
+      await fetch('/api/compras', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_usuario: 1,
+          origen: 'Lima',
+          destino: 'Huancayo',
+          fecha: '2026-10-15',
+          hora: '09:00 AM',
+          asiento: String(numeroAsiento),
+          precio: 60,
+          estado: estadoLwr,
+          registrado_por: 'Empleado Panel'
+        })
+      });
     }
 
+    cargarTablaAsientos();
+    cargarTodosLosPasajes();
+  } catch (error) {
+    console.error('Error al cambiar el estado del asiento:', error);
+  }
+}
+
+async function editarAsientoDirecto(id, asientoActual) {
+  const nuevoAsiento = prompt('Ingrese el nuevo número o lista de asientos (ej. 12 o 33,34):', asientoActual);
+  
+  if (nuevoAsiento) {
     try {
       const res = await fetch(`/api/compras?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ asiento: num })
+        body: JSON.stringify({ asiento: String(nuevoAsiento) })
       });
 
       if (res.ok) {
-        alert(`Asiento actualizado a N° ${num} con éxito.`);
+        alert(`Asiento actualizado a: ${nuevoAsiento}`);
         cargarTodosLosPasajes();
         cargarTablaAsientos();
       } else {
@@ -130,28 +189,6 @@ async function editarAsientoDirecto(id, asientoActual) {
     } catch (error) {
       console.error('Error al editar el asiento:', error);
     }
-  }
-}
-
-async function cambiarEstadoAsiento(id, estadoActual) {
-  const nuevoEstado = prompt('Ingresa el nuevo estado (registrado, atendido, cancelado):', estadoActual);
-  if (!nuevoEstado) return;
-
-  try {
-    const res = await fetch(`/api/compras?id=${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ estado: nuevoEstado.toLowerCase() })
-    });
-
-    if (res.ok) {
-      cargarTablaAsientos();
-      cargarTodosLosPasajes();
-    } else {
-      alert('Error al actualizar el estado del asiento.');
-    }
-  } catch (error) {
-    console.error('Error al cambiar estado:', error);
   }
 }
 
@@ -177,7 +214,7 @@ async function actualizarRegistroCompleto(id, origenActual, destinoActual, fecha
   const nuevoDestino = prompt('Editar Destino:', destinoActual);
   const nuevaFecha = prompt('Editar Fecha (AAAA-MM-DD):', fechaActual);
   const nuevaHora = prompt('Editar Hora:', horaActual || '09:00 AM');
-  const nuevoAsiento = prompt('Editar Asiento (1 al 40):', asientoActual);
+  const nuevoAsiento = prompt('Editar Asiento:', asientoActual);
   const nuevoPrecio = prompt('Editar Precio (S/):', precioActual);
 
   if (nuevoOrigen && nuevoDestino && nuevaFecha && nuevoAsiento) {
@@ -190,7 +227,7 @@ async function actualizarRegistroCompleto(id, origenActual, destinoActual, fecha
           destino: nuevoDestino,
           fecha: nuevaFecha,
           hora: nuevaHora,
-          asiento: parseInt(nuevoAsiento) || 1,
+          asiento: String(nuevoAsiento),
           precio: parseFloat(nuevoPrecio) || 0
         })
       });
@@ -219,7 +256,7 @@ async function crearNuevoPasaje() {
   if (!fecha) return;
 
   const hora = prompt('Hora de viaje:', '09:00 AM');
-  const asiento = prompt('Número de asiento (1-40):', '1');
+  const asiento = prompt('Número de asiento (1-40 o lista):', '1');
   const precio = prompt('Precio (S/):', '60');
   const idUsuario = prompt('ID de Usuario:', '1');
 
@@ -233,7 +270,7 @@ async function crearNuevoPasaje() {
         destino: destino,
         fecha: fecha,
         hora: hora || '09:00 AM',
-        asiento: parseInt(asiento) || 1,
+        asiento: String(asiento || '1'),
         precio: parseFloat(precio) || 0,
         estado: 'registrado',
         registrado_por: 'Admin / Empleado'
