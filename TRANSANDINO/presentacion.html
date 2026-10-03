@@ -1,56 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portafolio - Julius Axl Nicolai Perez Huamani</title>
-    <link rel="stylesheet" href="styles-portfolio.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portafolio - Julius Axl Nickolai Perez Huamani</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    header { background-color: #070f1e; text-align: center; padding: 2.5rem 1rem; border-bottom: 1px solid #1e293b; }
+    header h1 { color: #ea580c; font-size: 2rem; margin-bottom: 0.5rem; }
+    header p { color: #cbd5e1; font-size: 1rem; }
+
+    main { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; }
+    
+    .card { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .card h2 { color: #38bdf8; font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; }
+    .card p { color: #cbd5e1; line-height: 1.6; font-size: 0.95rem; }
+
+    .project-info h3 { color: #ea580c; margin-bottom: 0.5rem; }
+    .btn { display: inline-block; margin-top: 1rem; background-color: #ea580c; color: white; text-decoration: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: bold; transition: background 0.3s; }
+    .btn:hover { background-color: #c2410c; }
+
+    .contact-list { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
+    .contact-list li { color: #cbd5e1; font-size: 0.95rem; }
+    .contact-list a { color: #38bdf8; text-decoration: none; }
+    .contact-list a:hover { text-decoration: underline; }
+
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
+  </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="container">
-            <h1>Julius Axl Nickolai Perez Huamani</h1>
-            <p>Estudiante de Diseño Web | Desarrollador Frontend Trainee</p>
-        </div>
-    </header>
+  <header class="header">
+    <div class="container">
+      <h1>Julius Axl Nickolai Perez Huamani</h1>
+      <p>Estudiante de Diseño Web | Desarrollador Frontend Trainee</p>
+    </div>
+  </header>
 
-    <main class="container">
-        <section class="card profile-card">
-            <h2>Perfil Profesional</h2>
-            <p>
-                Estudiante de desarrollo web y el diseño de interfaces.
-                Enfocado en construir experiencias accesibles, semánticas y bien estructuradas
-                utilizando estándares modernos de HTML5 y CSS3.
-            </p>
-        </section>
+  <main class="container">
+    <section class="card profile-card">
+      <h2>Perfil Profesional</h2>
+      <p>
+        Estudiante apasionado por el desarrollo web y el diseño de interfaces.
+        Enfocado en construir experiencias accesibles, semánticas y bien estructuradas
+        utilizando estándares modernos de HTML5, CSS3 y JavaScript.
+      </p>
+    </section>
 
-        <section class="card project-card">
-            <h2>Proyecto Académico Asignado</h2>
-            <article class="project-info">
-                <h3>TransAndino Perú - Transporte Interprovincial</h3>
-                <p>
-                    Plataforma institucional enfocada en la ciudad de Ica para la venta de pasajes,
-                    consulta de horarios y seguimiento de encomiendas.
-                </p>
-                <a href="Practica.html" class="btn">Ver Proyecto TransAndino Perú</a>
-            </article>
-        </section>
+    <section class="card project-card">
+      <h2>Proyecto Académico Asignado</h2>
+      <article class="project-info">
+        <h3>TransAndino Perú - Transporte Interprovincial</h3>
+        <p>
+          Plataforma institucional enfocada en la ciudad de Ica para la venta de pasajes,
+          consulta de horarios, administración de operaciones y gestión de pasajes.
+        </p>
+        <a href="Practica.html" class="btn">Ver Proyecto TransAndino Perú</a>
+      </article>
+    </section>
 
-        <section class="card contact-card">
-            <h2>Contacto & Redes</h2>
-            <ul class="contact-list">
-                <li><strong>Ubicación:</strong> Ica, Perú</li>
-                <li><strong>Correo:</strong> axlperez183@gmail.com</li>
-                <li><strong>GitHub:</strong> <a href="#" target="_blank">https://github.com/dIFERSUR1</a></li>
-                <li><strong>LinkedIn:</strong> <a href="#" target="_blank">https://www.linkedin.com/in/julius-axl-nicolai-perez-huamani-415ba0432/</a></li>
-            </ul>
-        </section>
-    </main>
+    <section class="card contact-card">
+      <h2>Contacto & Redes</h2>
+      <ul class="contact-list">
+        <li><strong>Ubicación:</strong> Ica, Perú</li>
+        <li><strong>Correo:</strong> <a href="mailto:axlperez183@gmail.com">axlperez183@gmail.com</a></li>
+        <li><strong>GitHub:</strong> <a href="https://github.com/dIFERSUR1" target="_blank">https://github.com/dIFERSUR1</a></li>
+        <li><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/julius-axl-nicolai-perez-huamani-415ba0432/" target="_blank">Julius Axl Nickolai Perez Huamani</a></li>
+      </ul>
+    </section>
+  </main>
 
-    <footer class="footer">
-        <p>&copy; 2026 Julius Axl Nickolai Perez Huamani - Asignatura Diseño Web</p>
-    </footer>
+  <footer class="footer">
+    <p>&copy; 2026 Julius Axl Nickolai Perez Huamani - Asignatura Diseño Web</p>
+  </footer>
 
 </body>
 </html>
