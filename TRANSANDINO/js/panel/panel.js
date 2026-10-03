@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   cargarTodosLosPasajes();
   cargarTablaAsientos();
+
+  const btnRecargar = document.querySelector('.btn-recargar') || document.getElementById('btn-recargar');
+  if (btnRecargar) {
+    btnRecargar.addEventListener('click', () => {
+      cargarTodosLosPasajes();
+      cargarTablaAsientos();
+    });
+  }
 });
 
 async function cargarTodosLosPasajes() {
@@ -31,8 +39,8 @@ async function cargarTodosLosPasajes() {
       tr.innerHTML = `
         <td>#${item.id}</td>
         <td><strong>ID: ${item.id_usuario || '1'}</strong></td>
-        <td>${item.origen}</td>
-        <td>${item.destino}</td>
+        <td>${item.origen || 'Ica'}</td>
+        <td>${item.destino || 'Lima'}</td>
         <td>${fechaViaje}</td>
         <td>${horaViaje}</td>
         <td style="color:#f97316; font-weight:bold;">${asientoNum}</td>
@@ -47,7 +55,7 @@ async function cargarTodosLosPasajes() {
         </td>
         <td>
           <button class="btn-action btn-update" style="background:#ea580c; color:white; margin-right:4px; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;" onclick="editarAsientoDirecto(${item.id}, '${asientoNum}')">Editar Asiento</button>
-          <button class="btn-action btn-update" style="background:#0284c7; color:white; margin-right:4px; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asientoNum}', ${item.precio || 0})">Editar Precio</button>
+          <button class="btn-action btn-update" style="background:#0284c7; color:white; margin-right:4px; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;" onclick="actualizarRegistroCompleto(${item.id}, '${item.origen}', '${item.destino}', '${fechaViaje}', '${horaViaje}', '${asientoNum}', ${item.precio || 0})">Editar Registro</button>
           <button class="btn-action btn-delete" style="background:#ef4444; color:white; padding:4px 8px; border-radius:4px; border:none; cursor:pointer;" onclick="eliminarRegistro(${item.id})">Eliminar</button>
         </td>
       `;
@@ -59,28 +67,23 @@ async function cargarTodosLosPasajes() {
   }
 }
 
-// =========================================================
-// 2. PESTAÑA: ASIENTOS DE BUS (VISTA COMPLETA 1 AL 40)
-// =========================================================
 async function cargarTablaAsientos() {
   const tbodyAsientos = document.getElementById('asientos-tbody') || document.querySelector('#tabla-asientos-body');
   if (!tbodyAsientos) return;
 
-  tbodyAsientos.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">Cargando lista de asientos (1-40)...</td></tr>';
+  tbodyAsientos.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">Cargando mapa de 40 asientos...</td></tr>';
 
   try {
     const res = await fetch('/api/compras');
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('Error al consultar /api/compras');
 
     const pasajes = await res.json();
     tbodyAsientos.innerHTML = '';
 
-    // Mapear registros de la base de datos por número de asiento
     const mapaAsientosBD = {};
     if (Array.isArray(pasajes)) {
       pasajes.forEach(item => {
         const val = String(item.asiento || item.num_asiento || '');
-        // Manejar asientos múltiples guardados como "33, 34, 35, 36"
         const numeros = val.split(',').map(s => s.trim());
         numeros.forEach(numStr => {
           if (numStr) mapaAsientosBD[numStr] = item;
@@ -88,20 +91,19 @@ async function cargarTablaAsientos() {
       });
     }
 
-    // Dibujar los 40 asientos obligatorios del bus
     for (let i = 1; i <= 40; i++) {
       const itemBD = mapaAsientosBD[String(i)];
       const tr = document.createElement('tr');
 
-      const estado = itemBD ? itemBD.estado : 'disponible';
-      const origenDestino = itemBD ? `${itemBD.origen} -> ${itemBD.destino}` : 'Lima -> Huancayo (Ruta General)';
+      const estado = itemBD ? (itemBD.estado || 'registrado') : 'disponible';
+      const origenDestino = itemBD ? `${itemBD.origen} -> ${itemBD.destino}` : 'Ica -> Lima (Ruta Base)';
       const idRegistro = itemBD ? itemBD.id : null;
       const pasajeroTexto = itemBD ? `Usuario ID: ${itemBD.id_usuario || '1'}` : 'Libre';
 
-      // Colores de estado
-      let colorEstado = '#22c55e'; // Verde (disponible)
-      if (estado === 'registrado') colorEstado = '#f97316'; // Naranja (pendiente)
-      if (estado === 'atendido') colorEstado = '#ef4444'; // Rojo (ocupado)
+      // Estilos por estado
+      let colorEstado = '#22c55e'; // Verde
+      if (estado === 'registrado') colorEstado = '#f97316'; // Naranja
+      if (estado === 'atendido') colorEstado = '#ef4444'; // Rojo
       if (estado === 'cancelado') colorEstado = '#94a3b8'; // Gris
 
       tr.innerHTML = `
@@ -120,14 +122,11 @@ async function cargarTablaAsientos() {
     }
   } catch (error) {
     console.error('Error al cargar la tabla de asientos:', error);
+    tbodyAsientos.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:1.5rem;">Error al sincronizar mapa de asientos.</td></tr>`;
   }
 }
 
-// =========================================================
-// 3. ACCIONES Y EDICIONES DIRECTAS
-// =========================================================
 
-// Cambiar estado individual de un asiento del 1 al 40
 async function gestionarEstadoAsientoIndividual(numeroAsiento, idRegistro, estadoActual) {
   const nuevoEstado = prompt(`Asiento N° ${numeroAsiento}\nIngrese nuevo estado (disponible, registrado, atendido, cancelado):`, estadoActual);
   if (!nuevoEstado) return;
@@ -136,25 +135,23 @@ async function gestionarEstadoAsientoIndividual(numeroAsiento, idRegistro, estad
 
   try {
     if (idRegistro) {
-      // Si el registro ya existe en BD, actualizamos su estado
       await fetch(`/api/compras?id=${idRegistro}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estado: estadoLwr })
       });
     } else {
-      // Si el asiento estaba disponible, creamos la fila en Neon
       await fetch('/api/compras', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id_usuario: 1,
-          origen: 'Lima',
-          destino: 'Huancayo',
-          fecha: '2026-10-15',
+          origen: 'Ica',
+          destino: 'Lima',
+          fecha: '2026-10-03',
           hora: '09:00 AM',
           asiento: String(numeroAsiento),
-          precio: 60,
+          precio: 50.00,
           estado: estadoLwr,
           registrado_por: 'Empleado Panel'
         })
@@ -169,7 +166,7 @@ async function gestionarEstadoAsientoIndividual(numeroAsiento, idRegistro, estad
 }
 
 async function editarAsientoDirecto(id, asientoActual) {
-  const nuevoAsiento = prompt('Ingrese el nuevo número o lista de asientos (ej. 12 o 33,34):', asientoActual);
+  const nuevoAsiento = prompt('Ingrese el nuevo número de asiento:', asientoActual);
   
   if (nuevoAsiento) {
     try {
@@ -180,7 +177,7 @@ async function editarAsientoDirecto(id, asientoActual) {
       });
 
       if (res.ok) {
-        alert(`Asiento actualizado a: ${nuevoAsiento}`);
+        alert(`Asiento cambiado a: ${nuevoAsiento}`);
         cargarTodosLosPasajes();
         cargarTablaAsientos();
       } else {
@@ -210,9 +207,9 @@ async function cambiarEstado(id, nuevoEstado) {
 }
 
 async function actualizarRegistroCompleto(id, origenActual, destinoActual, fechaActual, horaActual, asientoActual, precioActual) {
-  const nuevoOrigen = prompt('Editar Origen:', origenActual);
-  const nuevoDestino = prompt('Editar Destino:', destinoActual);
-  const nuevaFecha = prompt('Editar Fecha (AAAA-MM-DD):', fechaActual);
+  const nuevoOrigen = prompt('Editar Origen:', origenActual || 'Ica');
+  const nuevoDestino = prompt('Editar Destino:', destinoActual || 'Lima');
+  const nuevaFecha = prompt('Editar Fecha (AAAA-MM-DD):', fechaActual || '2026-10-03');
   const nuevaHora = prompt('Editar Hora:', horaActual || '09:00 AM');
   const nuevoAsiento = prompt('Editar Asiento:', asientoActual);
   const nuevoPrecio = prompt('Editar Precio (S/):', precioActual);
@@ -233,7 +230,7 @@ async function actualizarRegistroCompleto(id, origenActual, destinoActual, fecha
       });
 
       if (res.ok) {
-        alert('Registro actualizado con éxito.');
+        alert('Registro actualizado correctamente.');
         cargarTodosLosPasajes();
         cargarTablaAsientos();
       } else {
@@ -246,18 +243,18 @@ async function actualizarRegistroCompleto(id, origenActual, destinoActual, fecha
 }
 
 async function crearNuevoPasaje() {
-  const origen = prompt('Origen:', 'Lima');
+  const origen = prompt('Origen:', 'Ica');
   if (!origen) return;
 
-  const destino = prompt('Destino:', 'Huancayo');
+  const destino = prompt('Destino:', 'Lima');
   if (!destino) return;
 
-  const fecha = prompt('Fecha (AAAA-MM-DD):', '2026-10-15');
+  const fecha = prompt('Fecha (AAAA-MM-DD):', '2026-10-03');
   if (!fecha) return;
 
   const hora = prompt('Hora de viaje:', '09:00 AM');
-  const asiento = prompt('Número de asiento (1-40 o lista):', '1');
-  const precio = prompt('Precio (S/):', '60');
+  const asiento = prompt('Número de asiento (1-40):', '1');
+  const precio = prompt('Precio (S/):', '50');
   const idUsuario = prompt('ID de Usuario:', '1');
 
   try {
@@ -283,7 +280,7 @@ async function crearNuevoPasaje() {
       cargarTablaAsientos();
     } else {
       const err = await res.json();
-      alert('Error al guardar: ' + (err.message || 'Error en los datos.'));
+      alert('Error al guardar: ' + (err.message || 'Datos no válidos.'));
     }
   } catch (error) {
     console.error('Error al crear el pasaje:', error);
@@ -292,7 +289,7 @@ async function crearNuevoPasaje() {
 }
 
 async function eliminarRegistro(id) {
-  if (confirm(`¿Seguro que deseas eliminar/liberar el registro #${id}?`)) {
+  if (confirm(`¿Seguro que deseas eliminar el registro #${id}?`)) {
     try {
       const res = await fetch(`/api/compras?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
