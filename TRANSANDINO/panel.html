@@ -21,7 +21,6 @@
     main { max-width: 1200px; margin: 2.5rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
     h1 { font-size: 2rem; color: #ea580c; margin-bottom: 1.5rem; text-align: center; }
 
-    /* Pestañas de Navegación */
     .tab-buttons { display: flex; gap: 10px; margin-bottom: 1.5rem; justify-content: center; flex-wrap: wrap; }
     .tab-btn { background: #15233b; border: 1px solid #1e293b; color: #fff; padding: 0.7rem 1.4rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
     .tab-btn.active { background: #ea580c; border-color: #ea580c; color: white; }
@@ -60,7 +59,7 @@
   <main>
     <h1 id="panel-title">Gestión de Operaciones</h1>
 
-    <!-- Pestañas para cambiar entre secciones -->
+    <!-- Pestañas de Navegación -->
     <div class="tab-buttons">
       <button id="tab-btn-pasajes" class="tab-btn admin-only active" onclick="switchTab('pasajes')">🎫 Precios y Pasajes</button>
       <button id="tab-btn-empleados" class="tab-btn admin-only" onclick="switchTab('empleados')">👥 Empleados</button>
@@ -121,7 +120,8 @@
     <!-- SECCIÓN 3: Gestión de Asientos (ADMIN Y EMPLEADOS) -->
     <section id="tab-asientos" class="tab-content">
       <div class="controls">
-        <span style="color: #94a3b8;">Estado y Asignación de Asientos</span>
+        <span style="color: #94a3b8;">Estado y Asignación de Asientos (Ica - Lima)</span>
+        <button class="btn-action btn-update" onclick="cargarAsientos()">🔄 Recargar Tabla</button>
       </div>
 
       <div class="table-container">
@@ -129,7 +129,7 @@
           <thead>
             <tr>
               <th>N° Asiento</th>
-              <th>Pasajero</th>
+              <th>Pasajero (ID)</th>
               <th>Ruta</th>
               <th>Estado Asiento</th>
               <th>Acción Empleado</th>
@@ -147,6 +147,7 @@
   </footer>
 
   <script>
+    const API_URL = '/api/compras';
     const currentUserRole = localStorage.getItem('userRole') || 'empleado';
     const currentUserEmail = localStorage.getItem('userEmail') || 'usuario@transandino.pe';
 
@@ -161,9 +162,7 @@
       document.getElementById('user-info-badge').textContent = `${currentUserEmail} (${currentUserRole.toUpperCase()})`;
 
       if (currentUserRole !== 'admin') {
-        // Ocultar elementos exclusivos de Admin
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-        // Redirigir a pestaña de asientos si no es Admin
         switchTab('asientos');
       }
     }
@@ -179,96 +178,177 @@
       if (targetBtn) targetBtn.classList.add('active');
     }
 
-    /* --- CÓDIGO PASAJES Y PRECIOS (ADMIN) --- */
-    function cargarPasajes() {
+    async function cargarPasajes() {
       const tbody = document.getElementById('panel-tbody');
-      tbody.innerHTML = '';
-      let registros = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Cargando pasajes...</td></tr>';
 
-      if (registros.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:#94a3b8;">No hay pasajes registrados.</td></tr>`;
-        return;
-      }
+      try {
+        const res = await fetch(API_URL);
+        const datos = await res.json();
 
-      registros.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>#${item.id || index + 1}</td>
-          <td><strong>ID: ${item.id_usuario || '1'}</strong></td>
-          <td>${item.origen}</td>
-          <td>${item.destino}</td>
-          <td>${item.fecha_viaje}</td>
-          <td>${item.hora_viaje || '08:00 AM'}</td>
-          <td>${item.num_asiento}</td>
-          <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio}.00</td>
-          <td>
-            <select onchange="cambiarEstado(${index}, this.value)" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
-              <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
-              <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
-              <option value="cancelado" ${item.estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
-            </select>
-          </td>
-          <td>
-            <button class="btn-action btn-update" onclick="editarPrecio(${index})">Editar Precio</button>
-            <button class="btn-action btn-delete" onclick="eliminarRegistro(${index})">Eliminar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+        tbody.innerHTML = '';
+        if (!Array.isArray(datos) || datos.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8;">No hay pasajes registrados.</td></tr>';
+          return;
+        }
 
-    function editarPrecio(index) {
-      if (currentUserRole !== 'admin') {
-        alert('Solo el Administrador puede cambiar el precio de los pasajes.');
-        return;
-      }
-      let registros = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      const nuevoPrecio = prompt('Ingrese el nuevo precio (S/):', registros[index].precio);
-      if (nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
-        registros[index].precio = parseFloat(nuevoPrecio);
-        localStorage.setItem('compras_pasajes', JSON.stringify(registros));
-        cargarPasajes();
-      }
-    }
-
-    function cambiarEstado(index, nuevoEstado) {
-      let registros = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      registros[index].estado = nuevoEstado;
-      localStorage.setItem('compras_pasajes', JSON.stringify(registros));
-    }
-
-    function crearNuevoRegistro() {
-      const orig = prompt('Origen:', 'Lima');
-      const dest = prompt('Destino:', 'Huancayo');
-      const precio = prompt('Precio (S/):', '60');
-      if (orig && dest && precio) {
-        let registros = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-        registros.push({
-          id: Date.now(),
-          id_usuario: 1,
-          origen: orig,
-          destino: dest,
-          fecha_viaje: '2026-10-15',
-          hora_viaje: '09:00 AM',
-          num_asiento: 12,
-          precio: parseFloat(precio),
-          estado: 'registrado'
+        datos.forEach((item) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>#${item.id}</td>
+            <td><strong>ID: ${item.id_usuario || '1'}</strong></td>
+            <td>${item.origen || 'Ica'}</td>
+            <td>${item.destino || 'Lima'}</td>
+            <td>${item.fecha || item.fecha_viaje || '2026-10-15'}</td>
+            <td>${item.hora || item.hora_viaje || '09:00 AM'}</td>
+            <td>${item.asiento || item.num_asiento}</td>
+            <td style="color:#22c55e; font-weight:bold;">S/ ${item.precio || 50}.00</td>
+            <td>
+              <select onchange="cambiarEstado(${item.id}, this.value)" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
+                <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
+                <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
+                <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
+                <option value="cancelado" ${item.estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn-action btn-update" onclick="editarPrecio(${item.id}, ${item.precio})">Editar Precio</button>
+              <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
         });
-        localStorage.setItem('compras_pasajes', JSON.stringify(registros));
-        cargarPasajes();
+      } catch (err) {
+        console.error('Error al cargar pasajes:', err);
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#ef4444;">Error de conexión con el servidor.</td></tr>';
       }
     }
 
-    function eliminarRegistro(index) {
-      if (confirm('¿Deseas eliminar este registro?')) {
-        let registros = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-        registros.splice(index, 1);
-        localStorage.setItem('compras_pasajes', JSON.stringify(registros));
-        cargarPasajes();
+    async function cargarAsientos() {
+      const tbody = document.getElementById('asientos-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando asientos...</td></tr>';
+
+      try {
+        const res = await fetch(API_URL);
+        const datos = await res.json();
+
+        tbody.innerHTML = '';
+        if (!Array.isArray(datos) || datos.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay asientos cargados en la base de datos.</td></tr>';
+          return;
+        }
+
+        datos.forEach((item) => {
+          const tr = document.createElement('tr');
+          const nroAsiento = item.asiento || item.num_asiento;
+          tr.innerHTML = `
+            <td><strong>Asiento N° ${nroAsiento}</strong></td>
+            <td>Usuario ID: ${item.id_usuario || '1'}</td>
+            <td>${item.origen || 'Ica'} - ${item.destino || 'Lima'}</td>
+            <td><span style="color:${item.estado === 'disponible' ? '#38bdf8' : '#22c55e'}; font-weight:bold;">${item.estado || 'disponible'}</span></td>
+            <td>
+              <button class="btn-action btn-update" onclick="modificarEstadoAsiento(${item.id}, '${nroAsiento}')">Cambiar Estado Asiento</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Error al cargar asientos:', err);
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Error de conexión con la base de datos.</td></tr>';
       }
     }
 
-    /* --- CÓDIGO EMPLEADOS (ADMIN) --- */
+    async function cambiarEstado(id, nuevoEstado) {
+      try {
+        await fetch(`${API_URL}?id=${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ estado: nuevoEstado })
+        });
+        cargarAsientos();
+      } catch (err) {
+        alert('Error al actualizar el estado.');
+      }
+    }
+
+    async function modificarEstadoAsiento(id, nroAsiento) {
+      const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / mantenimiento):`, 'atendido');
+      if (nuevoEstado) {
+        try {
+          await fetch(`${API_URL}?id=${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado: nuevoEstado })
+          });
+          cargarAsientos();
+          if (currentUserRole === 'admin') cargarPasajes();
+        } catch (err) {
+          alert('Error al modificar asiento.');
+        }
+      }
+    }
+
+    async function editarPrecio(id, precioActual) {
+      if (currentUserRole !== 'admin') {
+        alert('Solo el Administrador puede cambiar precios.');
+        return;
+      }
+      const nuevoPrecio = prompt('Ingrese el nuevo precio (S/):', precioActual);
+      if (nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
+        try {
+          await fetch(`${API_URL}?id=${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ precio: parseFloat(nuevoPrecio) })
+          });
+          cargarPasajes();
+        } catch (err) {
+          alert('Error al editar el precio.');
+        }
+      }
+    }
+
+    async function crearNuevoRegistro() {
+      const orig = prompt('Origen:', 'Ica');
+      const dest = prompt('Destino:', 'Lima');
+      const precio = prompt('Precio (S/):', '50');
+      const asiento = prompt('Número de asiento:', '1');
+
+      if (orig && dest && precio) {
+        try {
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              origen: orig,
+              destino: dest,
+              precio: parseFloat(precio),
+              asiento: asiento,
+              estado: 'registrado'
+            })
+          });
+          cargarPasajes();
+          cargarAsientos();
+        } catch (err) {
+          alert('Error al crear pasaje.');
+        }
+      }
+    }
+
+    async function eliminarRegistro(id) {
+      if (confirm('¿Deseas eliminar este registro de la base de datos?')) {
+        try {
+          await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
+          cargarPasajes();
+          cargarAsientos();
+        } catch (err) {
+          alert('Error al eliminar registro.');
+        }
+      }
+    }
+
     function cargarEmpleados() {
       const tbody = document.getElementById('empleados-tbody');
       if (!tbody) return;
@@ -283,43 +363,6 @@
       const correo = prompt('Correo Electrónico:');
       if (nombre && correo) {
         alert(`Empleado ${nombre} registrado exitosamente.`);
-      }
-    }
-
-    /* --- CÓDIGO ASIENTOS (EMPLEADOS Y ADMIN) --- */
-    function cargarAsientos() {
-      const tbody = document.getElementById('asientos-tbody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      
-      let registros = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      if (registros.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay asientos asignados actualmente.</td></tr>`;
-        return;
-      }
-
-      registros.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>Asiento N° ${item.num_asiento}</strong></td>
-          <td>Usuario ID: ${item.id_usuario}</td>
-          <td>${item.origen} - ${item.destino}</td>
-          <td><span style="color:#22c55e; font-weight:bold;">${item.estado || 'Ocupado'}</span></td>
-          <td>
-            <button class="btn-action btn-update" onclick="modificarEstadoAsiento(${index})">Cambiar Estado Asiento</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function modificarEstadoAsiento(index) {
-      let registros = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      const nuevoEstado = prompt('Estado del Asiento (Disponible / Ocupado / Mantenimiento):', 'Disponible');
-      if (nuevoEstado) {
-        registros[index].estado = nuevoEstado;
-        localStorage.setItem('compras_pasajes', JSON.stringify(registros));
-        cargarAsientos();
       }
     }
 
