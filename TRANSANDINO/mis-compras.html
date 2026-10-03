@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mis Pasajes - TransAndino Perú</title>
+  
+  <!-- Enlace a la hoja de estilos en la carpeta css -->
+  <link rel="stylesheet" href="css/consulta.css">
+
   <style>
     * {
       box-sizing: border-box;
@@ -267,6 +271,9 @@
     <p>&copy; 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.</p>
   </footer>
 
+  <!-- Enlace al archivo script JS modular -->
+  <script src="js/consulta/consulta.js"></script>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       cargarMisCompras();
@@ -353,7 +360,7 @@
           <td>
             ${puedeAccionar 
               ? `<button class="btn-edit" onclick="editarRegistro(${item.id})">✏️ Editar</button>
-                 <button class="btn-delete" onclick="eliminarRegistro(${item.id})">🗑️️ Eliminar</button>`
+                 <button class="btn-delete" onclick="eliminarRegistro(${item.id})">🗑 Eliminar</button>`
               : `<span style="color:#64748b; font-size:0.8rem;">Atendido (No modificable)</span>`}
           </td>
         `;
