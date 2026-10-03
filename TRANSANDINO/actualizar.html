@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Registro - TransAndino Perú</title>
+    <link rel="stylesheet" href="../css/actualizar.css">
+</head>
+<body>
+    <div class="container">
+        <h2>✏️ Actualizar mis Datos</h2>
+        <form id="form-actualizar">
+            <div class="input-group">
+                <label for="registro-id">ID del Registro a Modificar:</label>
+                <input type="text" id="registro-id" required placeholder="Ej. 12">
+            </div>
+
+            <div class="input-group">
+                <label for="nuevo-dato">Nuevo Valor / Destino / Detalle:</label>
+                <input type="text" id="nuevo-dato" required placeholder="Ingrese el nuevo dato actualizado">
+            </div>
+
+            <button type="submit" class="btn-actualizar">Guardar Cambios</button>
+        </form>
+        <p id="mensaje-estado"></p>
+        <br>
+        <a href="panel.html" class="btn-volver">← Volver al Panel</a>
+    </div>
+
+    <!-- Script específico para actualizar (Semana 7) -->
+    <script type="module" src="../js/actualizar/actualizar.js"></script>
+</body>
+</html>
