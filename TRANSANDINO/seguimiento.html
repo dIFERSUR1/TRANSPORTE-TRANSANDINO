@@ -20,6 +20,7 @@
       box-sizing: border-box; 
       margin: 0; 
       padding: 0; 
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
@@ -54,7 +55,6 @@
       align-items: center;
       gap: 0.5rem;
       text-decoration: none;
-      transition: transform 0.25s ease, color 0.25s ease;
     }
 
     .brand:hover {
@@ -79,7 +79,6 @@
       padding: 0.5rem 0.85rem;
       border-radius: 8px;
       font-weight: 500;
-      transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
     }
 
     .nav-item:hover { 
@@ -95,7 +94,6 @@
       box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
-    /* ANIMACIONES CONTINUAS DE EMOJIS */
     .icon, .brand span, .card h3 span {
       display: inline-block !important;
       will-change: transform;
@@ -139,7 +137,6 @@
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
     }
 
     .btn-login:hover {
@@ -156,7 +153,6 @@
       text-decoration: none;
       font-size: 0.85rem;
       font-weight: 600;
-      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
     }
 
     .btn-register:hover {
@@ -179,7 +175,6 @@
       text-decoration: none;
       font-weight: bold;
       font-size: 0.85rem;
-      transition: background 0.25s ease, transform 0.25s ease;
     }
 
     .btn-panel-admin:hover {
@@ -196,7 +191,6 @@
       font-weight: bold;
       font-size: 0.85rem;
       cursor: pointer;
-      transition: background 0.25s ease, transform 0.25s ease;
     }
 
     .btn-logout-red:hover {
@@ -238,7 +232,6 @@
       padding: 1.8rem;
       margin-bottom: 1.5rem;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
     .card:hover {
@@ -285,7 +278,6 @@
       color: white;
       outline: none;
       font-size: 0.95rem;
-      transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
     .track-input-group input:focus {
@@ -302,7 +294,6 @@
       font-weight: bold;
       cursor: pointer;
       font-size: 0.95rem;
-      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
     }
 
     .btn-track:hover {
@@ -413,7 +404,7 @@
 
     function cerrarSesion() {
       localStorage.clear();
-      window.location.reload();
+      window.location.href = '../index.html';
     }
   </script>
 
