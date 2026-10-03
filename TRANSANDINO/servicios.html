@@ -201,6 +201,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
+      margin-bottom: 3rem; /* Espacio antes de la galería de imágenes */
     }
 
     .card {
@@ -227,7 +228,6 @@
       gap: 0.5rem;
     }
 
-    /* Animación de pulso continuo en los emojis de los títulos */
     .card h3 span {
       display: inline-block;
       animation: pulseEmoji 2s infinite ease-in-out;
@@ -242,6 +242,56 @@
       color: var(--text-muted); 
       font-size: 0.9rem; 
       line-height: 1.5; 
+    }
+
+    /* Estilos nuevos añadidos para las 9 imágenes en cuadrícula (3x3) */
+    .section-subtitle {
+      font-size: 1.5rem;
+      color: var(--cyan-light);
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+
+    .galeria-grid-9 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .imagen-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .imagen-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--cyan-light);
+      box-shadow: 0 10px 25px rgba(56, 189, 248, 0.15);
+    }
+
+    .imagen-card img {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .imagen-card p {
+      color: var(--text-color);
+      font-size: 0.88rem;
+      padding: 1rem;
+      margin: 0;
+      text-align: center;
+    }
+
+    /* Responsivo para celulares (se vuelve de 1 columna) */
+    @media (max-width: 768px) {
+      .galeria-grid-9 {
+        grid-template-columns: 1fr;
+      }
     }
 
     footer {
@@ -282,6 +332,7 @@
   <main class="main-container">
     <h1 class="page-title"><span class="icon">📘</span> Nuestros Servicios</h1>
     
+    <!-- Tus 3 tarjetas originales intactas -->
     <div class="services-grid">
       <div class="card">
         <h3><span>🚌</span> Transporte Interprovincial</h3>
@@ -296,6 +347,56 @@
       <div class="card">
         <h3><span>⭐</span> Servicio VIP / Ejecutivo</h3>
         <p>Unidades panorámicas con snacks a bordo, WiFi integrado, tomacorrientes en cada asiento y entretenimiento a bordo.</p>
+      </div>
+    </div>
+
+    <!-- NUEVA SECCIÓN: Cuadrícula de 9 Imágenes debajo -->
+    <h2 class="section-subtitle">📸 Galería y Actividades de Transporte TransAndino</h2>
+    <div class="galeria-grid-9">
+      <!-- Imagen 1 -->
+      <div class="imagen-card">
+        <img src="img/imagen1.jpg" alt="Servicio 1">
+        <p>Unidades en ruta nacional</p>
+      </div>
+      <!-- Imagen 2 -->
+      <div class="imagen-card">
+        <img src="img/imagen2.jpg" alt="Servicio 2">
+        <p>Comodidad y asientos reclinables</p>
+      </div>
+      <!-- Imagen 3 -->
+      <div class="imagen-card">
+        <img src="img/imagen3.jpg" alt="Servicio 3">
+        <p>Zona de encomiendas y cargas</p>
+      </div>
+      <!-- Imagen 4 -->
+      <div class="imagen-card">
+        <img src="img/imagen4.jpg" alt="Servicio 4">
+        <p>Monitoreo GPS en tiempo real</p>
+      </div>
+      <!-- Imagen 5 -->
+      <div class="imagen-card">
+        <img src="img/imagen5.jpg" alt="Servicio 5">
+        <p>Atención y snacks a bordo</p>
+      </div>
+      <!-- Imagen 6 -->
+      <div class="imagen-card">
+        <img src="img/imagen6.jpg" alt="Servicio 6">
+        <p>Flota de buses modernos</p>
+      </div>
+      <!-- Imagen 7 -->
+      <div class="imagen-card">
+        <img src="img/imagen7.jpg" alt="Servicio 7">
+        <p>Área de embarque y pasajeros</p>
+      </div>
+      <!-- Imagen 8 -->
+      <div class="imagen-card">
+        <img src="img/imagen8.jpg" alt="Servicio 8">
+        <p>Servicio corporativo de carga</p>
+      </div>
+      <!-- Imagen 9 -->
+      <div class="imagen-card">
+        <img src="img/imagen9.jpg" alt="Servicio 9">
+        <p>Personal capacitado en ruta</p>
       </div>
     </div>
   </main>
