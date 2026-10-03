@@ -19,11 +19,23 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       const { id } = req.query;
-      if (id) {
-        const result = await client.query('SELECT * FROM compras WHERE id = $1', [id]);
-        return res.status(200).json(result.rows[0] || {});
+      
+      let result;
+      try {
+        if (id) {
+          result = await client.query('SELECT * FROM compras_pasajes WHERE id = $1', [id]);
+          return res.status(200).json(result.rows[0] || {});
+        }
+        result = await client.query('SELECT * FROM compras_pasajes ORDER BY CAST(NULLIF(regexp_replace(asiento, \'\\D\', \'\', \'g\'), \'\') AS INTEGER) ASC, id ASC');
+      } catch (err) {
+        // Fallback en caso la tabla se llame 'compras'
+        if (id) {
+          result = await client.query('SELECT * FROM compras WHERE id = $1', [id]);
+          return res.status(200).json(result.rows[0] || {});
+        }
+        result = await client.query('SELECT * FROM compras ORDER BY id DESC');
       }
-      const result = await client.query('SELECT * FROM compras ORDER BY id DESC');
+
       return res.status(200).json(result.rows);
     }
 
@@ -44,23 +56,23 @@ export default async function handler(req, res) {
       } = req.body;
 
       const fViaje = fecha_viaje || fecha || '2026-10-15';
-      const hViaje = hora_viaje || hora || '08:00 AM';
-      const nAsiento = parseInt(num_asiento || asiento || 1);
+      const hViaje = hora_viaje || hora || '09:00 AM';
+      const nAsiento = String(num_asiento || asiento || '1');
       const codSeguimiento = codigo_seguimiento || `TA-${Math.floor(100000 + Math.random() * 900000)}`;
 
       const query = `
-        INSERT INTO compras (id_usuario, origen, destino, fecha_viaje, hora_viaje, num_asiento, precio, estado, codigo_seguimiento)
+        INSERT INTO compras_pasajes (id_usuario, origen, destino, fecha, hora, asiento, precio, estado, codigo_seguimiento)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING *;
       `;
       const values = [
         parseInt(id_usuario) || 1,
-        origen,
-        destino,
+        origen || 'Ica',
+        destino || 'Lima',
         fViaje,
         hViaje,
         nAsiento,
-        parseFloat(precio) || 0,
+        parseFloat(precio) || 50.00,
         estado || 'registrado',
         codSeguimiento
       ];
@@ -71,29 +83,28 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT') {
       const { id } = req.query;
-      const { estado, origen, destino, fecha_viaje, precio } = req.body;
+      const { estado, origen, destino, fecha_viaje, precio, asiento } = req.body;
 
-      if (!id) {
-        return res.status(400).json({ message: 'Falta el ID del registro.' });
+      const targetId = id || req.body.id;
+
+      if (!targetId && !asiento) {
+        return res.status(400).json({ message: 'Falta el ID o Número de Asiento del registro.' });
       }
 
-      if (estado && !origen) {
-        const query = 'UPDATE compras SET estado = $1 WHERE id = $2 RETURNING *;';
-        const result = await client.query(query, [estado, id]);
-        return res.status(200).json(result.rows[0]);
-      } else {
-        const query = `
-          UPDATE compras 
-          SET origen = COALESCE($1, origen),
-              destino = COALESCE($2, destino),
-              fecha_viaje = COALESCE($3, fecha_viaje),
-              precio = COALESCE($4, precio),
-              estado = COALESCE($5, estado)
-          WHERE id = $6 RETURNING *;
-        `;
-        const result = await client.query(query, [origen, destino, fecha_viaje, precio, estado, id]);
-        return res.status(200).json(result.rows[0]);
+      let result;
+      if (targetId) {
+        result = await client.query(
+          'UPDATE compras_pasajes SET estado = $1 WHERE id = $2 RETURNING *;',
+          [estado, targetId]
+        );
+      } else if (asiento) {
+        result = await client.query(
+          'UPDATE compras_pasajes SET estado = $1 WHERE asiento = $2 RETURNING *;',
+          [estado, String(asiento)]
+        );
       }
+
+      return res.status(200).json(result.rows[0] || { message: 'Actualizado correctamente' });
     }
 
     if (req.method === 'DELETE') {
@@ -101,7 +112,7 @@ export default async function handler(req, res) {
       if (!id) {
         return res.status(400).json({ message: 'Falta el ID a eliminar.' });
       }
-      await client.query('DELETE FROM compras WHERE id = $1', [id]);
+      await client.query('DELETE FROM compras_pasajes WHERE id = $1', [id]);
       return res.status(200).json({ message: 'Registro eliminado correctamente.' });
     }
 
