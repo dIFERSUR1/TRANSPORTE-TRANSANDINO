@@ -88,3 +88,52 @@ body {
     font-size: 0.9rem;
     color: #64748b;
 }
+
+
+.galeria-titulo {
+    color: var(--primary-color);
+    margin: 40px 0 20px 0;
+    text-align: center;
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 5px;
+}
+
+.galeria-grid-9 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
+    gap: 20px; /* Espacio entre cada tarjeta de imagen */
+}
+
+.imagen-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.imagen-card:hover {
+    transform: translateY(-5px);
+}
+
+.imagen-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover; 
+    display: block;
+}
+
+.imagen-card p {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .galeria-grid-9 {
+        grid-template-columns: 1fr;
+    }
+}
