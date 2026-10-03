@@ -263,13 +263,14 @@
   </footer>
 
   <script>
-    document.getElementById('register-form').addEventListener('submit', function(e) {
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const nombre = document.getElementById('nombre').value.trim();
       const dni = document.getElementById('dni').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
 
       const empleadosAutorizados = [
         'transandinoempleado001@gmail.com',
@@ -284,12 +285,24 @@
         rol = 'empleado';
       }
 
-      const nuevoUsuario = { nombre, dni, telefono, email, rol };
-      localStorage.setItem('user', JSON.stringify(nuevoUsuario));
+      const nuevoUsuario = { nombre, dni, telefono, email, password, rol };
+      
+      try {
+        await fetch('/api/usuarios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nuevoUsuario)
+        });
+      } catch (err) {
+        console.log('Guardando usuario en el almacenamiento local...');
+      }
 
+      localStorage.setItem('user', JSON.stringify(nuevoUsuario));
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userRole', rol);
+
+      alert(`¡Cuenta creada con éxito! Bienvenido, ${nombre}.`);
 
       if (rol === 'admin' || rol === 'empleado') {
         window.location.href = 'panel.html';
