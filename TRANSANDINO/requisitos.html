@@ -33,7 +33,6 @@
       overflow-x: hidden;
     }
 
-    /* NAVBAR */
     .navbar {
       background: #030710;
       padding: 0.8rem 2rem;
@@ -94,7 +93,6 @@
       box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
     }
 
-    /* ANIMACIÓN CONTINUA DE EMOJIS */
     .icon, .brand span, .card h3 span {
       display: inline-block;
     }
@@ -121,7 +119,6 @@
       transform: scale(1.3) rotate(10deg);
     }
 
-    /* BOTONES DE AUTENTICACIÓN */
     .auth-buttons { 
       display: flex; 
       gap: 0.6rem; 
@@ -199,7 +196,6 @@
       box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
     }
 
-    /* CONTENEDOR PRINCIPAL */
     .main-container {
       flex: 1;
       padding: 2.5rem 1.5rem;
@@ -337,7 +333,7 @@
 
         const rawName = userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
         const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-        const panelLabel = userRole === 'admin' ? '⚙️ Panel Admin' : (userRole === 'empleado' ? '⚙️ Panel Empleado' : '⚙️ Mi Panel');
+        const panelLabel = userRole === 'admin' ? '⚙️️ Panel Admin' : (userRole === 'empleado' ? '⚙️ Panel Empleado' : '⚙️ Mi Panel');
 
         authContainer.innerHTML = `
           <span class="user-greeting">👋 Hola, ${formattedName}</span>
@@ -351,7 +347,7 @@
 
     function cerrarSesion() {
       localStorage.clear();
-      window.location.reload();
+      window.location.href = '../index.html';
     }
   </script>
 
