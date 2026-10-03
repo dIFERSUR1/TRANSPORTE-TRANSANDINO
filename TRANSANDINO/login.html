@@ -194,11 +194,11 @@
     </a>
     <nav>
       <a href="index.html">🍊 Inicio</a>
-      <a href="pages/servicios.html">📘 Servicios</a>
-      <a href="pages/requisitos.html">📜 Requisitos</a>
-      <a href="pages/compra-pasajes.html">🎟 Pasajes</a>
-      <a href="pages/seguimiento.html">📦 Encomiendas</a>
-      <a href="pages/ubicacion.html">📍 Ubicación</a>
+      <a href="servicios.html">📘 Servicios</a>
+      <a href="requisitos.html">📜 Requisitos</a>
+      <a href="compra-pasajes.html">🎟 Pasajes</a>
+      <a href="seguimiento.html">📦 Encomiendas</a>
+      <a href="ubicacion.html">📍 Ubicación</a>
       <a href="login.html" class="btn-login-active">🔑 Iniciar Sesión</a>
       <a href="registro.html">✍️ Registrarse</a>
     </nav>
@@ -234,7 +234,7 @@
   </footer>
 
   <script>
-    document.getElementById('login-form').addEventListener('submit', function(e) {
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const email = document.getElementById('email').value.trim().toLowerCase();
