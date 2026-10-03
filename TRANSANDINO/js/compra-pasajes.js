@@ -1,399 +1,21 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TransAndino Perú - Pasajes</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
+const PRECIO_PASAJE = 50.00;
+let seleccionados = [];
 
-    body {
-      background-color: #080c14;
-      color: #ffffff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* HEADER FIEL A TU INDEX.HTML */
-    header {
-      background-color: #0b0f19;
-      padding: 0.8rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #1e293b;
-    }
-
-    .logo {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #38bdf8;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    nav {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    nav a {
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 0.9rem;
-      padding: 0.4rem 0.8rem;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: all 0.2s;
-    }
-
-    nav a:hover {
-      color: #ffffff;
-    }
-
-    /* Pestaña activa con estilo naranja del index */
-    nav a.active {
-      background-color: #ea580c;
-      color: #ffffff !important;
-      font-weight: bold;
-    }
-
-    .user-section {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .user-greeting {
-      color: #38bdf8;
-      font-size: 0.9rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .btn-logout {
-      background-color: #ef4444;
-      color: white;
-      border: none;
-      padding: 0.4rem 0.8rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 0.85rem;
-    }
-
-    /* CONTENEDOR PRINCIPAL */
-    main {
-      flex: 1;
-      max-width: 900px;
-      width: 100%;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      color: #38bdf8;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    /* TARJETA CON ESTILO DE TU INDEX */
-    .card {
-      background-color: #111827;
-      border: 1px solid #1f2d42;
-      border-radius: 12px;
-      padding: 1.8rem;
-      margin-bottom: 2rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-bottom: 1.2rem;
-    }
-
-    @media (max-width: 650px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .form-group label {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      font-weight: 600;
-    }
-
-    .form-group select, .form-group input {
-      background-color: #0b0f19;
-      border: 1px solid #1f2d42;
-      color: #ffffff;
-      padding: 0.7rem;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .form-group select:focus, .form-group input:focus {
-      border-color: #38bdf8;
-    }
-
-    .btn-search {
-      width: 100%;
-      background-color: #ea580c;
-      color: white;
-      border: none;
-      padding: 0.8rem;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .btn-search:hover {
-      background-color: #c2410c;
-    }
-
-    /* SECCIÓN ASIENTOS */
-    #seccion-asientos {
-      display: none;
-    }
-
-    .bus-title {
-      text-align: center;
-      color: #38bdf8;
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-    }
-
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      font-size: 0.85rem;
-      color: #94a3b8;
-      margin-bottom: 1.2rem;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-    }
-
-    .seats-container {
-      max-width: 280px;
-      margin: 0 auto 1.5rem auto;
-      background-color: #0b0f19;
-      padding: 1.2rem;
-      border-radius: 10px;
-      border: 1px solid #1f2d42;
-    }
-
-    .seats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-
-    /* Pasillo central */
-    .seats-grid button:nth-child(4n+2) {
-      margin-right: 14px;
-    }
-
-    .seat-btn {
-      height: 38px;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-
-    .seat-btn.disponible {
-      background-color: #16a34a;
-      color: white;
-    }
-
-    .seat-btn.seleccionado {
-      background-color: #ea580c;
-      color: white;
-      box-shadow: 0 0 6px rgba(234, 88, 12, 0.8);
-    }
-
-    .checkout-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid #1f2d42;
-      padding-top: 1rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .btn-reserve {
-      background-color: #16a34a;
-      color: white;
-      border: none;
-      padding: 0.7rem 1.4rem;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 0.95rem;
-      cursor: pointer;
-    }
-
-    .btn-reserve:disabled {
-      background-color: #475569;
-      cursor: not-allowed;
-    }
-
-    footer {
-      text-align: center;
-      padding: 1.2rem;
-      font-size: 0.8rem;
-      color: #64748b;
-      border-top: 1px solid #1e293b;
-      margin-top: auto;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- HEADER -->
-  <header>
-    <a href="../index.html" class="logo">🚌 TransAndino Perú</a>
-    <nav>
-      <a href="../index.html">Inicio</a>
-      <a href="#">📘 Servicios</a>
-      <a href="#">📜 Requisitos</a>
-      <a href="compra-pasajes.html" class="active">✔ Pasajes</a>
-      <a href="#">📦 Encomiendas</a>
-      <a href="#">📍 Ubicación</a>
-    </nav>
-    <div class="user-section">
-      <span class="user-greeting">✋ Hola, Usuario01</span>
-      <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
-    </div>
-  </header>
-
-  <!-- CONTENIDO -->
-  <main>
-    <h1>✏️ Reserva y Salidas de Pasajes</h1>
-
-    <!-- FORMULARIO DE BÚSQUEDA -->
-    <div class="card">
-      <form id="form-busqueda">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="origen">Origen</label>
-            <select id="origen" required>
-              <option value="Ica" selected>Ica</option>
-              <option value="Lima">Lima</option>
-              <option value="Huancayo">Huancayo</option>
-              <option value="Arequipa">Arequipa</option>
-              <option value="Cusco">Cusco</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="destino">Destino</label>
-            <select id="destino" required>
-              <option value="Lima" selected>Lima</option>
-              <option value="Ica">Ica</option>
-              <option value="Huancayo">Huancayo</option>
-              <option value="Arequipa">Arequipa</option>
-              <option value="Cusco">Cusco</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="fecha">Fecha de Viaje</label>
-            <input type="date" id="fecha" value="2026-10-02" required>
-          </div>
-        </div>
-
-        <button type="submit" class="btn-search">🔍 Buscar Pasajes</button>
-      </form>
-    </div>
-
-    <!-- SECCIÓN DE 40 ASIENTOS -->
-    <div class="card" id="seccion-asientos">
-      <div class="bus-title">🚌 Selección de Asientos (Bus 40 Pasajeros)</div>
-
-      <div class="legend">
-        <div class="legend-item">
-          <div class="dot" style="background-color: #16a34a;"></div>
-          <span>Disponible</span>
-        </div>
-        <div class="legend-item">
-          <div class="dot" style="background-color: #ea580c;"></div>
-          <span>Seleccionado</span>
-        </div>
-      </div>
-
-      <div class="seats-container">
-        <div class="seats-grid" id="seats-grid"></div>
-      </div>
-
-      <div class="checkout-bar">
-        <div>
-          <p style="font-size: 0.9rem; color: #94a3b8;">Asientos seleccionados: <strong id="lbl-asientos" style="color: #ffffff;">Ninguno</strong></p>
-          <p style="font-size: 1.1rem; font-weight: bold; margin-top: 0.2rem;">Total: <span style="color: #16a34a;">S/ <span id="lbl-total">0.00</span></span></p>
-        </div>
-        <button id="btn-reservar" class="btn-reserve" disabled onclick="confirmarReserva()">Confirmar Reserva</button>
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    © 2026 TransAndino Perú - Todos los derechos reservados.
-  </footer>
-
-  <script>
-    const PRECIO_PASAJE = 50.00;
-    let seleccionados = [];
-
-    document.getElementById('form-busqueda').addEventListener('submit', function (e) {
+document.addEventListener('DOMContentLoaded', () => {
+  const formBusqueda = document.getElementById('form-busqueda');
+  if (formBusqueda) {
+    formBusqueda.addEventListener('submit', function (e) {
       e.preventDefault();
       
       const grid = document.getElementById('seats-grid');
       const seccion = document.getElementById('seccion-asientos');
       
+      if (!grid || !seccion) return;
+
       grid.innerHTML = '';
       seleccionados = [];
       actualizarResumen();
 
-      // Generación de los 40 asientos
       for (let i = 1; i <= 40; i++) {
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -406,46 +28,95 @@
 
       seccion.style.display = 'block';
     });
+  }
+});
 
-    function toggleAsiento(numero, boton) {
-      const index = seleccionados.indexOf(numero);
-      
-      if (index > -1) {
-        seleccionados.splice(index, 1);
-        boton.classList.remove('seleccionado');
-        boton.classList.add('disponible');
-      } else {
-        seleccionados.push(numero);
-        boton.classList.remove('disponible');
-        boton.classList.add('seleccionado');
-      }
-      
-      actualizarResumen();
+function toggleAsiento(numero, boton) {
+  const index = seleccionados.indexOf(numero);
+  
+  if (index > -1) {
+    seleccionados.splice(index, 1);
+    boton.classList.remove('seleccionado');
+    boton.classList.add('disponible');
+  } else {
+    seleccionados.push(numero);
+    boton.classList.remove('disponible');
+    boton.classList.add('seleccionado');
+  }
+  
+  actualizarResumen();
+}
+
+// Actualizar contadores y total a pagar
+function actualizarResumen() {
+  const lblAsientos = document.getElementById('lbl-asientos');
+  const lblTotal = document.getElementById('lbl-total');
+  const btnReservar = document.getElementById('btn-reservar');
+
+  if (!lblAsientos || !lblTotal || !btnReservar) return;
+
+  if (seleccionados.length === 0) {
+    lblAsientos.innerText = 'Ninguno';
+    lblTotal.innerText = '0.00';
+    btnReservar.disabled = true;
+  } else {
+    seleccionados.sort((a, b) => a - b);
+    lblAsientos.innerText = seleccionados.join(', ');
+    lblTotal.innerText = (seleccionados.length * PRECIO_PASAJE).toFixed(2);
+    btnReservar.disabled = false;
+  }
+}
+
+async function confirmarReserva() {
+  const origen = document.getElementById('origen')?.value || 'Ica';
+  const destino = document.getElementById('destino')?.value || 'Lima';
+  const fecha = document.getElementById('fecha')?.value || '2026-10-02';
+  const btnReservar = document.getElementById('btn-reservar');
+
+  if (seleccionados.length === 0) return;
+
+  if (btnReservar) {
+    btnReservar.disabled = true;
+    btnReservar.innerText = 'Guardando reserva...';
+  }
+
+  try {
+    for (const asientoNum of seleccionados) {
+      await fetch('/api/compras', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_usuario: 1,
+          origen: origen,
+          destino: destino,
+          fecha: fecha,
+          hora: '09:00 AM',
+          asiento: String(asientoNum),
+          precio: PRECIO_PASAJE,
+          estado: 'registrado',
+          registrado_por: 'Cliente Web'
+        })
+      });
     }
 
-    function actualizarResumen() {
-      const lblAsientos = document.getElementById('lbl-asientos');
-      const lblTotal = document.getElementById('lbl-total');
-      const btnReservar = document.getElementById('btn-reservar');
+    alert(`¡Reserva realizada con éxito!\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}\nTotal: S/ ${(seleccionados.length * PRECIO_PASAJE).toFixed(2)}`);
+    
+    seleccionados = [];
+    actualizarResumen();
+    const seccion = document.getElementById('seccion-asientos');
+    if (seccion) seccion.style.display = 'none';
 
-      if (seleccionados.length === 0) {
-        lblAsientos.innerText = 'Ninguno';
-        lblTotal.innerText = '0.00';
-        btnReservar.disabled = true;
-      } else {
-        seleccionados.sort((a, b) => a - b);
-        lblAsientos.innerText = seleccionados.join(', ');
-        lblTotal.innerText = (seleccionados.length * PRECIO_PASAJE).toFixed(2);
-        btnReservar.disabled = false;
-      }
+  } catch (error) {
+    console.error('Error al guardar la reserva:', error);
+    alert('Ocurrió un error al guardar la reserva en el servidor.');
+  } finally {
+    if (btnReservar) {
+      btnReservar.disabled = false;
+      btnReservar.innerText = 'Confirmar Reserva';
     }
+  }
+}
 
-    function confirmarReserva() {
-      const origen = document.getElementById('origen').value;
-      const destino = document.getElementById('destino').value;
-      alert(`Reserva realizada con éxito:\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}\nTotal: S/ ${(seleccionados.length * PRECIO_PASAJE).toFixed(2)}`);
-    }
-
-    function cerrarSesion() {
-      window.location.href = "../index.html";
-    }
+function cerrarSesion() {
+  window.location.href = "../index.html";
+}
