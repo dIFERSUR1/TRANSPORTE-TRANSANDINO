@@ -348,7 +348,7 @@
     async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
       const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
       if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero !== String(nroAsientoActual)) {
-        const numParsed = parseInt(nuevoNumero);
+        const numParsed = parseInt(nuevoNumero, 10);
         await actualizarServidorOLocal(id, { asiento: numParsed, num_asiento: numParsed, empleado_atendio: currentUserEmail }, indexFila);
         await cargarAsientos(true);
         if (currentUserRole === 'admin') await cargarPasajes(true);
@@ -419,18 +419,17 @@
     }
 
     async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
-      let index = pasajesData.findIndex(p => String(p.id) === String(id) && id !== '' && id !== 'undefined');
-      if (index === -1 && indexFila !== undefined && pasajesData[indexFila]) {
-        index = indexFila;
+      let targetRecord = pasajesData.find(p => String(p.id) === String(id) && id !== '' && id !== 'undefined');
+      if (!targetRecord && indexFila !== undefined && pasajesData[indexFila]) {
+        targetRecord = pasajesData[indexFila];
       }
 
-      if (index !== -1 && pasajesData[index]) {
-        pasajesData[index] = { ...pasajesData[index], ...nuevoObjeto };
+      const recordId = targetRecord ? targetRecord.id : id;
+
+      if (targetRecord) {
+        Object.assign(targetRecord, nuevoObjeto);
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
       }
-
-      // Si tenemos un ID válido, se realiza la llamada PUT a la API
-      const recordId = id || (pasajesData[indexFila] ? pasajesData[indexFila].id : null);
 
       if (recordId && String(recordId) !== '0' && String(recordId) !== 'undefined') {
         try {
@@ -541,6 +540,5 @@
       window.location.href = 'login.html';
     }
   </script>
-
 </body>
 </html>
