@@ -31,11 +31,13 @@ export default async function handler(req, res) {
       const { id } = req.query;
 
       if (id) {
-        const result = await client.query('SELECT * FROM compras_pasajes WHERE id = $1', [id]);
+        const result = await client.query('SELECT * FROM compras_pasajes WHERE id = $1', [parseInt(id)]);
+        await client.end();
         return res.status(200).json(result.rows[0] || {});
       }
 
       const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id DESC');
+      await client.end();
       return res.status(200).json(result.rows);
     }
 
@@ -79,59 +81,74 @@ export default async function handler(req, res) {
       ];
 
       const result = await client.query(query, values);
+      await client.end();
       return res.status(201).json(result.rows[0]);
     }
 
-    // 3. ACTUALIZAR PASAJE (PUT - Incluye cambio de asiento, precio y estado)
+    // 3. ACTUALIZAR PASAJE (PUT - Asiento, Precio, Estado)
     if (req.method === 'PUT') {
-      const targetId = req.query.id || (req.body && req.body.id);
+      const rawId = req.query.id || (req.body && req.body.id);
 
-      if (!targetId) {
+      if (!rawId) {
+        await client.end();
         return res.status(400).json({ message: 'Falta el ID del registro a actualizar.' });
       }
 
+      const targetId = parseInt(rawId);
       const { estado, precio, id_usuario, asiento, num_asiento } = req.body;
       const nuevoAsiento = asiento || num_asiento;
 
-      const result = await client.query(
-        `UPDATE compras_pasajes 
-         SET estado = COALESCE($1, estado), 
-             precio = COALESCE($2, precio),
-             id_usuario = COALESCE($3, id_usuario),
-             asiento = COALESCE($4, asiento)
-         WHERE id = $5 RETURNING *;`,
-        [
-          estado !== undefined ? estado : null,
-          precio !== undefined ? precio : null,
-          id_usuario !== undefined ? id_usuario : null,
-          nuevoAsiento !== undefined ? String(nuevoAsiento) : null,
-          targetId
-        ]
-      );
+      const query = `
+        UPDATE compras_pasajes 
+        SET estado = COALESCE($1, estado), 
+            precio = COALESCE($2, precio),
+            id_usuario = COALESCE($3, id_usuario),
+            asiento = COALESCE($4, asiento)
+        WHERE id = $5 
+        RETURNING *;
+      `;
 
-      return res.status(200).json(result.rows[0] || { message: 'Actualizado correctamente' });
+      const values = [
+        estado !== undefined && estado !== null ? String(estado) : null,
+        precio !== undefined && precio !== null ? parseFloat(precio) : null,
+        id_usuario !== undefined && id_usuario !== null ? parseInt(id_usuario) : null,
+        nuevoAsiento !== undefined && nuevoAsiento !== null ? String(nuevoAsiento) : null,
+        targetId
+      ];
+
+      const result = await client.query(query, values);
+      await client.end();
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ message: `No se encontró ningún registro con ID: ${targetId}` });
+      }
+
+      return res.status(200).json(result.rows[0]);
     }
 
     // 4. ELIMINAR PASAJE (DELETE)
     if (req.method === 'DELETE') {
-      const targetId = req.query.id || (req.body && req.body.id);
+      const rawId = req.query.id || (req.body && req.body.id);
 
-      if (!targetId) {
+      if (!rawId) {
+        await client.end();
         return res.status(400).json({ message: 'Falta el ID a eliminar.' });
       }
 
-      await client.query('DELETE FROM compras_pasajes WHERE id = $1', [targetId]);
-      return res.status(200).json({ message: 'Registro eliminado correctamente de la base de datos.' });
+      await client.query('DELETE FROM compras_pasajes WHERE id = $1', [parseInt(rawId)]);
+      await client.end();
+      return res.status(200).json({ message: 'Registro eliminado correctamente.' });
     }
 
+    await client.end();
     return res.status(405).json({ message: 'Método no permitido' });
+
   } catch (error) {
-    console.error('Error detallado en API compras:', error);
+    console.error('Error en API compras:', error);
+    try { await client.end(); } catch (e) {}
     return res.status(500).json({ 
       message: 'Error interno en servidor o base de datos', 
       error: error.message 
     });
-  } finally {
-    await client.end();
   }
 }
