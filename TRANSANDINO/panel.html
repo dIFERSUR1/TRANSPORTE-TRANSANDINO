@@ -348,7 +348,6 @@
     async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
       const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
       if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero !== String(nroAsientoActual)) {
-        // CORRECCIÓN CLAVE: Actualiza tanto 'asiento' como 'num_asiento' en memoria para que la vista se repinte de inmediato
         await actualizarServidorOLocal(id, { asiento: nuevoNumero, num_asiento: nuevoNumero, empleado_atendio: currentUserEmail }, indexFila);
         await cargarAsientos(true);
         if (currentUserRole === 'admin') await cargarPasajes(true);
@@ -386,7 +385,6 @@
         empleadosData[index].turno = nuevoTurno;
         localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
         cargarEmpleados();
-        // CORRECCIÓN CLAVE: Refresca también las tablas que muestran los turnos de atención
         if (currentUserRole === 'admin') cargarPasajes();
         alert(`Turno de ${emp.nombre} actualizado a: ${nuevoTurno}`);
       }
@@ -432,13 +430,18 @@
 
       if (id && String(id) !== '0' && String(id) !== 'undefined') {
         try {
-          await fetch(`${API_URL}?id=${id}`, {
+          // Se envía el ID tanto por parámetro URL como dentro del payload del body
+          const payload = { id: id, ...nuevoObjeto };
+          const res = await fetch(`${API_URL}?id=${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevoObjeto)
+            body: JSON.stringify(payload)
           });
+          if (!res.ok) {
+            console.warn('El servidor devolvió un estado no exitoso al actualizar.');
+          }
         } catch (err) {
-          console.log('Actualizado localmente');
+          console.log('Actualizado localmente por fallo de conexión:', err);
         }
       }
     }
@@ -469,7 +472,6 @@
 
       if (orig && dest && precio) {
         const nuevoItem = {
-          id: Date.now(),
           usuario_id: '1',
           empleado_atendio: currentUserEmail || 'Admin',
           turno: new Date().getHours() < 13 ? 'Mañana' : 'Tarde',
@@ -484,13 +486,21 @@
         };
 
         try {
-          await fetch(API_URL, {
+          const res = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(nuevoItem)
           });
+          
+          if (res.ok) {
+            const dataGuardada = await res.json();
+            if (dataGuardada && dataGuardada.id) {
+              nuevoItem.id = dataGuardada.id;
+            }
+          }
         } catch (err) {
-          console.log('Guardado en local');
+          console.log('Guardado en local por fallo de servidor');
+          if (!nuevoItem.id) nuevoItem.id = Date.now();
         }
 
         pasajesData.push(nuevoItem);
