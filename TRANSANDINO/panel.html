@@ -324,13 +324,35 @@
           <td><strong>Asiento N° ${nroAsiento}</strong></td>
           <td>Usuario ID: ${usuarioId}</td>
           <td>${ruta}</td>
-          <td><span style="color:${obtenerColorEstado(estado)}; font-weight:bold;">${estado}</span></td>
           <td>
-            <button class="btn-action btn-update" onclick="modificarEstadoAsiento('${item.id || ''}', '${nroAsiento}', ${index})">Cambiar Estado Asiento</button>
+            <select onchange="cambiarEstadoAsientoDirecto('${item.id || ''}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.3rem; border-radius:4px; cursor:pointer;">
+              <option value="disponible" ${estado === 'disponible' ? 'selected' : ''}>disponible</option>
+              <option value="registrado" ${estado === 'registrado' ? 'selected' : ''}>registrado</option>
+              <option value="atendido" ${estado === 'atendido' ? 'selected' : ''}>atendido</option>
+              <option value="cancelado" ${estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn-action btn-update" onclick="modificarNumeroAsiento('${item.id || ''}', '${nroAsiento}', ${index})">✏️ Cambiar N° Asiento</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    async function cambiarEstadoAsientoDirecto(id, nuevoEstado, indexFila) {
+      await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
+      cargarAsientos();
+      if (currentUserRole === 'admin') cargarPasajes();
+    }
+
+    async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
+      const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
+      if (nuevoNumero && nuevoNumero !== nroAsientoActual) {
+        await actualizarServidorOLocal(id, { asiento: nuevoNumero, empleado_atendio: currentUserEmail }, indexFila);
+        cargarAsientos();
+        if (currentUserRole === 'admin') cargarPasajes();
+      }
     }
 
     /* GESTIÓN DE EMPLEADOS Y HORARIOS */
@@ -359,7 +381,7 @@
     function editarTurnoEmpleado(index) {
       const emp = empleadosData[index];
       const nuevoTurno = prompt(`Ingrese el nuevo horario/turno para ${emp.nombre}:`, emp.turno || 'Mañana (08:00 AM - 02:00 PM)');
-      
+
       if (nuevoTurno) {
         empleadosData[index].turno = nuevoTurno;
         localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
@@ -423,23 +445,6 @@
       await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
       cargarAsientos();
       if (currentUserRole === 'admin') cargarPasajes();
-    }
-
-    async function modificarEstadoAsiento(id, nroAsiento, indexFila) {
-      const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, 'cancelado');
-      if (nuevoEstado) {
-        const estadoLimpio = nuevoEstado.toLowerCase().trim();
-
-        if (pasajesData[indexFila]) {
-          pasajesData[indexFila].estado = estadoLimpio;
-          localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-        }
-
-        cargarAsientos();
-        if (currentUserRole === 'admin') cargarPasajes();
-
-        await actualizarServidorOLocal(id, { estado: estadoLimpio, empleado_atendio: currentUserEmail }, indexFila);
-      }
     }
 
     async function editarPrecio(id, precioActual, indexFila) {
