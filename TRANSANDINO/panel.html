@@ -235,7 +235,7 @@
       if (est === 'registrado') return '#22c55e'; // Verde
       if (est === 'atendido') return '#a855f7';   // Morado
       if (est === 'cancelado') return '#ef4444';  // Rojo
-      return '#22c55e';                           // Verde por defecto
+      return '#22c55e';
     }
 
     async function cargarPasajes() {
@@ -318,17 +318,17 @@
     }
 
     async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
-      let index = pasajesData.findIndex(p => String(p.id) === String(id));
+      let index = pasajesData.findIndex(p => String(p.id) === String(id) && id !== '' && id !== 'undefined');
       if (index === -1 && indexFila !== undefined && pasajesData[indexFila]) {
         index = indexFila;
       }
 
-      if (index !== -1) {
+      if (index !== -1 && pasajesData[index]) {
         pasajesData[index] = { ...pasajesData[index], ...nuevoObjeto };
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
       }
 
-      if (id && String(id) !== '0') {
+      if (id && String(id) !== '0' && String(id) !== 'undefined') {
         try {
           await fetch(`${API_URL}/${id}`, {
             method: 'PUT',
@@ -351,9 +351,19 @@
       const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, 'cancelado');
       if (nuevoEstado) {
         const estadoLimpio = nuevoEstado.toLowerCase().trim();
-        await actualizarServidorOLocal(id, { estado: estadoLimpio }, indexFila);
+
+        // Actualización directa garantizada en la estructura de datos local
+        if (pasajesData[indexFila]) {
+          pasajesData[indexFila].estado = estadoLimpio;
+          localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+        }
+
+        // Refrescar vistas en pantalla
         cargarAsientos();
         if (currentUserRole === 'admin') cargarPasajes();
+
+        // Sincronizar con el backend
+        await actualizarServidorOLocal(id, { estado: estadoLimpio, empleado_atendio: currentUserEmail }, indexFila);
       }
     }
 
