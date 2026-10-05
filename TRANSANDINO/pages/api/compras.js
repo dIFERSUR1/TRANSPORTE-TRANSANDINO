@@ -59,7 +59,7 @@ export default async function handler(req, res) {
 
       const fViaje = fecha_viaje || fecha || '2026-10-15';
       const hViaje = hora_viaje || hora || '09:00 AM';
-      const nAsiento = String(num_asiento || asiento || '1');
+      const nAsiento = String(num_asiento !== undefined ? num_asiento : (asiento || '1'));
       const codSeguimiento = codigo_seguimiento || `TA-${Math.floor(100000 + Math.random() * 900000)}`;
 
       const query = `
@@ -87,18 +87,16 @@ export default async function handler(req, res) {
     if (req.method === 'PUT') {
       const rawId = req.query.id || (req.body && req.body.id);
 
-      if (!rawId) {
+      if (!rawId || isNaN(parseInt(rawId))) {
         await client.end();
-        return res.status(400).json({ message: 'Falta el ID del registro a actualizar.' });
+        return res.status(400).json({ message: 'Falta un ID válido del registro a actualizar.' });
       }
 
       const targetId = parseInt(rawId);
       const { estado, precio, id_usuario, asiento, num_asiento } = req.body;
       
-      // Capturar el nuevo número de asiento si viene como 'asiento' o 'num_asiento'
       const nuevoAsiento = asiento !== undefined ? asiento : num_asiento;
 
-      // Construcción dinámica de la consulta para evitar sobrescribir campos con NULL
       let fields = [];
       let values = [];
       let index = 1;
@@ -146,9 +144,9 @@ export default async function handler(req, res) {
     if (req.method === 'DELETE') {
       const rawId = req.query.id || (req.body && req.body.id);
 
-      if (!rawId) {
+      if (!rawId || isNaN(parseInt(rawId))) {
         await client.end();
-        return res.status(400).json({ message: 'Falta el ID a eliminar.' });
+        return res.status(400).json({ message: 'Falta un ID válido a eliminar.' });
       }
 
       const result = await client.query('DELETE FROM compras_pasajes WHERE id = $1', [parseInt(rawId)]);
