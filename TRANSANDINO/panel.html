@@ -224,6 +224,8 @@
     }
 
     async function obtenerDatosPasajes() {
+      if (pasajesData.length > 0) return pasajesData;
+
       try {
         const res = await fetch(API_URL);
         if (res.ok) {
@@ -249,7 +251,6 @@
     async function cargarPasajes() {
       const tbody = document.getElementById('panel-tbody');
       if (!tbody) return;
-      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Cargando pasajes...</td></tr>';
 
       const datos = await obtenerDatosPasajes();
       tbody.innerHTML = '';
@@ -303,7 +304,6 @@
     async function cargarAsientos() {
       const tbody = document.getElementById('asientos-tbody');
       if (!tbody) return;
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando asientos...</td></tr>';
 
       const datos = await obtenerDatosPasajes();
       tbody.innerHTML = '';
@@ -502,10 +502,10 @@
       if (confirm('¿Deseas eliminar este registro de la base de datos?')) {
         let idStr = String(id);
 
-        if (idStr && idStr !== '0' && idStr !== 'undefined') {
-          pasajesData = pasajesData.filter(p => String(p.id) !== idStr);
-        } else if (indexFila !== undefined && pasajesData[indexFila]) {
+        if (indexFila !== undefined && pasajesData[indexFila]) {
           pasajesData.splice(indexFila, 1);
+        } else if (idStr && idStr !== '0' && idStr !== 'undefined') {
+          pasajesData = pasajesData.filter(p => String(p.id) !== idStr);
         }
 
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
