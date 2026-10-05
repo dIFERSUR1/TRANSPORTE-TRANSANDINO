@@ -34,7 +34,7 @@ export default async function handler(req, res) {
         return res.status(200).json(result.rows[0] || {});
       }
 
-      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id ASC');
+      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id DESC');
       return res.status(200).json(result.rows);
     }
 
@@ -81,13 +81,13 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-      const { id } = req.query;
-      const { estado, precio, id_usuario } = req.body;
-      const targetId = id || req.body.id;
+      const targetId = req.query.id || (req.body && req.body.id);
 
       if (!targetId) {
         return res.status(400).json({ message: 'Falta el ID del registro a actualizar.' });
       }
+
+      const { estado, precio, id_usuario } = req.body;
 
       const result = await client.query(
         `UPDATE compras_pasajes 
@@ -102,12 +102,15 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
-      const { id } = req.query;
-      if (!id) {
+      // Captura el ID tanto de la URL query como del body para evitar fallos
+      const targetId = req.query.id || (req.body && req.body.id);
+
+      if (!targetId) {
         return res.status(400).json({ message: 'Falta el ID a eliminar.' });
       }
-      await client.query('DELETE FROM compras_pasajes WHERE id = $1', [id]);
-      return res.status(200).json({ message: 'Registro eliminado correctamente.' });
+
+      await client.query('DELETE FROM compras_pasajes WHERE id = $1', [targetId]);
+      return res.status(200).json({ message: 'Registro eliminado correctamente de la base de datos.' });
     }
 
     return res.status(405).json({ message: 'Método no permitido' });
