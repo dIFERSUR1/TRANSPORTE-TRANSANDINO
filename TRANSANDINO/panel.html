@@ -229,7 +229,6 @@
       return pasajesData;
     }
 
-    // ARREGLO 1: Obtener color correcto según la palabra del estado
     function obtenerColorEstado(estadoTexto) {
       const est = String(estadoTexto || '').toLowerCase().trim();
       if (est === 'disponible') return '#38bdf8'; // Celeste
@@ -252,7 +251,7 @@
         return;
       }
 
-      datos.forEach((item) => {
+      datos.forEach((item, index) => {
         const tr = document.createElement('tr');
         const numAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || '-';
         const usuarioId = item.usuario_id || item.id_usuario || item['Pasajero (ID)'] || '1';
@@ -260,7 +259,7 @@
         const hora = item.hora_viaje || item.hora || '09:00 AM';
 
         tr.innerHTML = `
-          <td>#${item.id || '-'}</td>
+          <td>#${item.id || (index + 1)}</td>
           <td><strong>ID: ${usuarioId}</strong></td>
           <td>${item.origen || 'Ica'}</td>
           <td>${item.destino || 'Lima'}</td>
@@ -269,7 +268,7 @@
           <td>${numAsiento}</td>
           <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 50).toFixed(2)}</td>
           <td>
-            <select onchange="cambiarEstado(${item.id}, this.value)" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
+            <select onchange="cambiarEstado('${item.id || ''}', this.value, ${index})" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
               <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
               <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
               <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
@@ -277,8 +276,8 @@
             </select>
           </td>
           <td>
-            <button class="btn-action btn-update" onclick="editarPrecio(${item.id}, ${item.precio || 50})">Editar Precio</button>
-            <button class="btn-action btn-delete" onclick="eliminarRegistro(${item.id})">Eliminar</button>
+            <button class="btn-action btn-update" onclick="editarPrecio('${item.id || ''}', ${item.precio || 50}, ${index})">Editar Precio</button>
+            <button class="btn-action btn-delete" onclick="eliminarRegistro('${item.id || ''}', ${index})">Eliminar</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -298,10 +297,8 @@
         return;
       }
 
-      datos.forEach((item) => {
+      datos.forEach((item, index) => {
         const tr = document.createElement('tr');
-        
-        // Mapeo flexible para obtener correctamente la información de Neon/PostgreSQL
         const nroAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || '-';
         const usuarioId = item.usuario_id || item.id_usuario || item['Pasajero (ID)'] || '1';
         const ruta = item.origen && item.destino ? `${item.origen} -> ${item.destino}` : (item.Ruta || 'Ica -> Lima');
@@ -313,54 +310,61 @@
           <td>${ruta}</td>
           <td><span style="color:${obtenerColorEstado(estado)}; font-weight:bold;">${estado}</span></td>
           <td>
-            <button class="btn-action btn-update" onclick="modificarEstadoAsiento(${item.id || 0}, '${nroAsiento}')">Cambiar Estado Asiento</button>
+            <button class="btn-action btn-update" onclick="modificarEstadoAsiento('${item.id || ''}', '${nroAsiento}', ${index})">Cambiar Estado Asiento</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    async function actualizarServidorOLocal(id, nuevoObjeto) {
+    async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
       let index = pasajesData.findIndex(p => String(p.id) === String(id));
+      if (index === -1 && indexFila !== undefined && pasajesData[indexFila]) {
+        index = indexFila;
+      }
+
       if (index !== -1) {
         pasajesData[index] = { ...pasajesData[index], ...nuevoObjeto };
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
       }
 
-      try {
-        await fetch(`${API_URL}/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(nuevoObjeto)
-        });
-      } catch (err) {
-        console.log('Actualizando localmente...');
+      if (id && String(id) !== '0') {
+        try {
+          await fetch(`${API_URL}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevoObjeto)
+          });
+        } catch (err) {
+          console.log('Actualizando localmente...');
+        }
       }
     }
 
-    async function cambiarEstado(id, nuevoEstado) {
-      await actualizarServidorOLocal(id, { estado: nuevoEstado });
+    async function cambiarEstado(id, nuevoEstado, indexFila) {
+      await actualizarServidorOLocal(id, { estado: nuevoEstado }, indexFila);
       cargarAsientos();
       if (currentUserRole === 'admin') cargarPasajes();
     }
 
-    async function modificarEstadoAsiento(id, nroAsiento) {
-      const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, 'atendido');
+    async function modificarEstadoAsiento(id, nroAsiento, indexFila) {
+      const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, 'cancelado');
       if (nuevoEstado) {
-        await actualizarServidorOLocal(id, { estado: nuevoEstado.toLowerCase().trim() });
+        const estadoLimpio = nuevoEstado.toLowerCase().trim();
+        await actualizarServidorOLocal(id, { estado: estadoLimpio }, indexFila);
         cargarAsientos();
         if (currentUserRole === 'admin') cargarPasajes();
       }
     }
 
-    async function editarPrecio(id, precioActual) {
+    async function editarPrecio(id, precioActual, indexFila) {
       if (currentUserRole !== 'admin') {
         alert('Solo el Administrador puede cambiar precios.');
         return;
       }
       const nuevoPrecio = prompt('Ingrese el nuevo precio (S/):', precioActual);
       if (nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
-        await actualizarServidorOLocal(id, { precio: parseFloat(nuevoPrecio) });
+        await actualizarServidorOLocal(id, { precio: parseFloat(nuevoPrecio) }, indexFila);
         cargarPasajes();
       }
     }
@@ -402,23 +406,27 @@
       }
     }
 
-    async function eliminarRegistro(id) {
+    async function eliminarRegistro(id, indexFila) {
       if (confirm('¿Deseas eliminar este registro de la base de datos?')) {
-        const idStr = String(id);
+        let idStr = String(id);
 
-        // 1. Eliminar inmediatamente del arreglo local y localStorage
-        pasajesData = pasajesData.filter(p => String(p.id) !== idStr);
+        if (idStr && idStr !== '0' && idStr !== 'undefined') {
+          pasajesData = pasajesData.filter(p => String(p.id) !== idStr);
+        } else if (indexFila !== undefined && pasajesData[indexFila]) {
+          pasajesData.splice(indexFila, 1);
+        }
+
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
 
-        // 2. Refrescar tablas para que desaparezca visualmente de inmediato
         cargarPasajes();
         cargarAsientos();
 
-        // 3. Intentar petición DELETE al backend en segundo plano
-        try {
-          await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        } catch (err) {
-          console.log('Eliminado localmente...');
+        if (idStr && idStr !== '0' && idStr !== 'undefined') {
+          try {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+          } catch (err) {
+            console.log('Eliminado localmente...');
+          }
         }
       }
     }
