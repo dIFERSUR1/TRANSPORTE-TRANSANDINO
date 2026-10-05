@@ -59,14 +59,13 @@
   <main>
     <h1 id="panel-title">Gestión de Operaciones</h1>
 
-    <!-- Pestañas de Navegación -->
     <div class="tab-buttons">
       <button id="tab-btn-pasajes" class="tab-btn admin-only active" onclick="switchTab('pasajes')">🎫 Precios y Pasajes</button>
       <button id="tab-btn-empleados" class="tab-btn admin-only" onclick="switchTab('empleados')">👥 Empleados</button>
       <button id="tab-btn-asientos" class="tab-btn" onclick="switchTab('asientos')">💺 Asientos de Bus</button>
     </div>
 
-    <!-- SECCIÓN 1: Pasajes y Precios (SOLO ADMIN) -->
+    <!-- SECCIÓN 1: Pasajes y Precios -->
     <section id="tab-pasajes" class="tab-content admin-only active">
       <div class="controls">
         <span style="color: #94a3b8;">Control de Pasajes y Edición de Precios</span>
@@ -95,7 +94,7 @@
       </div>
     </section>
 
-    <!-- SECCIÓN 2: Gestión de Empleados (SOLO ADMIN) -->
+    <!-- SECCIÓN 2: Gestión de Empleados -->
     <section id="tab-empleados" class="tab-content admin-only">
       <div class="controls">
         <span style="color: #94a3b8;">Lista de Empleados Registrados</span>
@@ -119,7 +118,7 @@
       </div>
     </section>
 
-    <!-- SECCIÓN 3: Gestión de Asientos (ADMIN Y EMPLEADOS) -->
+    <!-- SECCIÓN 3: Gestión de Asientos -->
     <section id="tab-asientos" class="tab-content">
       <div class="controls">
         <span style="color: #94a3b8;">Estado y Asignación de Asientos</span>
@@ -349,6 +348,7 @@
     async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
       const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
       if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero !== String(nroAsientoActual)) {
+        // CORRECCIÓN CLAVE: Actualiza tanto 'asiento' como 'num_asiento' en memoria para que la vista se repinte de inmediato
         await actualizarServidorOLocal(id, { asiento: nuevoNumero, num_asiento: nuevoNumero, empleado_atendio: currentUserEmail }, indexFila);
         await cargarAsientos(true);
         if (currentUserRole === 'admin') await cargarPasajes(true);
@@ -382,10 +382,12 @@
       const emp = empleadosData[index];
       const nuevoTurno = prompt(`Ingrese el nuevo horario/turno para ${emp.nombre}:`, emp.turno || 'Mañana (08:00 AM - 02:00 PM)');
 
-      if (nuevoTurno) {
+      if (nuevoTurno && nuevoTurno.trim() !== '') {
         empleadosData[index].turno = nuevoTurno;
         localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
         cargarEmpleados();
+        // CORRECCIÓN CLAVE: Refresca también las tablas que muestran los turnos de atención
+        if (currentUserRole === 'admin') cargarPasajes();
         alert(`Turno de ${emp.nombre} actualizado a: ${nuevoTurno}`);
       }
     }
@@ -475,6 +477,7 @@
           destino: dest,
           precio: parseFloat(precio),
           asiento: asiento,
+          num_asiento: asiento,
           estado: 'registrado',
           fecha_viaje: '2026-10-15',
           hora_viaje: '09:00 AM'
