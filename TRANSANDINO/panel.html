@@ -229,6 +229,16 @@
       return pasajesData;
     }
 
+    // Función aux para obtener color según el estado
+    function obtenerColorEstado(est) {
+      const e = String(est || '').toLowerCase().trim();
+      if (e === 'disponible') return '#38bdf8'; // Celeste
+      if (e === 'registrado') return '#22c55e'; // Verde
+      if (e === 'atendido') return '#a855f7';   // Morado (o #3b82f6 Azul)
+      if (e === 'cancelado') return '#ef4444';  // Rojo
+      return '#94a3b8'; // Gris por defecto
+    }
+
     async function cargarPasajes() {
       const tbody = document.getElementById('panel-tbody');
       if (!tbody) return;
@@ -291,17 +301,17 @@
       datos.forEach((item) => {
         const tr = document.createElement('tr');
         
-        // Mapeo flexible para obtener correctamente la información de Neon/PostgreSQL
         const nroAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || '-';
         const usuarioId = item.usuario_id || item.id_usuario || item['Pasajero (ID)'] || '1';
         const ruta = item.origen && item.destino ? `${item.origen} -> ${item.destino}` : (item.Ruta || 'Ica -> Lima');
         const estado = item.estado || item['Estado Asiento'] || 'registrado';
+        const colorEstado = obtenerColorEstado(estado);
 
         tr.innerHTML = `
           <td><strong>Asiento N° ${nroAsiento}</strong></td>
           <td>Usuario ID: ${usuarioId}</td>
           <td>${ruta}</td>
-          <td><span style="color:${estado === 'disponible' ? '#38bdf8' : '#22c55e'}; font-weight:bold;">${estado}</span></td>
+          <td><span style="color:${colorEstado}; font-weight:bold;">${estado}</span></td>
           <td>
             <button class="btn-action btn-update" onclick="modificarEstadoAsiento(${item.id || 0}, '${nroAsiento}')">Cambiar Estado Asiento</button>
           </td>
@@ -311,6 +321,14 @@
     }
 
     async function actualizarServidorOLocal(id, nuevoObjeto) {
+      // 1. Actualizar array en memoria y LocalStorage primero
+      let index = pasajesData.findIndex(p => String(p.id) === String(id));
+      if (index !== -1) {
+        pasajesData[index] = { ...pasajesData[index], ...nuevoObjeto };
+        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+      }
+
+      // 2. Intentar actualizar en Backend
       try {
         await fetch(`${API_URL}/${id}`, {
           method: 'PUT',
@@ -318,25 +336,21 @@
           body: JSON.stringify(nuevoObjeto)
         });
       } catch (err) {
-        console.log('Actualizando localmente...');
-      }
-
-      let index = pasajesData.findIndex(p => String(p.id) === String(id));
-      if (index !== -1) {
-        pasajesData[index] = { ...pasajesData[index], ...nuevoObjeto };
-        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+        console.log('Error conectando a la API, se guardó en memoria local.');
       }
     }
 
     async function cambiarEstado(id, nuevoEstado) {
       await actualizarServidorOLocal(id, { estado: nuevoEstado });
       cargarAsientos();
+      if (currentUserRole === 'admin') cargarPasajes();
     }
 
     async function modificarEstadoAsiento(id, nroAsiento) {
       const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, 'atendido');
       if (nuevoEstado) {
-        await actualizarServidorOLocal(id, { estado: nuevoEstado });
+        const estadoLimpio = nuevoEstado.toLowerCase().trim();
+        await actualizarServidorOLocal(id, { estado: estadoLimpio });
         cargarAsientos();
         if (currentUserRole === 'admin') cargarPasajes();
       }
