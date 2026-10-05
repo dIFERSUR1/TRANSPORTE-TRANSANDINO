@@ -79,6 +79,7 @@
             <tr>
               <th>ID</th>
               <th>Usuario ID</th>
+              <th>Atendido por / Turno</th>
               <th>Origen</th>
               <th>Destino</th>
               <th>Fecha</th>
@@ -109,6 +110,7 @@
               <th>Nombre</th>
               <th>Correo</th>
               <th>Rol</th>
+              <th>Turno / Horario</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -151,6 +153,12 @@
     let currentUserRole = 'empleado';
     let currentUserEmail = '';
     let pasajesData = [];
+
+    // Arreglo persistente de empleados con Turno
+    let empleadosData = JSON.parse(localStorage.getItem('lista_empleados')) || [
+      { id: 1, nombre: 'Juan Pérez', correo: 'empleado1@transandino.pe', rol: 'Empleado', turno: 'Mañana (08:00 AM - 02:00 PM)' },
+      { id: 2, nombre: 'María López', correo: 'empleado2@transandino.pe', rol: 'Empleado', turno: 'Tarde (02:00 PM - 08:00 PM)' }
+    ];
 
     document.addEventListener('DOMContentLoaded', () => {
       if (verificarSesion()) {
@@ -241,13 +249,13 @@
     async function cargarPasajes() {
       const tbody = document.getElementById('panel-tbody');
       if (!tbody) return;
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Cargando pasajes...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Cargando pasajes...</td></tr>';
 
       const datos = await obtenerDatosPasajes();
       tbody.innerHTML = '';
 
       if (!Array.isArray(datos) || datos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#94a3b8;">No hay pasajes registrados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:#94a3b8;">No hay pasajes registrados.</td></tr>';
         return;
       }
 
@@ -258,9 +266,17 @@
         const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '2026-10-15');
         const hora = item.hora_viaje || item.hora || '09:00 AM';
 
+        const empleado = item.empleado_atendio || item.atendido_por || 'Sistema';
+        const turno = item.turno || (new Date().getHours() < 13 ? 'Mañana' : 'Tarde');
+        const iconoTurno = turno.toLowerCase().includes('mañana') ? '☀️' : '🌙';
+
         tr.innerHTML = `
           <td>#${item.id || (index + 1)}</td>
           <td><strong>ID: ${usuarioId}</strong></td>
+          <td>
+            <span style="color:#ea580c; font-weight:bold;">👤 ${empleado}</span><br>
+            <small style="color:#cbd5e1;">${iconoTurno} ${turno}</small>
+          </td>
           <td>${item.origen || 'Ica'}</td>
           <td>${item.destino || 'Lima'}</td>
           <td>${fecha}</td>
@@ -317,6 +333,68 @@
       });
     }
 
+    /* GESTIÓN DE EMPLEADOS Y HORARIOS */
+    function cargarEmpleados() {
+      const tbody = document.getElementById('empleados-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      empleadosData.forEach((emp, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${emp.id}</td>
+          <td><strong>${emp.nombre}</strong></td>
+          <td>${emp.correo}</td>
+          <td><span style="background:#0284c7; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.75rem;">${emp.rol}</span></td>
+          <td><strong style="color:#f59e0b;">☀ ${emp.turno || 'Mañana'}</strong></td>
+          <td>
+            <button class="btn-action btn-update" onclick="editarTurnoEmpleado(${index})">✏️ Cambiar Turno</button>
+            <button class="btn-action btn-delete" onclick="desactivarEmpleado(${index})">Desactivar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editarTurnoEmpleado(index) {
+      const emp = empleadosData[index];
+      const nuevoTurno = prompt(`Ingrese el nuevo horario/turno para ${emp.nombre}:`, emp.turno || 'Mañana (08:00 AM - 02:00 PM)');
+      
+      if (nuevoTurno) {
+        empleadosData[index].turno = nuevoTurno;
+        localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+        cargarEmpleados();
+        alert(`Turno de ${emp.nombre} actualizado a: ${nuevoTurno}`);
+      }
+    }
+
+    function crearEmpleado() {
+      const nombre = prompt('Nombre del Empleado:');
+      const correo = prompt('Correo Electrónico:');
+      const turno = prompt('Turno / Horario:', 'Mañana (08:00 AM - 02:00 PM)');
+
+      if (nombre && correo) {
+        const nuevoEmp = {
+          id: empleadosData.length + 1,
+          nombre: nombre,
+          correo: correo,
+          rol: 'Empleado',
+          turno: turno || 'Mañana'
+        };
+        empleadosData.push(nuevoEmp);
+        localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+        cargarEmpleados();
+      }
+    }
+
+    function desactivarEmpleado(index) {
+      if (confirm(`¿Seguro que deseas desactivar a ${empleadosData[index].nombre}?`)) {
+        empleadosData.splice(index, 1);
+        localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+        cargarEmpleados();
+      }
+    }
+
     async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
       let index = pasajesData.findIndex(p => String(p.id) === String(id) && id !== '' && id !== 'undefined');
       if (index === -1 && indexFila !== undefined && pasajesData[indexFila]) {
@@ -342,7 +420,7 @@
     }
 
     async function cambiarEstado(id, nuevoEstado, indexFila) {
-      await actualizarServidorOLocal(id, { estado: nuevoEstado }, indexFila);
+      await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
       cargarAsientos();
       if (currentUserRole === 'admin') cargarPasajes();
     }
@@ -352,17 +430,14 @@
       if (nuevoEstado) {
         const estadoLimpio = nuevoEstado.toLowerCase().trim();
 
-        // Actualización directa garantizada en la estructura de datos local
         if (pasajesData[indexFila]) {
           pasajesData[indexFila].estado = estadoLimpio;
           localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
         }
 
-        // Refrescar vistas en pantalla
         cargarAsientos();
         if (currentUserRole === 'admin') cargarPasajes();
 
-        // Sincronizar con el backend
         await actualizarServidorOLocal(id, { estado: estadoLimpio, empleado_atendio: currentUserEmail }, indexFila);
       }
     }
@@ -389,6 +464,8 @@
         const nuevoItem = {
           id: Date.now(),
           usuario_id: '1',
+          empleado_atendio: currentUserEmail || 'Admin',
+          turno: new Date().getHours() < 13 ? 'Mañana' : 'Tarde',
           origen: orig,
           destino: dest,
           precio: parseFloat(precio),
@@ -438,23 +515,6 @@
             console.log('Eliminado localmente...');
           }
         }
-      }
-    }
-
-    function cargarEmpleados() {
-      const tbody = document.getElementById('empleados-tbody');
-      if (!tbody) return;
-      tbody.innerHTML = `
-        <tr><td>1</td><td>Juan Pérez</td><td>empleado1@transandino.pe</td><td>Empleado</td><td><button class="btn-action btn-delete">Desactivar</button></td></tr>
-        <tr><td>2</td><td>María López</td><td>empleado2@transandino.pe</td><td>Empleado</td><td><button class="btn-action btn-delete">Desactivar</button></td></tr>
-      `;
-    }
-
-    function crearEmpleado() {
-      const nombre = prompt('Nombre del Empleado:');
-      const correo = prompt('Correo Electrónico:');
-      if (nombre && correo) {
-        alert(`Empleado ${nombre} registrado exitosamente.`);
       }
     }
 
