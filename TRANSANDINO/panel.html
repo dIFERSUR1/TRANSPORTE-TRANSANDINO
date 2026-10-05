@@ -342,16 +342,16 @@
 
     async function cambiarEstadoAsientoDirecto(id, nuevoEstado, indexFila) {
       await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
-      cargarAsientos();
-      if (currentUserRole === 'admin') cargarPasajes();
+      await cargarAsientos(true);
+      if (currentUserRole === 'admin') await cargarPasajes(true);
     }
 
     async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
       const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
-      if (nuevoNumero && nuevoNumero !== nroAsientoActual) {
-        await actualizarServidorOLocal(id, { asiento: nuevoNumero, empleado_atendio: currentUserEmail }, indexFila);
-        cargarAsientos();
-        if (currentUserRole === 'admin') cargarPasajes();
+      if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero !== String(nroAsientoActual)) {
+        await actualizarServidorOLocal(id, { asiento: nuevoNumero, num_asiento: nuevoNumero, empleado_atendio: currentUserEmail }, indexFila);
+        await cargarAsientos(true);
+        if (currentUserRole === 'admin') await cargarPasajes(true);
       }
     }
 
@@ -430,29 +430,21 @@
 
       if (id && String(id) !== '0' && String(id) !== 'undefined') {
         try {
-          let res = await fetch(`${API_URL}?id=${id}`, {
+          await fetch(`${API_URL}?id=${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(nuevoObjeto)
           });
-          
-          if (!res.ok) {
-            await fetch(`${API_URL}/${id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(nuevoObjeto)
-            });
-          }
         } catch (err) {
-          console.log('Actualizado en memoria local');
+          console.log('Actualizado localmente');
         }
       }
     }
 
     async function cambiarEstado(id, nuevoEstado, indexFila) {
       await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
-      cargarAsientos();
-      if (currentUserRole === 'admin') cargarPasajes();
+      await cargarAsientos(true);
+      if (currentUserRole === 'admin') await cargarPasajes(true);
     }
 
     async function editarPrecio(id, precioActual, indexFila) {
@@ -463,7 +455,7 @@
       const nuevoPrecio = prompt('Ingrese el nuevo precio (S/):', precioActual);
       if (nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
         await actualizarServidorOLocal(id, { precio: parseFloat(nuevoPrecio) }, indexFila);
-        cargarPasajes();
+        await cargarPasajes(true);
       }
     }
 
@@ -501,16 +493,14 @@
         pasajesData.push(nuevoItem);
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
 
-        cargarPasajes(true);
-        cargarAsientos(true);
+        await cargarPasajes(true);
+        await cargarAsientos(true);
       }
     }
 
-    // ELIMINACIÓN CORREGIDA PARA NEON DB
     async function eliminarRegistro(id, indexFila) {
       if (!confirm('¿Deseas eliminar este registro?')) return;
 
-      // 1. Borra de la lista y del localStorage inmediatamente
       if (indexFila !== undefined && pasajesData[indexFila]) {
         pasajesData.splice(indexFila, 1);
       } else if (id) {
@@ -518,11 +508,9 @@
       }
       localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
 
-      // 2. Refresca la tabla en pantalla
-      cargarPasajes();
-      cargarAsientos();
+      await cargarPasajes(true);
+      await cargarAsientos(true);
 
-      // 3. Envía la orden de eliminación a Neon DB en Vercel
       if (id) {
         try {
           await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
