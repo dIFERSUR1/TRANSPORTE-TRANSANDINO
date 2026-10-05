@@ -26,6 +26,7 @@ export default async function handler(req, res) {
   try {
     await client.connect();
 
+    // 1. OBTENER PASAJES (GET)
     if (req.method === 'GET') {
       const { id } = req.query;
 
@@ -38,6 +39,7 @@ export default async function handler(req, res) {
       return res.status(200).json(result.rows);
     }
 
+    // 2. CREAR NUEVO PASAJE (POST)
     if (req.method === 'POST') {
       const {
         id_usuario,
@@ -80,6 +82,7 @@ export default async function handler(req, res) {
       return res.status(201).json(result.rows[0]);
     }
 
+    // 3. ACTUALIZAR PASAJE (PUT - Incluye cambio de asiento, precio y estado)
     if (req.method === 'PUT') {
       const targetId = req.query.id || (req.body && req.body.id);
 
@@ -87,22 +90,30 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Falta el ID del registro a actualizar.' });
       }
 
-      const { estado, precio, id_usuario } = req.body;
+      const { estado, precio, id_usuario, asiento, num_asiento } = req.body;
+      const nuevoAsiento = asiento || num_asiento;
 
       const result = await client.query(
         `UPDATE compras_pasajes 
          SET estado = COALESCE($1, estado), 
              precio = COALESCE($2, precio),
-             id_usuario = COALESCE($3, id_usuario)
-         WHERE id = $4 RETURNING *;`,
-        [estado, precio, id_usuario, targetId]
+             id_usuario = COALESCE($3, id_usuario),
+             asiento = COALESCE($4, asiento)
+         WHERE id = $5 RETURNING *;`,
+        [
+          estado !== undefined ? estado : null,
+          precio !== undefined ? precio : null,
+          id_usuario !== undefined ? id_usuario : null,
+          nuevoAsiento !== undefined ? String(nuevoAsiento) : null,
+          targetId
+        ]
       );
 
       return res.status(200).json(result.rows[0] || { message: 'Actualizado correctamente' });
     }
 
+    // 4. ELIMINAR PASAJE (DELETE)
     if (req.method === 'DELETE') {
-      // Captura el ID tanto de la URL query como del body para evitar fallos
       const targetId = req.query.id || (req.body && req.body.id);
 
       if (!targetId) {
