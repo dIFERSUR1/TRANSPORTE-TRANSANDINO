@@ -229,14 +229,14 @@
       return pasajesData;
     }
 
-    // Función aux para obtener color según el estado
-    function obtenerColorEstado(est) {
-      const e = String(est || '').toLowerCase().trim();
-      if (e === 'disponible') return '#38bdf8'; // Celeste
-      if (e === 'registrado') return '#22c55e'; // Verde
-      if (e === 'atendido') return '#a855f7';   // Morado (o #3b82f6 Azul)
-      if (e === 'cancelado') return '#ef4444';  // Rojo
-      return '#94a3b8'; // Gris por defecto
+    // ARREGLO 1: Obtener color correcto según la palabra del estado
+    function obtenerColorEstado(estadoTexto) {
+      const est = String(estadoTexto || '').toLowerCase().trim();
+      if (est === 'disponible') return '#38bdf8'; // Celeste
+      if (est === 'registrado') return '#22c55e'; // Verde
+      if (est === 'atendido') return '#a855f7';   // Morado
+      if (est === 'cancelado') return '#ef4444';  // Rojo
+      return '#22c55e';                           // Verde por defecto
     }
 
     async function cargarPasajes() {
@@ -301,17 +301,17 @@
       datos.forEach((item) => {
         const tr = document.createElement('tr');
         
+        // Mapeo flexible para obtener correctamente la información de Neon/PostgreSQL
         const nroAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || '-';
         const usuarioId = item.usuario_id || item.id_usuario || item['Pasajero (ID)'] || '1';
         const ruta = item.origen && item.destino ? `${item.origen} -> ${item.destino}` : (item.Ruta || 'Ica -> Lima');
         const estado = item.estado || item['Estado Asiento'] || 'registrado';
-        const colorEstado = obtenerColorEstado(estado);
 
         tr.innerHTML = `
           <td><strong>Asiento N° ${nroAsiento}</strong></td>
           <td>Usuario ID: ${usuarioId}</td>
           <td>${ruta}</td>
-          <td><span style="color:${colorEstado}; font-weight:bold;">${estado}</span></td>
+          <td><span style="color:${obtenerColorEstado(estado)}; font-weight:bold;">${estado}</span></td>
           <td>
             <button class="btn-action btn-update" onclick="modificarEstadoAsiento(${item.id || 0}, '${nroAsiento}')">Cambiar Estado Asiento</button>
           </td>
@@ -321,14 +321,12 @@
     }
 
     async function actualizarServidorOLocal(id, nuevoObjeto) {
-      // 1. Actualizar array en memoria y LocalStorage primero
       let index = pasajesData.findIndex(p => String(p.id) === String(id));
       if (index !== -1) {
         pasajesData[index] = { ...pasajesData[index], ...nuevoObjeto };
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
       }
 
-      // 2. Intentar actualizar en Backend
       try {
         await fetch(`${API_URL}/${id}`, {
           method: 'PUT',
@@ -336,7 +334,7 @@
           body: JSON.stringify(nuevoObjeto)
         });
       } catch (err) {
-        console.log('Error conectando a la API, se guardó en memoria local.');
+        console.log('Actualizando localmente...');
       }
     }
 
@@ -349,8 +347,7 @@
     async function modificarEstadoAsiento(id, nroAsiento) {
       const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, 'atendido');
       if (nuevoEstado) {
-        const estadoLimpio = nuevoEstado.toLowerCase().trim();
-        await actualizarServidorOLocal(id, { estado: estadoLimpio });
+        await actualizarServidorOLocal(id, { estado: nuevoEstado.toLowerCase().trim() });
         cargarAsientos();
         if (currentUserRole === 'admin') cargarPasajes();
       }
@@ -407,17 +404,22 @@
 
     async function eliminarRegistro(id) {
       if (confirm('¿Deseas eliminar este registro de la base de datos?')) {
+        const idStr = String(id);
+
+        // 1. Eliminar inmediatamente del arreglo local y localStorage
+        pasajesData = pasajesData.filter(p => String(p.id) !== idStr);
+        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+
+        // 2. Refrescar tablas para que desaparezca visualmente de inmediato
+        cargarPasajes();
+        cargarAsientos();
+
+        // 3. Intentar petición DELETE al backend en segundo plano
         try {
           await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         } catch (err) {
-          console.log('Eliminando localmente...');
+          console.log('Eliminado localmente...');
         }
-
-        pasajesData = pasajesData.filter(p => String(p.id) !== String(id));
-        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-
-        cargarPasajes();
-        cargarAsientos();
       }
     }
 
