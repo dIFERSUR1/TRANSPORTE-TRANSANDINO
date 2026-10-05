@@ -232,7 +232,6 @@
       font-weight: bold;
     }
 
-    /* ESTILOS Y COLORES POR ESTADO */
     .status-registrado { background: #0284c7; color: white; }
     .status-atendido   { background: #a855f7; color: white; }
     .status-disponible { background: #38bdf8; color: #070f1e; }
@@ -327,6 +326,12 @@
             <option value="Cusco">Destino: Cusco</option>
           </select>
 
+          <!-- SELECCIÓN DE TURNO DEL EMPLEADO -->
+          <select id="emp-turno" required>
+            <option value="Mañana">☀️ Turno Mañana</option>
+            <option value="Tarde">🌙 Turno Tarde</option>
+          </select>
+
           <input type="date" id="emp-fecha" value="2026-10-15" required>
           <input type="number" id="emp-asiento" min="1" max="40" placeholder="N° Asiento (1-40)" required>
           <input type="number" id="emp-precio" value="50" placeholder="Precio (S/)" required>
@@ -358,7 +363,7 @@
     <!-- Buscador -->
     <div class="controls-bar">
       <div class="search-box">
-        <input type="text" id="input-buscar" onkeyup="filtrarTabla()" placeholder="🔎 Buscar por ID, Usuario, Origen o Destino...">
+        <input type="text" id="input-buscar" onkeyup="filtrarTabla()" placeholder="🔎 Buscar por ID, Empleado, Turno, Origen o Destino...">
       </div>
     </div>
 
@@ -368,7 +373,8 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Usuario / Ref</th>
+            <th>Pasajero / Ref</th>
+            <th>Atendido por / Turno</th>
             <th>Ruta</th>
             <th>Fecha / Hora</th>
             <th>Asiento</th>
@@ -460,6 +466,9 @@
     async function asignarPasajeEmpleado(e) {
       e.preventDefault();
 
+      const user = getUsuarioActual();
+      const empleadoNombre = user ? (user.nombre || user.email) : 'Empleado';
+      const turno = document.getElementById('emp-turno').value;
       const origen = document.getElementById('emp-origen').value;
       const destino = document.getElementById('emp-destino').value;
       const fecha = document.getElementById('emp-fecha').value;
@@ -469,10 +478,12 @@
       const nuevoPasaje = {
         id: Date.now(),
         id_usuario: 'Venta Presencial',
+        empleado_atendio: empleadoNombre,
+        turno: turno,
         origen: origen,
         destino: destino,
         fecha_viaje: fecha,
-        hora_viaje: '09:00 AM',
+        hora_viaje: turno === 'Mañana' ? '08:00 AM' : '03:00 PM',
         num_asiento: asiento,
         precio: precio,
         estado: 'registrado'
@@ -491,7 +502,7 @@
       todosLosPasajes.push(nuevoPasaje);
       localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
 
-      alert(`¡Pasaje N° ${asiento} para la ruta ${origen} ➔ ${destino} asignado con éxito!`);
+      alert(`¡Pasaje N° ${asiento} asignado por ${empleadoNombre} (${turno}) con éxito!`);
       document.getElementById('emp-asiento').value = '';
       
       cargarPasajesGlobales();
@@ -506,7 +517,6 @@
       const atendidos = pasajes.filter(p => p.estado === 'atendido').length;
       document.getElementById('stat-atendidos').textContent = atendidos;
 
-      // Solo sumar pasajes válidos (excluir cancelados)
       const totalDinero = pasajes
         .filter(p => p.estado !== 'cancelado')
         .reduce((acc, curr) => acc + (Number(curr.precio) || 0), 0);
@@ -519,7 +529,7 @@
       tbody.innerHTML = '';
 
       if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding: 2rem;">No hay pasajes registrados en el sistema.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8; padding: 2rem;">No hay pasajes registrados en el sistema.</td></tr>`;
         return;
       }
 
@@ -530,6 +540,11 @@
         const hora = item.hora_viaje || item.hora || '08:00 AM';
         const estadoLimpio = String(item.estado || 'registrado').toLowerCase().trim();
 
+        // Empleado que atendió y su turno
+        const empleadoAtendio = item.empleado_atendio || item.atendido_por || 'Empleado';
+        const turno = item.turno || (new Date().getHours() < 13 ? 'Mañana' : 'Tarde');
+        const iconoTurno = turno === 'Mañana' ? '☀️️' : '🌙';
+
         let claseBadge = 'status-registrado';
         if (estadoLimpio === 'atendido') claseBadge = 'status-atendido';
         if (estadoLimpio === 'disponible') claseBadge = 'status-disponible';
@@ -538,6 +553,10 @@
         tr.innerHTML = `
           <td>#${item.id}</td>
           <td><strong style="color:#38bdf8;">${item.id_usuario || item.pasajero || 'Cliente'}</strong></td>
+          <td>
+            <span style="color:#ea580c; font-weight:bold;">👤 ${empleadoAtendio}</span><br>
+            <small style="color:#cbd5e1;">${iconoTurno} Turno ${turno}</small>
+          </td>
           <td>${item.origen} ➔ ${item.destino}</td>
           <td>${fecha} (${hora})</td>
           <td>N° ${numAsiento}</td>
@@ -545,7 +564,7 @@
           <td><span class="status-badge ${claseBadge}">${estadoLimpio}</span></td>
           <td>
             <button class="btn-status" onclick="cambiarEstado(${item.id}, '${numAsiento}')">
-              ⚙️ Cambiar Estado
+              ⚙️ Estado
             </button>
             <button class="btn-edit" onclick="editarPasaje(${item.id})">✏</button>
             <button class="btn-delete" onclick="eliminarPasaje(${item.id})">🗑️</button>
@@ -555,22 +574,25 @@
       });
     }
 
-    // Permitir al empleado elegir cualquier estado (atendido, cancelado, registrado, disponible)
     async function cambiarEstado(id, nroAsiento) {
       let index = todosLosPasajes.findIndex(p => String(p.id) === String(id));
       if (index !== -1) {
+        const user = getUsuarioActual();
+        const empleadoNombre = user ? (user.nombre || user.email) : 'Empleado';
         const estadoActual = todosLosPasajes[index].estado || 'registrado';
-        const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, estadoActual);
+        
+        const nuevoEstado = prompt(`Nuevo estado para Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, estadoActual);
 
         if (nuevoEstado) {
           const estadoLimpio = nuevoEstado.toLowerCase().trim();
           todosLosPasajes[index].estado = estadoLimpio;
+          todosLosPasajes[index].empleado_atendio = empleadoNombre; // Registra quién hizo la modificación
 
           try {
             await fetch(`/api/compras/${id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ estado: estadoLimpio })
+              body: JSON.stringify({ estado: estadoLimpio, empleado_atendio: empleadoNombre })
             });
           } catch (e) {
             console.log('Actualizando localmente...');
@@ -620,6 +642,8 @@
       const filtrados = todosLosPasajes.filter(p => 
         String(p.id).toLowerCase().includes(texto) ||
         String(p.id_usuario || '').toLowerCase().includes(texto) ||
+        String(p.empleado_atendio || '').toLowerCase().includes(texto) ||
+        String(p.turno || '').toLowerCase().includes(texto) ||
         (p.origen && p.origen.toLowerCase().includes(texto)) ||
         (p.destino && p.destino.toLowerCase().includes(texto)) ||
         (p.estado && p.estado.toLowerCase().includes(texto))
