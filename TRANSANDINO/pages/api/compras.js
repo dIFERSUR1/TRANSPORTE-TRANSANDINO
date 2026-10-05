@@ -1,6 +1,7 @@
 import { Client } from 'pg';
 
 export default async function handler(req, res) {
+  // Configuración de Cabeceras CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -26,7 +27,6 @@ export default async function handler(req, res) {
   try {
     await client.connect();
 
-    // 1. OBTENER PASAJES (GET)
     if (req.method === 'GET') {
       const { id } = req.query;
 
@@ -36,12 +36,11 @@ export default async function handler(req, res) {
         return res.status(200).json(result.rows[0] || {});
       }
 
-      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id DESC');
+      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id ASC');
       await client.end();
       return res.status(200).json(result.rows);
     }
 
-    // 2. CREAR NUEVO PASAJE (POST)
     if (req.method === 'POST') {
       const {
         id_usuario,
@@ -85,7 +84,6 @@ export default async function handler(req, res) {
       return res.status(201).json(result.rows[0]);
     }
 
-    // 3. ACTUALIZAR PASAJE (PUT - Asiento, Precio, Estado)
     if (req.method === 'PUT') {
       const rawId = req.query.id || (req.body && req.body.id);
 
@@ -96,37 +94,55 @@ export default async function handler(req, res) {
 
       const targetId = parseInt(rawId);
       const { estado, precio, id_usuario, asiento, num_asiento } = req.body;
-      const nuevoAsiento = asiento || num_asiento;
+      
+      // Capturar el nuevo número de asiento si viene como 'asiento' o 'num_asiento'
+      const nuevoAsiento = asiento !== undefined ? asiento : num_asiento;
 
-      const query = `
+      // Construcción dinámica de la consulta para evitar sobrescribir campos con NULL
+      let fields = [];
+      let values = [];
+      let index = 1;
+
+      if (estado !== undefined && estado !== null) {
+        fields.push(`estado = $${index++}`);
+        values.push(String(estado));
+      }
+      if (precio !== undefined && precio !== null) {
+        fields.push(`precio = $${index++}`);
+        values.push(parseFloat(precio));
+      }
+      if (id_usuario !== undefined && id_usuario !== null) {
+        fields.push(`id_usuario = $${index++}`);
+        values.push(parseInt(id_usuario));
+      }
+      if (nuevoAsiento !== undefined && nuevoAsiento !== null) {
+        fields.push(`asiento = $${index++}`);
+        values.push(String(nuevoAsiento));
+      }
+
+      if (fields.length === 0) {
+        await client.end();
+        return res.status(400).json({ message: 'No se enviaron datos para actualizar.' });
+      }
+
+      values.push(targetId);
+      const updateQuery = `
         UPDATE compras_pasajes 
-        SET estado = COALESCE($1, estado), 
-            precio = COALESCE($2, precio),
-            id_usuario = COALESCE($3, id_usuario),
-            asiento = COALESCE($4, asiento)
-        WHERE id = $5 
+        SET ${fields.join(', ')} 
+        WHERE id = $${index} 
         RETURNING *;
       `;
 
-      const values = [
-        estado !== undefined && estado !== null ? String(estado) : null,
-        precio !== undefined && precio !== null ? parseFloat(precio) : null,
-        id_usuario !== undefined && id_usuario !== null ? parseInt(id_usuario) : null,
-        nuevoAsiento !== undefined && nuevoAsiento !== null ? String(nuevoAsiento) : null,
-        targetId
-      ];
-
-      const result = await client.query(query, values);
+      const result = await client.query(updateQuery, values);
       await client.end();
 
       if (result.rowCount === 0) {
-        return res.status(404).json({ message: `No se encontró ningún registro con ID: ${targetId}` });
+        return res.status(404).json({ message: `No se encontró ningún pasaje con ID ${targetId}` });
       }
 
       return res.status(200).json(result.rows[0]);
     }
 
-    // 4. ELIMINAR PASAJE (DELETE)
     if (req.method === 'DELETE') {
       const rawId = req.query.id || (req.body && req.body.id);
 
@@ -135,16 +151,17 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Falta el ID a eliminar.' });
       }
 
-      await client.query('DELETE FROM compras_pasajes WHERE id = $1', [parseInt(rawId)]);
+      const result = await client.query('DELETE FROM compras_pasajes WHERE id = $1', [parseInt(rawId)]);
       await client.end();
-      return res.status(200).json({ message: 'Registro eliminado correctamente.' });
+
+      return res.status(200).json({ message: 'Registro eliminado correctamente de la base de datos.' });
     }
 
     await client.end();
     return res.status(405).json({ message: 'Método no permitido' });
 
   } catch (error) {
-    console.error('Error en API compras:', error);
+    console.error('Error detallado en API compras:', error);
     try { await client.end(); } catch (e) {}
     return res.status(500).json({ 
       message: 'Error interno en servidor o base de datos', 
