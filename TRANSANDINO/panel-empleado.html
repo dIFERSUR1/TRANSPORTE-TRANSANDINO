@@ -232,11 +232,14 @@
       font-weight: bold;
     }
 
+    /* ESTILOS Y COLORES POR ESTADO */
     .status-registrado { background: #0284c7; color: white; }
-    .status-atendido { background: #22c55e; color: white; }
+    .status-atendido   { background: #a855f7; color: white; }
+    .status-disponible { background: #38bdf8; color: #070f1e; }
+    .status-cancelado  { background: #ef4444; color: white; }
 
     .btn-status {
-      background: #22c55e;
+      background: #0284c7;
       color: white;
       border: none;
       padding: 0.4rem 0.7rem;
@@ -245,7 +248,7 @@
       font-weight: bold;
       transition: background 0.2s;
     }
-    .btn-status:hover { background: #16a34a; }
+    .btn-status:hover { background: #0369a1; }
 
     .btn-edit {
       background: #ea580c;
@@ -344,7 +347,7 @@
       </div>
       <div class="stat-card">
         <h3>Atendidos</h3>
-        <div class="number" style="color:#22c55e;" id="stat-atendidos">0</div>
+        <div class="number" style="color:#a855f7;" id="stat-atendidos">0</div>
       </div>
       <div class="stat-card">
         <h3>Recaudación Total</h3>
@@ -503,7 +506,11 @@
       const atendidos = pasajes.filter(p => p.estado === 'atendido').length;
       document.getElementById('stat-atendidos').textContent = atendidos;
 
-      const totalDinero = pasajes.reduce((acc, curr) => acc + (Number(curr.precio) || 0), 0);
+      // Solo sumar pasajes válidos (excluir cancelados)
+      const totalDinero = pasajes
+        .filter(p => p.estado !== 'cancelado')
+        .reduce((acc, curr) => acc + (Number(curr.precio) || 0), 0);
+
       document.getElementById('stat-dinero').textContent = `S/ ${totalDinero.toFixed(2)}`;
     }
 
@@ -518,10 +525,15 @@
 
       lista.forEach(item => {
         const tr = document.createElement('tr');
-        const esRegistrado = item.estado === 'registrado';
         const numAsiento = item.num_asiento || item.asiento || '-';
         const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || 'N/A');
         const hora = item.hora_viaje || item.hora || '08:00 AM';
+        const estadoLimpio = String(item.estado || 'registrado').toLowerCase().trim();
+
+        let claseBadge = 'status-registrado';
+        if (estadoLimpio === 'atendido') claseBadge = 'status-atendido';
+        if (estadoLimpio === 'disponible') claseBadge = 'status-disponible';
+        if (estadoLimpio === 'cancelado') claseBadge = 'status-cancelado';
 
         tr.innerHTML = `
           <td>#${item.id}</td>
@@ -530,12 +542,12 @@
           <td>${fecha} (${hora})</td>
           <td>N° ${numAsiento}</td>
           <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 0).toFixed(2)}</td>
-          <td><span class="status-badge ${esRegistrado ? 'status-registrado' : 'status-atendido'}">${item.estado}</span></td>
+          <td><span class="status-badge ${claseBadge}">${estadoLimpio}</span></td>
           <td>
-            <button class="btn-status" onclick="cambiarEstado(${item.id})">
-              ${esRegistrado ? '✅ Marcar Atendido' : '🔄 Revertir'}
+            <button class="btn-status" onclick="cambiarEstado(${item.id}, '${numAsiento}')">
+              ⚙️ Cambiar Estado
             </button>
-            <button class="btn-edit" onclick="editarPasaje(${item.id})">✏️️</button>
+            <button class="btn-edit" onclick="editarPasaje(${item.id})">✏</button>
             <button class="btn-delete" onclick="eliminarPasaje(${item.id})">🗑️</button>
           </td>
         `;
@@ -543,24 +555,30 @@
       });
     }
 
-    async function cambiarEstado(id) {
+    // Permitir al empleado elegir cualquier estado (atendido, cancelado, registrado, disponible)
+    async function cambiarEstado(id, nroAsiento) {
       let index = todosLosPasajes.findIndex(p => String(p.id) === String(id));
       if (index !== -1) {
-        const nuevoEstado = todosLosPasajes[index].estado === 'registrado' ? 'atendido' : 'registrado';
-        todosLosPasajes[index].estado = nuevoEstado;
+        const estadoActual = todosLosPasajes[index].estado || 'registrado';
+        const nuevoEstado = prompt(`Nuevo estado para el Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, estadoActual);
 
-        try {
-          await fetch(`/api/compras/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ estado: nuevoEstado })
-          });
-        } catch (e) {
-          console.log('Actualizando localmente...');
+        if (nuevoEstado) {
+          const estadoLimpio = nuevoEstado.toLowerCase().trim();
+          todosLosPasajes[index].estado = estadoLimpio;
+
+          try {
+            await fetch(`/api/compras/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ estado: estadoLimpio })
+            });
+          } catch (e) {
+            console.log('Actualizando localmente...');
+          }
+
+          localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
+          cargarPasajesGlobales();
         }
-
-        localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
-        cargarPasajesGlobales();
       }
     }
 
@@ -583,14 +601,16 @@
     async function eliminarPasaje(id) {
       if (!confirm('¿Seguro que deseas eliminar este pasaje como empleado?')) return;
 
+      const idStr = String(id);
+      todosLosPasajes = todosLosPasajes.filter(p => String(p.id) !== idStr);
+      localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
+
       try {
         await fetch(`/api/compras/${id}`, { method: 'DELETE' });
       } catch (e) {
-        console.log('Eliminando localmente...');
+        console.log('Eliminado localmente...');
       }
 
-      todosLosPasajes = todosLosPasajes.filter(p => String(p.id) !== String(id));
-      localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
       alert('Pasaje eliminado.');
       cargarPasajesGlobales();
     }
@@ -601,7 +621,8 @@
         String(p.id).toLowerCase().includes(texto) ||
         String(p.id_usuario || '').toLowerCase().includes(texto) ||
         (p.origen && p.origen.toLowerCase().includes(texto)) ||
-        (p.destino && p.destino.toLowerCase().includes(texto))
+        (p.destino && p.destino.toLowerCase().includes(texto)) ||
+        (p.estado && p.estado.toLowerCase().includes(texto))
       );
       renderizarTabla(filtrados);
     }
