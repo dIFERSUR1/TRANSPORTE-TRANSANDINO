@@ -123,7 +123,7 @@
     <section id="tab-asientos" class="tab-content">
       <div class="controls">
         <span style="color: #94a3b8;">Estado y Asignación de Asientos</span>
-        <button class="btn-action btn-update" onclick="cargarAsientos()">🔄 Recargar Tabla</button>
+        <button class="btn-action btn-update" onclick="cargarAsientos(true)">🔄 Recargar Tabla</button>
       </div>
 
       <div class="table-container">
@@ -154,7 +154,6 @@
     let currentUserEmail = '';
     let pasajesData = [];
 
-    // Arreglo persistente de empleados con Turno
     let empleadosData = JSON.parse(localStorage.getItem('lista_empleados')) || [
       { id: 1, nombre: 'Juan Pérez', correo: 'empleado1@transandino.pe', rol: 'Empleado', turno: 'Mañana (08:00 AM - 02:00 PM)' },
       { id: 2, nombre: 'María López', correo: 'empleado2@transandino.pe', rol: 'Empleado', turno: 'Tarde (02:00 PM - 08:00 PM)' }
@@ -162,9 +161,9 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       if (verificarSesion()) {
-        cargarPasajes();
+        cargarPasajes(true);
         cargarEmpleados();
-        cargarAsientos();
+        cargarAsientos(true);
       }
     });
 
@@ -223,13 +222,14 @@
       if (targetBtn) targetBtn.classList.add('active');
     }
 
-    async function obtenerDatosPasajes() {
-      if (pasajesData.length > 0) return pasajesData;
+    async function obtenerDatosPasajes(forzarRefresco = false) {
+      if (!forzarRefresco && pasajesData.length > 0) return pasajesData;
 
       try {
         const res = await fetch(API_URL);
         if (res.ok) {
           pasajesData = await res.json();
+          localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
         } else {
           pasajesData = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
         }
@@ -241,18 +241,18 @@
 
     function obtenerColorEstado(estadoTexto) {
       const est = String(estadoTexto || '').toLowerCase().trim();
-      if (est === 'disponible') return '#38bdf8'; // Celeste
-      if (est === 'registrado') return '#22c55e'; // Verde
-      if (est === 'atendido') return '#a855f7';   // Morado
-      if (est === 'cancelado') return '#ef4444';  // Rojo
+      if (est === 'disponible') return '#38bdf8'; 
+      if (est === 'registrado') return '#22c55e'; 
+      if (est === 'atendido') return '#a855f7';   
+      if (est === 'cancelado') return '#ef4444';  
       return '#22c55e';
     }
 
-    async function cargarPasajes() {
+    async function cargarPasajes(forzarRefresco = false) {
       const tbody = document.getElementById('panel-tbody');
       if (!tbody) return;
 
-      const datos = await obtenerDatosPasajes();
+      const datos = await obtenerDatosPasajes(forzarRefresco);
       tbody.innerHTML = '';
 
       if (!Array.isArray(datos) || datos.length === 0) {
@@ -285,7 +285,7 @@
           <td>${numAsiento}</td>
           <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 50).toFixed(2)}</td>
           <td>
-            <select onchange="cambiarEstado('${item.id || ''}', this.value, ${index})" style="background:#070f1e; color:white; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
+            <select onchange="cambiarEstado('${item.id || ''}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(item.estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
               <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
               <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
               <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
@@ -301,11 +301,11 @@
       });
     }
 
-    async function cargarAsientos() {
+    async function cargarAsientos(forzarRefresco = false) {
       const tbody = document.getElementById('asientos-tbody');
       if (!tbody) return;
 
-      const datos = await obtenerDatosPasajes();
+      const datos = await obtenerDatosPasajes(forzarRefresco);
       tbody.innerHTML = '';
 
       if (!Array.isArray(datos) || datos.length === 0) {
@@ -333,7 +333,7 @@
             </select>
           </td>
           <td>
-            <button class="btn-action btn-update" onclick="modificarNumeroAsiento('${item.id || ''}', '${nroAsiento}', ${index})">✏️ Cambiar N° Asiento</button>
+            <button class="btn-action btn-update" onclick="modificarNumeroAsiento('${item.id || ''}', '${nroAsiento}', ${index})">✏️️ Cambiar N° Asiento</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -342,16 +342,16 @@
 
     async function cambiarEstadoAsientoDirecto(id, nuevoEstado, indexFila) {
       await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
-      cargarAsientos();
-      if (currentUserRole === 'admin') cargarPasajes();
+      cargarAsientos(false);
+      if (currentUserRole === 'admin') cargarPasajes(false);
     }
 
     async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
       const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
       if (nuevoNumero && nuevoNumero !== nroAsientoActual) {
         await actualizarServidorOLocal(id, { asiento: nuevoNumero, empleado_atendio: currentUserEmail }, indexFila);
-        cargarAsientos();
-        if (currentUserRole === 'admin') cargarPasajes();
+        cargarAsientos(false);
+        if (currentUserRole === 'admin') cargarPasajes(false);
       }
     }
 
@@ -430,11 +430,20 @@
 
       if (id && String(id) !== '0' && String(id) !== 'undefined') {
         try {
-          await fetch(`${API_URL}/${id}`, {
+          // Intenta con parámetro ID estándar en Vercel Serverless / API Route
+          let res = await fetch(`${API_URL}?id=${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(nuevoObjeto)
           });
+          
+          if (!res.ok) {
+            await fetch(`${API_URL}/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(nuevoObjeto)
+            });
+          }
         } catch (err) {
           console.log('Actualizando localmente...');
         }
@@ -443,8 +452,8 @@
 
     async function cambiarEstado(id, nuevoEstado, indexFila) {
       await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
-      cargarAsientos();
-      if (currentUserRole === 'admin') cargarPasajes();
+      cargarAsientos(false);
+      if (currentUserRole === 'admin') cargarPasajes(false);
     }
 
     async function editarPrecio(id, precioActual, indexFila) {
@@ -455,7 +464,7 @@
       const nuevoPrecio = prompt('Ingrese el nuevo precio (S/):', precioActual);
       if (nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
         await actualizarServidorOLocal(id, { precio: parseFloat(nuevoPrecio) }, indexFila);
-        cargarPasajes();
+        cargarPasajes(false);
       }
     }
 
@@ -493,8 +502,8 @@
         pasajesData.push(nuevoItem);
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
 
-        cargarPasajes();
-        cargarAsientos();
+        cargarPasajes(true);
+        cargarAsientos(true);
       }
     }
 
@@ -510,12 +519,12 @@
 
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
 
-        cargarPasajes();
-        cargarAsientos();
+        cargarPasajes(false);
+        cargarAsientos(false);
 
         if (idStr && idStr !== '0' && idStr !== 'undefined') {
           try {
-            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
           } catch (err) {
             console.log('Eliminado localmente...');
           }
