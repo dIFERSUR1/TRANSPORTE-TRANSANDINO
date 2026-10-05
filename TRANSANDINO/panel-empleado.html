@@ -303,7 +303,7 @@
   </header>
 
   <main>
-    <h1>Panel de Gestión de Empleado 👨‍‍💼</h1>
+    <h1>Panel de Gestión de Empleado 👨‍💼</h1>
 
     <!-- FORMULARIO DE VENTA / ASIGNACIÓN RÁPIDA -->
     <div class="form-asignar">
@@ -395,6 +395,7 @@
   </footer>
 
   <script>
+    const API_URL = '/api/compras';
     let todosLosPasajes = [];
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -449,9 +450,10 @@
 
     async function cargarPasajesGlobales() {
       try {
-        const res = await fetch('/api/compras');
+        const res = await fetch(API_URL);
         if (res.ok) {
           todosLosPasajes = await res.json();
+          localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
         } else {
           todosLosPasajes = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
         }
@@ -461,6 +463,33 @@
 
       actualizarMetricas(todosLosPasajes);
       renderizarTabla(todosLosPasajes);
+    }
+
+    async function actualizarServidorOLocal(id, nuevosCampos, indexFila) {
+      let index = todosLosPasajes.findIndex(p => String(p.id) === String(id) && id !== '' && id !== 'undefined');
+      if (index === -1 && indexFila !== undefined && todosLosPasajes[indexFila]) {
+        index = indexFila;
+      }
+
+      if (index !== -1 && todosLosPasajes[index]) {
+        todosLosPasajes[index] = { ...todosLosPasajes[index], ...nuevosCampos };
+        localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
+      }
+
+      const targetId = id || (todosLosPasajes[index] ? todosLosPasajes[index].id : null);
+
+      if (targetId && String(targetId) !== '0' && String(targetId) !== 'undefined') {
+        try {
+          const payload = { id: targetId, ...nuevosCampos };
+          await fetch(`${API_URL}?id=${targetId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } catch (err) {
+          console.log('Sincronizado localmente por fallo de red:', err);
+        }
+      }
     }
 
     async function asignarPasajeEmpleado(e) {
@@ -476,7 +505,7 @@
       const precio = parseFloat(document.getElementById('emp-precio').value);
 
       const nuevoPasaje = {
-        id: Date.now(),
+        usuario_id: 'Venta Presencial',
         id_usuario: 'Venta Presencial',
         empleado_atendio: empleadoNombre,
         turno: turno,
@@ -484,19 +513,25 @@
         destino: destino,
         fecha_viaje: fecha,
         hora_viaje: turno === 'Mañana' ? '08:00 AM' : '03:00 PM',
+        asiento: asiento,
         num_asiento: asiento,
         precio: precio,
         estado: 'registrado'
       };
 
       try {
-        await fetch('/api/compras', {
+        const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(nuevoPasaje)
         });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.id) nuevoPasaje.id = data.id;
+        }
       } catch (err) {
-        console.log('Guardando en localStorage...');
+        console.log('Guardando localmente...');
+        if (!nuevoPasaje.id) nuevoPasaje.id = Date.now();
       }
 
       todosLosPasajes.push(nuevoPasaje);
@@ -505,7 +540,7 @@
       alert(`¡Pasaje N° ${asiento} asignado por ${empleadoNombre} (${turno}) con éxito!`);
       document.getElementById('emp-asiento').value = '';
       
-      cargarPasajesGlobales();
+      await cargarPasajesGlobales();
     }
 
     function actualizarMetricas(pasajes) {
@@ -542,7 +577,7 @@
 
         const empleadoAtendio = item.empleado_atendio || item.atendido_por || 'Empleado';
         const turno = item.turno || (new Date().getHours() < 13 ? 'Mañana' : 'Tarde');
-        const iconoTurno = turno === 'Mañana' ? '☀' : '🌙';
+        const iconoTurno = turno === 'Mañana' ? '☀️' : '🌙';
 
         let claseBadge = 'status-registrado';
         if (estadoLimpio === 'atendido') claseBadge = 'status-atendido';
@@ -551,19 +586,19 @@
 
         tr.innerHTML = `
           <td>#${item.id || (index + 1)}</td>
-          <td><strong style="color:#38bdf8;">${item.id_usuario || item.pasajero || 'Cliente'}</strong></td>
+          <td><strong style="color:#38bdf8;">${item.id_usuario || item.usuario_id || item.pasajero || 'Cliente'}</strong></td>
           <td>
             <span style="color:#ea580c; font-weight:bold;">👤 ${empleadoAtendio}</span><br>
             <small style="color:#cbd5e1;">${iconoTurno} Turno ${turno}</small>
           </td>
-          <td>${item.origen} ➔ ${item.destino}</td>
+          <td>${item.origen || 'Ica'} ➔ ${item.destino || 'Lima'}</td>
           <td>${fecha} (${hora})</td>
           <td>N° ${numAsiento}</td>
           <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 0).toFixed(2)}</td>
           <td><span class="status-badge ${claseBadge}">${estadoLimpio}</span></td>
           <td>
             <button class="btn-status" onclick="cambiarEstado('${item.id || ''}', '${numAsiento}', ${index})">
-              ⚙️ Estado
+              ⚙️️ Estado
             </button>
             <button class="btn-edit" onclick="editarPasaje('${item.id || ''}', ${index})">✏</button>
             <button class="btn-delete" onclick="eliminarPasaje('${item.id || ''}', ${index})">🗑️</button>
@@ -574,7 +609,6 @@
     }
 
     async function cambiarEstado(id, nroAsiento, indexFila) {
-      // 1. Localizar el elemento por ID o por índice de fila
       let index = todosLosPasajes.findIndex(p => String(p.id) === String(id) && id !== '' && id !== 'undefined');
       if (index === -1 && indexFila !== undefined && todosLosPasajes[indexFila]) {
         index = indexFila;
@@ -589,33 +623,13 @@
 
         if (nuevoEstado) {
           const estadoLimpio = nuevoEstado.toLowerCase().trim();
-          
-          // Actualizar inmediatamente memoria y localStorage
-          todosLosPasajes[index].estado = estadoLimpio;
-          todosLosPasajes[index].empleado_atendio = empleadoNombre;
-          localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
-
-          // Renderizar de inmediato para reflejar el cambio en pantalla
-          cargarPasajesGlobales();
-
-          // Sincronizar en servidor en segundo plano
-          const targetId = todosLosPasajes[index].id;
-          if (targetId) {
-            try {
-              await fetch(`/api/compras/${targetId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado: estadoLimpio, empleado_atendio: empleadoNombre })
-              });
-            } catch (e) {
-              console.log('Actualizado localmente.');
-            }
-          }
+          await actualizarServidorOLocal(id, { estado: estadoLimpio, empleado_atendio: empleadoNombre }, indexFila);
+          await cargarPasajesGlobales();
         }
       }
     }
 
-    function editarPasaje(id, indexFila) {
+    async function editarPasaje(id, indexFila) {
       let index = todosLosPasajes.findIndex(p => String(p.id) === String(id) && id !== '' && id !== 'undefined');
       if (index === -1 && indexFila !== undefined && todosLosPasajes[indexFila]) {
         index = indexFila;
@@ -624,13 +638,18 @@
       if (index !== -1 && todosLosPasajes[index]) {
         const nuevoOrigen = prompt('Editar Origen:', todosLosPasajes[index].origen || 'Lima');
         const nuevoDestino = prompt('Editar Destino:', todosLosPasajes[index].destino || 'Huancayo');
+        const nuevoAsiento = prompt('Editar N° Asiento:', todosLosPasajes[index].num_asiento || todosLosPasajes[index].asiento || '1');
 
         if (nuevoOrigen && nuevoDestino) {
-          todosLosPasajes[index].origen = nuevoOrigen;
-          todosLosPasajes[index].destino = nuevoDestino;
-          localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
+          const camposActualizados = {
+            origen: nuevoOrigen,
+            destino: nuevoDestino,
+            asiento: nuevoAsiento,
+            num_asiento: nuevoAsiento
+          };
+          await actualizarServidorOLocal(id, camposActualizados, indexFila);
           alert('Pasaje actualizado con éxito.');
-          cargarPasajesGlobales();
+          await cargarPasajesGlobales();
         }
       }
     }
@@ -647,11 +666,11 @@
       }
 
       localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
-      cargarPasajesGlobales();
+      await cargarPasajesGlobales();
 
-      if (targetId) {
+      if (targetId && String(targetId) !== 'undefined') {
         try {
-          await fetch(`/api/compras/${targetId}`, { method: 'DELETE' });
+          await fetch(`${API_URL}?id=${targetId}`, { method: 'DELETE' });
         } catch (e) {
           console.log('Eliminado localmente...');
         }
@@ -662,7 +681,7 @@
       const texto = document.getElementById('input-buscar').value.toLowerCase();
       const filtrados = todosLosPasajes.filter(p => 
         String(p.id).toLowerCase().includes(texto) ||
-        String(p.id_usuario || '').toLowerCase().includes(texto) ||
+        String(p.id_usuario || p.usuario_id || '').toLowerCase().includes(texto) ||
         String(p.empleado_atendio || '').toLowerCase().includes(texto) ||
         String(p.turno || '').toLowerCase().includes(texto) ||
         (p.origen && p.origen.toLowerCase().includes(texto)) ||
