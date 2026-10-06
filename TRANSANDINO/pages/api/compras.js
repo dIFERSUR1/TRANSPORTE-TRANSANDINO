@@ -26,6 +26,7 @@ export default async function handler(req, res) {
   try {
     await client.connect();
 
+    // GET: Leer pasajes
     if (req.method === 'GET') {
       const { id } = req.query;
 
@@ -35,14 +36,18 @@ export default async function handler(req, res) {
         return res.status(200).json(result.rows[0] || {});
       }
 
-      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id ASC');
+      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id DESC');
       await client.end();
       return res.status(200).json(result.rows);
     }
 
+    // POST: Insertar pasaje (Empleado / Venta Presencial)
     if (req.method === 'POST') {
       const {
         id_usuario,
+        usuario_id,
+        empleado_atendio,
+        turno,
         origen,
         destino,
         fecha_viaje,
@@ -56,18 +61,24 @@ export default async function handler(req, res) {
         codigo_seguimiento
       } = req.body;
 
+      const userRef = String(id_usuario || usuario_id || 'Venta Presencial');
+      const empNombre = empleado_atendio || 'Empleado';
+      const turnoAsignado = turno || 'Mañana';
       const fViaje = fecha_viaje || fecha || '2026-10-15';
-      const hViaje = hora_viaje || hora || '09:00 AM';
+      const hViaje = hora_viaje || hora || '08:00 AM';
       const nAsiento = String(num_asiento !== undefined ? num_asiento : (asiento || '1'));
       const codSeguimiento = codigo_seguimiento || `TA-${Math.floor(100000 + Math.random() * 900000)}`;
 
       const query = `
-        INSERT INTO compras_pasajes (id_usuario, origen, destino, fecha, hora, asiento, precio, estado, codigo_seguimiento)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO compras_pasajes 
+        (id_usuario, empleado_atendio, turno, origen, destino, fecha, hora, asiento, precio, estado, codigo_seguimiento)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING *;
       `;
       const values = [
-        parseInt(id_usuario) || 1,
+        userRef,
+        empNombre,
+        turnoAsignado,
         origen || 'Ica',
         destino || 'Lima',
         fViaje,
@@ -83,6 +94,7 @@ export default async function handler(req, res) {
       return res.status(201).json(result.rows[0]);
     }
 
+    // PUT: Actualizar pasaje (Empleado / Edición)
     if (req.method === 'PUT') {
       const rawId = req.query.id || (req.body && req.body.id);
 
@@ -92,9 +104,27 @@ export default async function handler(req, res) {
       }
 
       const targetId = parseInt(rawId);
-      const { estado, precio, id_usuario, asiento, num_asiento } = req.body;
+      const { 
+        estado, 
+        precio, 
+        id_usuario, 
+        usuario_id, 
+        asiento, 
+        num_asiento,
+        origen,
+        destino,
+        fecha_viaje,
+        fecha,
+        hora_viaje,
+        hora,
+        empleado_atendio,
+        turno
+      } = req.body;
       
       const nuevoAsiento = asiento !== undefined ? asiento : num_asiento;
+      const nuevaFecha = fecha_viaje !== undefined ? fecha_viaje : fecha;
+      const nuevaHora = hora_viaje !== undefined ? hora_viaje : hora;
+      const pasajeroRef = id_usuario !== undefined ? id_usuario : usuario_id;
 
       let fields = [];
       let values = [];
@@ -108,13 +138,37 @@ export default async function handler(req, res) {
         fields.push(`precio = $${index++}`);
         values.push(parseFloat(precio));
       }
-      if (id_usuario !== undefined && id_usuario !== null) {
+      if (pasajeroRef !== undefined && pasajeroRef !== null) {
         fields.push(`id_usuario = $${index++}`);
-        values.push(parseInt(id_usuario));
+        values.push(String(pasajeroRef));
       }
       if (nuevoAsiento !== undefined && nuevoAsiento !== null) {
         fields.push(`asiento = $${index++}`);
         values.push(String(nuevoAsiento));
+      }
+      if (origen !== undefined && origen !== null) {
+        fields.push(`origen = $${index++}`);
+        values.push(String(origen));
+      }
+      if (destino !== undefined && destino !== null) {
+        fields.push(`destino = $${index++}`);
+        values.push(String(destino));
+      }
+      if (nuevaFecha !== undefined && nuevaFecha !== null) {
+        fields.push(`fecha = $${index++}`);
+        values.push(String(nuevaFecha));
+      }
+      if (nuevaHora !== undefined && nuevaHora !== null) {
+        fields.push(`hora = $${index++}`);
+        values.push(String(nuevaHora));
+      }
+      if (empleado_atendio !== undefined && empleado_atendio !== null) {
+        fields.push(`empleado_atendio = $${index++}`);
+        values.push(String(empleado_atendio));
+      }
+      if (turno !== undefined && turno !== null) {
+        fields.push(`turno = $${index++}`);
+        values.push(String(turno));
       }
 
       if (fields.length === 0) {
@@ -140,6 +194,7 @@ export default async function handler(req, res) {
       return res.status(200).json(result.rows[0]);
     }
 
+    // DELETE: Eliminar pasaje
     if (req.method === 'DELETE') {
       const rawId = req.query.id || (req.body && req.body.id);
 
@@ -148,7 +203,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Falta un ID válido a eliminar.' });
       }
 
-      const result = await client.query('DELETE FROM compras_pasajes WHERE id = $1', [parseInt(rawId)]);
+      await client.query('DELETE FROM compras_pasajes WHERE id = $1', [parseInt(rawId)]);
       await client.end();
 
       return res.status(200).json({ message: 'Registro eliminado correctamente de la base de datos.' });
