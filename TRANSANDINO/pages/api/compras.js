@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   try {
     await client.connect();
 
-    // GET: Leer pasajes
+    // GET: Consultar pasajes
     if (req.method === 'GET') {
       const { id } = req.query;
 
@@ -36,12 +36,12 @@ export default async function handler(req, res) {
         return res.status(200).json(result.rows[0] || {});
       }
 
-      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id DESC');
+      const result = await client.query('SELECT * FROM compras_pasajes ORDER BY id ASC');
       await client.end();
       return res.status(200).json(result.rows);
     }
 
-    // POST: Insertar pasaje (Empleado / Venta Presencial)
+    // POST: Insertar nuevo pasaje
     if (req.method === 'POST') {
       const {
         id_usuario,
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
         codigo_seguimiento
       } = req.body;
 
-      const userRef = String(id_usuario || usuario_id || 'Venta Presencial');
+      const userRef = String(id_usuario || usuario_id || '1');
       const empNombre = empleado_atendio || 'Empleado';
       const turnoAsignado = turno || 'Mañana';
       const fViaje = fecha_viaje || fecha || '2026-10-15';
@@ -94,7 +94,7 @@ export default async function handler(req, res) {
       return res.status(201).json(result.rows[0]);
     }
 
-    // PUT: Actualizar pasaje (Empleado / Edición)
+    // PUT: Actualizar pasaje (Asiento, Estado, Precio, Ruta, etc.)
     if (req.method === 'PUT') {
       const rawId = req.query.id || (req.body && req.body.id);
 
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
         turno
       } = req.body;
       
-      const nuevoAsiento = asiento !== undefined ? asiento : num_asiento;
+      const valorAsiento = asiento !== undefined ? asiento : num_asiento;
       const nuevaFecha = fecha_viaje !== undefined ? fecha_viaje : fecha;
       const nuevaHora = hora_viaje !== undefined ? hora_viaje : hora;
       const pasajeroRef = id_usuario !== undefined ? id_usuario : usuario_id;
@@ -142,9 +142,9 @@ export default async function handler(req, res) {
         fields.push(`id_usuario = $${index++}`);
         values.push(String(pasajeroRef));
       }
-      if (nuevoAsiento !== undefined && nuevoAsiento !== null) {
+      if (valorAsiento !== undefined && valorAsiento !== null) {
         fields.push(`asiento = $${index++}`);
-        values.push(String(nuevoAsiento));
+        values.push(String(valorAsiento));
       }
       if (origen !== undefined && origen !== null) {
         fields.push(`origen = $${index++}`);
