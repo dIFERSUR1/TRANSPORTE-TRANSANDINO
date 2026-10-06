@@ -111,7 +111,14 @@
     .form-asignar h3 {
       color: #ea580c;
       font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .empleado-info-bar {
+      font-size: 0.85rem;
+      color: #38bdf8;
       margin-bottom: 0.8rem;
+      font-weight: 500;
     }
 
     .form-asignar-grid {
@@ -308,8 +315,15 @@
     <!-- FORMULARIO DE VENTA / ASIGNACIÓN RÁPIDA -->
     <div class="form-asignar">
       <h3>➕ Asignar / Vender Pasaje Rápidamente</h3>
+      <div class="empleado-info-bar">
+        Atendiendo como: <strong id="lbl-empleado">Cargando...</strong>
+      </div>
+
       <form id="form-empleado-asignar" onsubmit="asignarPasajeEmpleado(event)">
         <div class="form-asignar-grid">
+          <!-- Campo Pasajero adicionado -->
+          <input type="text" id="emp-pasajero" placeholder="Pasajero (Nombre / DNI)" required>
+
           <select id="emp-origen" required>
             <option value="Lima">Origen: Lima</option>
             <option value="Huancayo">Origen: Huancayo</option>
@@ -326,7 +340,6 @@
             <option value="Cusco">Destino: Cusco</option>
           </select>
 
-          <!-- SELECCIÓN DE TURNO DEL EMPLEADO -->
           <select id="emp-turno" required>
             <option value="Mañana">☀️ Turno Mañana</option>
             <option value="Tarde">🌙 Turno Tarde</option>
@@ -363,7 +376,7 @@
     <!-- Buscador -->
     <div class="controls-bar">
       <div class="search-box">
-        <input type="text" id="input-buscar" onkeyup="filtrarTabla()" placeholder="🔎 Buscar por ID, Empleado, Turno, Origen o Destino...">
+        <input type="text" id="input-buscar" onkeyup="filtrarTabla()" placeholder="🔎 Buscar por ID, Pasajero, Empleado, Turno, Origen o Destino...">
       </div>
     </div>
 
@@ -400,6 +413,10 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       if (verificarRolEmpleado()) {
+        const user = getUsuarioActual();
+        if (user) {
+          document.getElementById('lbl-empleado').textContent = user.nombre || user.email;
+        }
         cargarPasajesGlobales();
       }
     });
@@ -497,6 +514,7 @@
 
       const user = getUsuarioActual();
       const empleadoNombre = user ? (user.nombre || user.email) : 'Empleado';
+      const pasajero = document.getElementById('emp-pasajero').value;
       const turno = document.getElementById('emp-turno').value;
       const origen = document.getElementById('emp-origen').value;
       const destino = document.getElementById('emp-destino').value;
@@ -505,8 +523,8 @@
       const precio = parseFloat(document.getElementById('emp-precio').value);
 
       const nuevoPasaje = {
-        usuario_id: 'Venta Presencial',
-        id_usuario: 'Venta Presencial',
+        usuario_id: pasajero,
+        id_usuario: pasajero,
         empleado_atendio: empleadoNombre,
         turno: turno,
         origen: origen,
@@ -537,8 +555,9 @@
       todosLosPasajes.push(nuevoPasaje);
       localStorage.setItem('compras_pasajes', JSON.stringify(todosLosPasajes));
 
-      alert(`¡Pasaje N° ${asiento} asignado por ${empleadoNombre} (${turno}) con éxito!`);
+      alert(`¡Pasaje N° ${asiento} asignado a ${pasajero} por ${empleadoNombre} (${turno}) con éxito!`);
       document.getElementById('emp-asiento').value = '';
+      document.getElementById('emp-pasajero').value = '';
       
       await cargarPasajesGlobales();
     }
@@ -598,7 +617,7 @@
           <td><span class="status-badge ${claseBadge}">${estadoLimpio}</span></td>
           <td>
             <button class="btn-status" onclick="cambiarEstado('${item.id || ''}', '${numAsiento}', ${index})">
-              ⚙️️ Estado
+              ⚙ Estado
             </button>
             <button class="btn-edit" onclick="editarPasaje('${item.id || ''}', ${index})">✏</button>
             <button class="btn-delete" onclick="eliminarPasaje('${item.id || ''}', ${index})">🗑️</button>
@@ -636,16 +655,21 @@
       }
 
       if (index !== -1 && todosLosPasajes[index]) {
-        const nuevoOrigen = prompt('Editar Origen:', todosLosPasajes[index].origen || 'Lima');
-        const nuevoDestino = prompt('Editar Destino:', todosLosPasajes[index].destino || 'Huancayo');
-        const nuevoAsiento = prompt('Editar N° Asiento:', todosLosPasajes[index].num_asiento || todosLosPasajes[index].asiento || '1');
+        const p = todosLosPasajes[index];
+        const nuevoOrigen = prompt('Editar Origen:', p.origen || 'Lima');
+        const nuevoDestino = prompt('Editar Destino:', p.destino || 'Huancayo');
+        const nuevoAsiento = prompt('Editar N° Asiento:', p.num_asiento || p.asiento || '1');
+        const nuevaFecha = prompt('Editar Fecha (YYYY-MM-DD):', p.fecha_viaje ? p.fecha_viaje.split('T')[0] : (p.fecha || '2026-10-15'));
+        const nuevaHora = prompt('Editar Hora (ej: 08:00 AM / 03:00 PM):', p.hora_viaje || p.hora || '08:00 AM');
 
         if (nuevoOrigen && nuevoDestino) {
           const camposActualizados = {
             origen: nuevoOrigen,
             destino: nuevoDestino,
             asiento: nuevoAsiento,
-            num_asiento: nuevoAsiento
+            num_asiento: nuevoAsiento,
+            fecha_viaje: nuevaFecha,
+            hora_viaje: nuevaHora
           };
           await actualizarServidorOLocal(id, camposActualizados, indexFila);
           alert('Pasaje actualizado con éxito.');
