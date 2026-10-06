@@ -358,7 +358,15 @@
       if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero.trim() !== String(nroAsientoActual)) {
         const asientoLimpio = nuevoNumero.trim();
         
-        // Actualizar datos en memoria local inmediatamente
+        // 1. Enviar actualización a la API en Neon PostgreSQL PRIMERO
+        const exito = await actualizarServidorOLocal(id, { 
+          asiento: asientoLimpio, 
+          num_asiento: asientoLimpio, 
+          'N° Asiento': asientoLimpio, 
+          empleado_atendio: currentUserEmail 
+        }, indexFila);
+
+        // 2. Si fue exitoso, actualizar la vista y la memoria local
         if (pasajesData[indexFila]) {
           pasajesData[indexFila].asiento = asientoLimpio;
           pasajesData[indexFila].num_asiento = asientoLimpio;
@@ -366,17 +374,8 @@
           pasajesData[indexFila].empleado_atendio = currentUserEmail;
         }
 
-        // Renderizar vistas inmediatamente
         renderizarAsientosEnDOM();
         if (currentUserRole === 'admin') renderizarPasajesEnDOM();
-
-        // Enviar actualización persistente
-        await actualizarServidorOLocal(id, { 
-          asiento: asientoLimpio, 
-          num_asiento: asientoLimpio, 
-          'N° Asiento': asientoLimpio, 
-          empleado_atendio: currentUserEmail 
-        }, indexFila);
       }
     }
 
@@ -457,15 +456,24 @@
       if (recordId && String(recordId) !== '' && String(recordId) !== 'undefined') {
         try {
           const payload = { id: recordId, ...nuevoObjeto };
-          await fetch(`${API_URL}?id=${recordId}`, {
+          const response = await fetch(`${API_URL}?id=${recordId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+          
+          if (response.ok) {
+            return true;
+          } else {
+            console.error('Error al actualizar en servidor:', await response.text());
+            return false;
+          }
         } catch (err) {
           console.log('Actualizado localmente por fallo de conexión/API:', err);
+          return false;
         }
       }
+      return true;
     }
 
     async function cambiarEstado(id, nuevoEstado, indexFila) {
