@@ -259,6 +259,7 @@
 
       pasajesData.forEach((item, index) => {
         const tr = document.createElement('tr');
+        const dbId = item.id || item.id_pasaje || '';
         const nroAsiento = item.asiento !== undefined ? item.asiento : (item.num_asiento !== undefined ? item.num_asiento : (item['N° Asiento'] || '-'));
         const usuarioId = item.usuario_id || item.id_usuario || item['Pasajero (ID)'] || '1';
         const ruta = item.origen && item.destino ? `${item.origen} -> ${item.destino}` : (item.Ruta || 'Ica -> Lima');
@@ -269,7 +270,7 @@
           <td>Usuario ID: ${usuarioId}</td>
           <td>${ruta}</td>
           <td>
-            <select onchange="cambiarEstadoAsientoDirecto('${item.id || ''}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.3rem; border-radius:4px; cursor:pointer;">
+            <select onchange="cambiarEstadoAsientoDirecto('${dbId}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.3rem; border-radius:4px; cursor:pointer;">
               <option value="disponible" ${estado === 'disponible' ? 'selected' : ''}>disponible</option>
               <option value="registrado" ${estado === 'registrado' ? 'selected' : ''}>registrado</option>
               <option value="atendido" ${estado === 'atendido' ? 'selected' : ''}>atendido</option>
@@ -277,7 +278,7 @@
             </select>
           </td>
           <td>
-            <button class="btn-action btn-update" onclick="modificarNumeroAsiento('${item.id || ''}', '${nroAsiento}', ${index})">✏ Cambiar N° Asiento</button>
+            <button class="btn-action btn-update" onclick="modificarNumeroAsiento('${dbId}', '${nroAsiento}', ${index})">✏ Cambiar N° Asiento</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -296,6 +297,7 @@
 
       pasajesData.forEach((item, index) => {
         const tr = document.createElement('tr');
+        const dbId = item.id || item.id_pasaje || '';
         const numAsiento = item.asiento !== undefined ? item.asiento : (item.num_asiento !== undefined ? item.num_asiento : (item['N° Asiento'] || '-'));
         const usuarioId = item.usuario_id || item.id_usuario || item['Pasajero (ID)'] || '1';
         const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '2026-10-15');
@@ -306,7 +308,7 @@
         const iconoTurno = turno.toLowerCase().includes('mañana') ? '☀️' : '🌙';
 
         tr.innerHTML = `
-          <td>#${item.id || (index + 1)}</td>
+          <td>#${dbId || (index + 1)}</td>
           <td><strong>ID: ${usuarioId}</strong></td>
           <td>
             <span style="color:#ea580c; font-weight:bold;">👤 ${empleado}</span><br>
@@ -319,7 +321,7 @@
           <td>${numAsiento}</td>
           <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 50).toFixed(2)}</td>
           <td>
-            <select onchange="cambiarEstado('${item.id || ''}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(item.estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
+            <select onchange="cambiarEstado('${dbId}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(item.estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
               <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
               <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
               <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
@@ -327,8 +329,8 @@
             </select>
           </td>
           <td>
-            <button class="btn-action btn-update" onclick="editarPrecio('${item.id || ''}', ${item.precio || 50}, ${index})">Editar Precio</button>
-            <button class="btn-action btn-delete" onclick="eliminarRegistro('${item.id || ''}', ${index})">Eliminar</button>
+            <button class="btn-action btn-update" onclick="editarPrecio('${dbId}', ${item.precio || 50}, ${index})">Editar Precio</button>
+            <button class="btn-action btn-delete" onclick="eliminarRegistro('${dbId}', ${index})">Eliminar</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -353,9 +355,14 @@
 
     async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
       const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
-      if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero !== String(nroAsientoActual)) {
-        const numParsed = parseInt(nuevoNumero, 10) || nuevoNumero;
-        await actualizarServidorOLocal(id, { asiento: numParsed, num_asiento: numParsed, 'N° Asiento': numParsed, empleado_atendio: currentUserEmail }, indexFila);
+      if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero.trim() !== String(nroAsientoActual)) {
+        const asientoLimpio = nuevoNumero.trim();
+        await actualizarServidorOLocal(id, { 
+          asiento: asientoLimpio, 
+          num_asiento: asientoLimpio, 
+          'N° Asiento': asientoLimpio, 
+          empleado_atendio: currentUserEmail 
+        }, indexFila);
         renderizarAsientosEnDOM();
         if (currentUserRole === 'admin') renderizarPasajesEnDOM();
       }
@@ -376,7 +383,7 @@
           <td><span style="background:#0284c7; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.75rem;">${emp.rol}</span></td>
           <td><strong style="color:#f59e0b;">☀ ${emp.turno || 'Mañana'}</strong></td>
           <td>
-            <button class="btn-action btn-update" onclick="editarTurnoEmpleado(${index})">✏️ Cambiar Turno</button>
+            <button class="btn-action btn-update" onclick="editarTurnoEmpleado(${index})">✏️️ Cambiar Turno</button>
             <button class="btn-action btn-delete" onclick="desactivarEmpleado(${index})">Desactivar</button>
           </td>
         `;
@@ -425,22 +432,21 @@
     }
 
     async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
-      let targetRecord = pasajesData.find(p => String(p.id) === String(id) && id !== '' && id !== 'undefined');
+      let targetRecord = pasajesData.find(p => (p.id && String(p.id) === String(id)) || (p.id_pasaje && String(p.id_pasaje) === String(id)));
+      
       if (!targetRecord && indexFila !== undefined && pasajesData[indexFila]) {
         targetRecord = pasajesData[indexFila];
       }
 
       if (targetRecord) {
         Object.assign(targetRecord, nuevoObjeto);
-      } else if (indexFila !== undefined && pasajesData[indexFila]) {
-        Object.assign(pasajesData[indexFila], nuevoObjeto);
       }
 
       localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
 
-      const recordId = targetRecord ? targetRecord.id : id;
+      const recordId = targetRecord && (targetRecord.id || targetRecord.id_pasaje) ? (targetRecord.id || targetRecord.id_pasaje) : id;
 
-      if (recordId && String(recordId) !== '0' && String(recordId) !== 'undefined') {
+      if (recordId && String(recordId) !== '' && String(recordId) !== 'undefined') {
         try {
           const payload = { id: recordId, ...nuevoObjeto };
           await fetch(`${API_URL}?id=${recordId}`, {
@@ -486,9 +492,9 @@
           origen: orig,
           destino: dest,
           precio: parseFloat(precio),
-          asiento: parseInt(asiento) || 1,
-          num_asiento: parseInt(asiento) || 1,
-          'N° Asiento': parseInt(asiento) || 1,
+          asiento: String(asiento || '1'),
+          num_asiento: String(asiento || '1'),
+          'N° Asiento': String(asiento || '1'),
           estado: 'registrado',
           fecha_viaje: '2026-10-15',
           hora_viaje: '09:00 AM'
@@ -503,8 +509,8 @@
           
           if (res.ok) {
             const dataGuardada = await res.json();
-            if (dataGuardada && dataGuardada.id) {
-              nuevoItem.id = dataGuardada.id;
+            if (dataGuardada && (dataGuardada.id || dataGuardada.id_pasaje)) {
+              nuevoItem.id = dataGuardada.id || dataGuardada.id_pasaje;
             }
           }
         } catch (err) {
@@ -526,7 +532,7 @@
       if (indexFila !== undefined && pasajesData[indexFila]) {
         pasajesData.splice(indexFila, 1);
       } else if (id) {
-        pasajesData = pasajesData.filter(p => String(p.id) !== String(id));
+        pasajesData = pasajesData.filter(p => String(p.id || p.id_pasaje) !== String(id));
       }
       localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
 
