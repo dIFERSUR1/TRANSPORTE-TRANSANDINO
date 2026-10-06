@@ -227,14 +227,39 @@
       try {
         const res = await fetch(API_URL);
         if (res.ok) {
-          pasajesData = await res.json();
-          localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-        } else {
-          pasajesData = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            pasajesData = data;
+            localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+            return pasajesData;
+          }
         }
       } catch (err) {
-        pasajesData = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+        console.log('Error de red/API, cargando datos locales.');
       }
+
+      // Intentar leer de múltiples fuentes de LocalStorage
+      pasajesData = JSON.parse(localStorage.getItem('compras_pasajes')) || 
+                    JSON.parse(localStorage.getItem('asientos_bus')) || [];
+
+      // Si aún no hay nada, generamos una plantilla inicial de 10 asientos
+      if (pasajesData.length === 0) {
+        pasajesData = Array.from({ length: 10 }, (_, i) => ({
+          id: i + 1,
+          usuario_id: `PAS-00${i + 1}`,
+          asiento: `${i + 1}`,
+          num_asiento: `${i + 1}`,
+          origen: 'Huancayo',
+          destino: 'Lima',
+          precio: 50,
+          estado: i % 2 === 0 ? 'disponible' : 'registrado',
+          fecha_viaje: '2026-10-15',
+          hora_viaje: '08:00 AM',
+          empleado_atendio: currentUserEmail || 'Empleado'
+        }));
+        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+      }
+
       return pasajesData;
     }
 
@@ -253,21 +278,21 @@
       tbody.innerHTML = '';
 
       if (!Array.isArray(pasajesData) || pasajesData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay asientos cargados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay asientos cargados.</td></tr>';
         return;
       }
 
       pasajesData.forEach((item, index) => {
         const tr = document.createElement('tr');
         const dbId = item.id || item.id_pasaje || '';
-        const nroAsiento = item.asiento !== undefined ? item.asiento : (item.num_asiento !== undefined ? item.num_asiento : (item['N° Asiento'] || '-'));
-        const usuarioId = item.usuario_id || item.id_usuario || item['Pasajero (ID)'] || '1';
-        const ruta = item.origen && item.destino ? `${item.origen} -> ${item.destino}` : (item.Ruta || 'Ica -> Lima');
-        const estado = item.estado || item['Estado Asiento'] || 'registrado';
+        const nroAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || (index + 1);
+        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || 'Sin registrar';
+        const ruta = (item.origen && item.destino) ? `${item.origen} ➔ ${item.destino}` : (item.Ruta || 'Huancayo ➔ Lima');
+        const estado = (item.estado || item['Estado Asiento'] || 'disponible').toLowerCase();
 
         tr.innerHTML = `
           <td><strong>Asiento N° ${nroAsiento}</strong></td>
-          <td>Usuario ID: ${usuarioId}</td>
+          <td>${usuarioId}</td>
           <td>${ruta}</td>
           <td>
             <select onchange="cambiarEstadoAsientoDirecto('${dbId}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.3rem; border-radius:4px; cursor:pointer;">
@@ -291,15 +316,15 @@
       tbody.innerHTML = '';
 
       if (!Array.isArray(pasajesData) || pasajesData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:#94a3b8;">No hay pasajes registrados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay pasajes registrados.</td></tr>';
         return;
       }
 
       pasajesData.forEach((item, index) => {
         const tr = document.createElement('tr');
         const dbId = item.id || item.id_pasaje || '';
-        const numAsiento = item.asiento !== undefined ? item.asiento : (item.num_asiento !== undefined ? item.num_asiento : (item['N° Asiento'] || '-'));
-        const usuarioId = item.usuario_id || item.id_usuario || item['Pasajero (ID)'] || '1';
+        const numAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || (index + 1);
+        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || '1';
         const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '2026-10-15');
         const hora = item.hora_viaje || item.hora || '09:00 AM';
 
@@ -314,7 +339,7 @@
             <span style="color:#ea580c; font-weight:bold;">👤 ${empleado}</span><br>
             <small style="color:#cbd5e1;">${iconoTurno} ${turno}</small>
           </td>
-          <td>${item.origen || 'Ica'}</td>
+          <td>${item.origen || 'Huancayo'}</td>
           <td>${item.destino || 'Lima'}</td>
           <td>${fecha}</td>
           <td>${hora}</td>
@@ -358,15 +383,13 @@
       if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero.trim() !== String(nroAsientoActual)) {
         const asientoLimpio = nuevoNumero.trim();
         
-        // 1. Enviar actualización a la API en Neon PostgreSQL PRIMERO
-        const exito = await actualizarServidorOLocal(id, { 
+        await actualizarServidorOLocal(id, { 
           asiento: asientoLimpio, 
           num_asiento: asientoLimpio, 
           'N° Asiento': asientoLimpio, 
           empleado_atendio: currentUserEmail 
         }, indexFila);
 
-        // 2. Si fue exitoso, actualizar la vista y la memoria local
         if (pasajesData[indexFila]) {
           pasajesData[indexFila].asiento = asientoLimpio;
           pasajesData[indexFila].num_asiento = asientoLimpio;
@@ -379,7 +402,6 @@
       }
     }
 
-    /* GESTIÓN DE EMPLEADOS Y HORARIOS */
     function cargarEmpleados() {
       const tbody = document.getElementById('empleados-tbody');
       if (!tbody) return;
@@ -450,6 +472,7 @@
       }
 
       localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
 
       const recordId = id || (targetRecord && (targetRecord.id || targetRecord.id_pasaje) ? (targetRecord.id || targetRecord.id_pasaje) : null);
 
@@ -462,14 +485,9 @@
             body: JSON.stringify(payload)
           });
           
-          if (response.ok) {
-            return true;
-          } else {
-            console.error('Error al actualizar en servidor:', await response.text());
-            return false;
-          }
+          return response.ok;
         } catch (err) {
-          console.log('Actualizado localmente por fallo de conexión/API:', err);
+          console.log('Actualizado localmente por fallo de conexión/API');
           return false;
         }
       }
@@ -495,14 +513,14 @@
     }
 
     async function crearNuevoRegistro() {
-      const orig = prompt('Origen:', 'Ica');
+      const orig = prompt('Origen:', 'Huancayo');
       const dest = prompt('Destino:', 'Lima');
       const precio = prompt('Precio (S/):', '50');
       const asiento = prompt('Número de asiento:', '1');
 
       if (orig && dest && precio) {
         const nuevoItem = {
-          usuario_id: '1',
+          usuario_id: `PAS-00${pasajesData.length + 1}`,
           empleado_atendio: currentUserEmail || 'Admin',
           turno: new Date().getHours() < 13 ? 'Mañana' : 'Tarde',
           origen: orig,
@@ -530,12 +548,12 @@
             }
           }
         } catch (err) {
-          console.log('Guardado en local por fallo de servidor');
           if (!nuevoItem.id) nuevoItem.id = Date.now();
         }
 
         pasajesData.push(nuevoItem);
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+        localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
 
         renderizarPasajesEnDOM();
         renderizarAsientosEnDOM();
@@ -551,6 +569,7 @@
         pasajesData = pasajesData.filter(p => String(p.id || p.id_pasaje) !== String(id));
       }
       localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
 
       renderizarPasajesEnDOM();
       renderizarAsientosEnDOM();
@@ -559,7 +578,7 @@
         try {
           await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
         } catch (e) {
-          console.log('Error al enviar eliminación al servidor:', e);
+          console.log('Error al eliminar en servidor:', e);
         }
       }
     }
