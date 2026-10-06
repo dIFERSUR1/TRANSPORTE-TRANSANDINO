@@ -153,7 +153,6 @@
     let currentUserRole = 'empleado';
     let currentUserEmail = '';
     let pasajesData = [];
-
     let empleadosData = [];
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -219,7 +218,6 @@
       if (targetBtn) targetBtn.classList.add('active');
     }
 
-    // Genera 40 asientos por defecto para Ica -> Lima si no hay registros
     function generar40AsientosDefault() {
       return Array.from({ length: 40 }, (_, i) => ({
         id: i + 1,
@@ -239,6 +237,10 @@
     async function obtenerDatosPasajes(forzarRefresco = false) {
       if (!forzarRefresco && pasajesData.length > 0) return pasajesData;
 
+      // 1. Intentar cargar primero de LocalStorage
+      const localData = JSON.parse(localStorage.getItem('compras_pasajes')) || 
+                        JSON.parse(localStorage.getItem('asientos_bus'));
+
       try {
         const res = await fetch(API_URL);
         if (res.ok) {
@@ -246,23 +248,24 @@
           if (Array.isArray(data) && data.length > 0) {
             pasajesData = data;
             localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+            localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
             return pasajesData;
           }
         }
       } catch (err) {
-        console.log('Error de red/API, cargando datos de LocalStorage.');
+        console.log('API no disponible o en modo local, usando datos persistidos.');
       }
 
-      // Cargar desde LocalStorage
-      pasajesData = JSON.parse(localStorage.getItem('compras_pasajes')) || 
-                    JSON.parse(localStorage.getItem('asientos_bus')) || [];
-
-      // Si LocalStorage no tiene o tiene menos datos, inicializamos los 40 asientos de Ica -> Lima
-      if (pasajesData.length === 0) {
-        pasajesData = generar40AsientosDefault();
-        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-        localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
+      // 2. Si LocalStorage tenía datos, los usamos
+      if (localData && localData.length > 0) {
+        pasajesData = localData;
+        return pasajesData;
       }
+
+      // 3. Solo si NO HAY NADA en servidor NI en local, generamos por defecto
+      pasajesData = generar40AsientosDefault();
+      localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
 
       return pasajesData;
     }
@@ -412,21 +415,27 @@
       const tbody = document.getElementById('empleados-tbody');
       if (!tbody) return;
 
+      const localEmp = JSON.parse(localStorage.getItem('lista_empleados'));
+
       try {
         const res = await fetch(API_EMPLEADOS_URL);
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data)) {
+          if (Array.isArray(data) && data.length > 0) {
             empleadosData = data;
             localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
           }
         }
       } catch (err) {
-        console.log('Error de red/API, cargando empleados desde LocalStorage.');
-        empleadosData = JSON.parse(localStorage.getItem('lista_empleados')) || [
+        console.log('Cargando empleados desde LocalStorage.');
+      }
+
+      if (!empleadosData || empleadosData.length === 0) {
+        empleadosData = localEmp || [
           { id: 1, nombre: 'Juan Pérez', correo: 'empleado1@transandino.pe', rol: 'Empleado', turno: 'Mañana (08:00 AM - 02:00 PM)' },
           { id: 2, nombre: 'María López', correo: 'empleado2@transandino.pe', rol: 'Empleado', turno: 'Tarde (02:00 PM - 08:00 PM)' }
         ];
+        localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
       }
 
       tbody.innerHTML = '';
@@ -469,7 +478,7 @@
               body: JSON.stringify({ id, turno: turnoLimpio })
             });
           } catch (e) {
-            console.log('Error de red al actualizar turno en base de datos.');
+            console.log('Actualizado localmente.');
           }
         }
 
@@ -508,7 +517,6 @@
             }
           }
         } catch (err) {
-          console.log('Error de red, guardando temporalmente en LocalStorage.');
           nuevoEmp.id = Date.now();
         }
 
@@ -526,7 +534,7 @@
         try {
           await fetch(`${API_EMPLEADOS_URL}?id=${id}`, { method: 'DELETE' });
         } catch (e) {
-          console.log('Error al eliminar empleado en el servidor.');
+          console.log('Eliminado localmente.');
         }
       }
 
@@ -558,7 +566,6 @@
           
           return response.ok;
         } catch (err) {
-          console.log('Actualizado en LocalStorage');
           return false;
         }
       }
@@ -591,6 +598,7 @@
 
       if (orig && dest && precio) {
         const nuevoItem = {
+          id: Date.now(),
           usuario_id: `PAS-${String(pasajesData.length + 1).padStart(3, '0')}`,
           empleado_atendio: currentUserEmail || 'Admin',
           turno: new Date().getHours() < 13 ? 'Mañana' : 'Tarde',
@@ -619,7 +627,7 @@
             }
           }
         } catch (err) {
-          if (!nuevoItem.id) nuevoItem.id = Date.now();
+          console.log('Guardado en storage local.');
         }
 
         pasajesData.push(nuevoItem);
@@ -654,8 +662,12 @@
       }
     }
 
+    // CORREGIDO: Ya no borra la base de datos local al salir
     function cerrarSesion() {
-      localStorage.clear();
+      localStorage.removeItem('user');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userRole');
       window.location.href = 'login.html';
     }
   </script>
