@@ -357,14 +357,26 @@
       const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
       if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero.trim() !== String(nroAsientoActual)) {
         const asientoLimpio = nuevoNumero.trim();
+        
+        // Actualizar datos en memoria local inmediatamente
+        if (pasajesData[indexFila]) {
+          pasajesData[indexFila].asiento = asientoLimpio;
+          pasajesData[indexFila].num_asiento = asientoLimpio;
+          pasajesData[indexFila]['N° Asiento'] = asientoLimpio;
+          pasajesData[indexFila].empleado_atendio = currentUserEmail;
+        }
+
+        // Renderizar vistas inmediatamente
+        renderizarAsientosEnDOM();
+        if (currentUserRole === 'admin') renderizarPasajesEnDOM();
+
+        // Enviar actualización persistente
         await actualizarServidorOLocal(id, { 
           asiento: asientoLimpio, 
           num_asiento: asientoLimpio, 
           'N° Asiento': asientoLimpio, 
           empleado_atendio: currentUserEmail 
         }, indexFila);
-        renderizarAsientosEnDOM();
-        if (currentUserRole === 'admin') renderizarPasajesEnDOM();
       }
     }
 
@@ -383,7 +395,7 @@
           <td><span style="background:#0284c7; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.75rem;">${emp.rol}</span></td>
           <td><strong style="color:#f59e0b;">☀ ${emp.turno || 'Mañana'}</strong></td>
           <td>
-            <button class="btn-action btn-update" onclick="editarTurnoEmpleado(${index})">✏️️ Cambiar Turno</button>
+            <button class="btn-action btn-update" onclick="editarTurnoEmpleado(${index})">✏ Cambiar Turno</button>
             <button class="btn-action btn-delete" onclick="desactivarEmpleado(${index})">Desactivar</button>
           </td>
         `;
@@ -432,11 +444,7 @@
     }
 
     async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
-      let targetRecord = pasajesData.find(p => (p.id && String(p.id) === String(id)) || (p.id_pasaje && String(p.id_pasaje) === String(id)));
-      
-      if (!targetRecord && indexFila !== undefined && pasajesData[indexFila]) {
-        targetRecord = pasajesData[indexFila];
-      }
+      let targetRecord = pasajesData[indexFila] || pasajesData.find(p => (p.id && String(p.id) === String(id)) || (p.id_pasaje && String(p.id_pasaje) === String(id)));
 
       if (targetRecord) {
         Object.assign(targetRecord, nuevoObjeto);
@@ -444,7 +452,7 @@
 
       localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
 
-      const recordId = targetRecord && (targetRecord.id || targetRecord.id_pasaje) ? (targetRecord.id || targetRecord.id_pasaje) : id;
+      const recordId = id || (targetRecord && (targetRecord.id || targetRecord.id_pasaje) ? (targetRecord.id || targetRecord.id_pasaje) : null);
 
       if (recordId && String(recordId) !== '' && String(recordId) !== 'undefined') {
         try {
