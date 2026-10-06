@@ -221,6 +221,23 @@
       if (targetBtn) targetBtn.classList.add('active');
     }
 
+    // Genera 40 asientos por defecto para Ica -> Lima si no hay registros
+    function generar40AsientosDefault() {
+      return Array.from({ length: 40 }, (_, i) => ({
+        id: i + 1,
+        usuario_id: `PAS-${String(i + 1).padStart(3, '0')}`,
+        asiento: `${i + 1}`,
+        num_asiento: `${i + 1}`,
+        origen: 'Ica',
+        destino: 'Lima',
+        precio: 50,
+        estado: 'disponible',
+        fecha_viaje: '2026-10-15',
+        hora_viaje: '09:00 AM',
+        empleado_atendio: currentUserEmail || 'Empleado'
+      }));
+    }
+
     async function obtenerDatosPasajes(forzarRefresco = false) {
       if (!forzarRefresco && pasajesData.length > 0) return pasajesData;
 
@@ -235,29 +252,18 @@
           }
         }
       } catch (err) {
-        console.log('Error de red/API, cargando datos locales.');
+        console.log('Error de red/API, cargando datos de LocalStorage.');
       }
 
-      // Intentar leer de múltiples fuentes de LocalStorage
+      // Cargar desde LocalStorage
       pasajesData = JSON.parse(localStorage.getItem('compras_pasajes')) || 
                     JSON.parse(localStorage.getItem('asientos_bus')) || [];
 
-      // Si aún no hay nada, generamos una plantilla inicial de 10 asientos
+      // Si LocalStorage no tiene o tiene menos datos, inicializamos los 40 asientos de Ica -> Lima
       if (pasajesData.length === 0) {
-        pasajesData = Array.from({ length: 10 }, (_, i) => ({
-          id: i + 1,
-          usuario_id: `PAS-00${i + 1}`,
-          asiento: `${i + 1}`,
-          num_asiento: `${i + 1}`,
-          origen: 'Huancayo',
-          destino: 'Lima',
-          precio: 50,
-          estado: i % 2 === 0 ? 'disponible' : 'registrado',
-          fecha_viaje: '2026-10-15',
-          hora_viaje: '08:00 AM',
-          empleado_atendio: currentUserEmail || 'Empleado'
-        }));
+        pasajesData = generar40AsientosDefault();
         localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+        localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
       }
 
       return pasajesData;
@@ -269,7 +275,7 @@
       if (est === 'registrado') return '#22c55e'; 
       if (est === 'atendido') return '#a855f7';   
       if (est === 'cancelado') return '#ef4444';  
-      return '#22c55e';
+      return '#38bdf8';
     }
 
     function renderizarAsientosEnDOM() {
@@ -286,8 +292,10 @@
         const tr = document.createElement('tr');
         const dbId = item.id || item.id_pasaje || '';
         const nroAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || (index + 1);
-        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || 'Sin registrar';
-        const ruta = (item.origen && item.destino) ? `${item.origen} ➔ ${item.destino}` : (item.Ruta || 'Huancayo ➔ Lima');
+        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || 'Sin Asignar';
+        const orig = item.origen || 'Ica';
+        const dest = item.destino || 'Lima';
+        const ruta = `${orig} ➔ ${dest}`;
         const estado = (item.estado || item['Estado Asiento'] || 'disponible').toLowerCase();
 
         tr.innerHTML = `
@@ -324,7 +332,7 @@
         const tr = document.createElement('tr');
         const dbId = item.id || item.id_pasaje || '';
         const numAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || (index + 1);
-        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || '1';
+        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || 'PAS-001';
         const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '2026-10-15');
         const hora = item.hora_viaje || item.hora || '09:00 AM';
 
@@ -339,7 +347,7 @@
             <span style="color:#ea580c; font-weight:bold;">👤 ${empleado}</span><br>
             <small style="color:#cbd5e1;">${iconoTurno} ${turno}</small>
           </td>
-          <td>${item.origen || 'Huancayo'}</td>
+          <td>${item.origen || 'Ica'}</td>
           <td>${item.destino || 'Lima'}</td>
           <td>${fecha}</td>
           <td>${hora}</td>
@@ -487,7 +495,7 @@
           
           return response.ok;
         } catch (err) {
-          console.log('Actualizado localmente por fallo de conexión/API');
+          console.log('Actualizado en LocalStorage');
           return false;
         }
       }
@@ -513,14 +521,14 @@
     }
 
     async function crearNuevoRegistro() {
-      const orig = prompt('Origen:', 'Huancayo');
+      const orig = prompt('Origen:', 'Ica');
       const dest = prompt('Destino:', 'Lima');
       const precio = prompt('Precio (S/):', '50');
       const asiento = prompt('Número de asiento:', '1');
 
       if (orig && dest && precio) {
         const nuevoItem = {
-          usuario_id: `PAS-00${pasajesData.length + 1}`,
+          usuario_id: `PAS-${String(pasajesData.length + 1).padStart(3, '0')}`,
           empleado_atendio: currentUserEmail || 'Admin',
           turno: new Date().getHours() < 13 ? 'Mañana' : 'Tarde',
           origen: orig,
