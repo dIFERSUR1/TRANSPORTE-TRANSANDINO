@@ -149,14 +149,12 @@
 
   <script>
     const API_URL = '/api/compras';
+    const API_EMPLEADOS_URL = '/api/empleados';
     let currentUserRole = 'empleado';
     let currentUserEmail = '';
     let pasajesData = [];
 
-    let empleadosData = JSON.parse(localStorage.getItem('lista_empleados')) || [
-      { id: 1, nombre: 'Juan Pérez', correo: 'empleado1@transandino.pe', rol: 'Empleado', turno: 'Mañana (08:00 AM - 02:00 PM)' },
-      { id: 2, nombre: 'María López', correo: 'empleado2@transandino.pe', rol: 'Empleado', turno: 'Tarde (02:00 PM - 08:00 PM)' }
-    ];
+    let empleadosData = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       if (verificarSesion()) {
@@ -410,66 +408,131 @@
       }
     }
 
-    function cargarEmpleados() {
+    async function cargarEmpleados() {
       const tbody = document.getElementById('empleados-tbody');
       if (!tbody) return;
+
+      try {
+        const res = await fetch(API_EMPLEADOS_URL);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            empleadosData = data;
+            localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+          }
+        }
+      } catch (err) {
+        console.log('Error de red/API, cargando empleados desde LocalStorage.');
+        empleadosData = JSON.parse(localStorage.getItem('lista_empleados')) || [
+          { id: 1, nombre: 'Juan Pérez', correo: 'empleado1@transandino.pe', rol: 'Empleado', turno: 'Mañana (08:00 AM - 02:00 PM)' },
+          { id: 2, nombre: 'María López', correo: 'empleado2@transandino.pe', rol: 'Empleado', turno: 'Tarde (02:00 PM - 08:00 PM)' }
+        ];
+      }
+
       tbody.innerHTML = '';
+
+      if (!Array.isArray(empleadosData) || empleadosData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay empleados registrados.</td></tr>';
+        return;
+      }
 
       empleadosData.forEach((emp, index) => {
         const tr = document.createElement('tr');
+        const empId = emp.id || (index + 1);
         tr.innerHTML = `
-          <td>${emp.id}</td>
+          <td>${empId}</td>
           <td><strong>${emp.nombre}</strong></td>
           <td>${emp.correo}</td>
-          <td><span style="background:#0284c7; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.75rem;">${emp.rol}</span></td>
+          <td><span style="background:#0284c7; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.75rem;">${emp.rol || 'Empleado'}</span></td>
           <td><strong style="color:#f59e0b;">☀ ${emp.turno || 'Mañana'}</strong></td>
           <td>
-            <button class="btn-action btn-update" onclick="editarTurnoEmpleado(${index})">✏ Cambiar Turno</button>
-            <button class="btn-action btn-delete" onclick="desactivarEmpleado(${index})">Desactivar</button>
+            <button class="btn-action btn-update" onclick="editarTurnoEmpleado('${emp.id}', ${index})">✏ Cambiar Turno</button>
+            <button class="btn-action btn-delete" onclick="desactivarEmpleado('${emp.id}', ${index})">Desactivar</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function editarTurnoEmpleado(index) {
+    async function editarTurnoEmpleado(id, index) {
       const emp = empleadosData[index];
       const nuevoTurno = prompt(`Ingrese el nuevo horario/turno para ${emp.nombre}:`, emp.turno || 'Mañana (08:00 AM - 02:00 PM)');
 
       if (nuevoTurno && nuevoTurno.trim() !== '') {
-        empleadosData[index].turno = nuevoTurno;
+        const turnoLimpio = nuevoTurno.trim();
+
+        if (id && id !== 'undefined') {
+          try {
+            await fetch(API_EMPLEADOS_URL, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id, turno: turnoLimpio })
+            });
+          } catch (e) {
+            console.log('Error de red al actualizar turno en base de datos.');
+          }
+        }
+
+        empleadosData[index].turno = turnoLimpio;
         localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
         cargarEmpleados();
         if (currentUserRole === 'admin') renderizarPasajesEnDOM();
-        alert(`Turno de ${emp.nombre} actualizado a: ${nuevoTurno}`);
+        alert(`Turno de ${emp.nombre} actualizado a: ${turnoLimpio}`);
       }
     }
 
-    function crearEmpleado() {
+    async function crearEmpleado() {
       const nombre = prompt('Nombre del Empleado:');
       const correo = prompt('Correo Electrónico:');
       const turno = prompt('Turno / Horario:', 'Mañana (08:00 AM - 02:00 PM)');
 
       if (nombre && correo) {
         const nuevoEmp = {
-          id: empleadosData.length + 1,
-          nombre: nombre,
-          correo: correo,
+          nombre: nombre.trim(),
+          correo: correo.trim(),
           rol: 'Empleado',
-          turno: turno || 'Mañana'
+          turno: turno ? turno.trim() : 'Mañana (08:00 AM - 02:00 PM)'
         };
+
+        try {
+          const res = await fetch(API_EMPLEADOS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevoEmp)
+          });
+
+          if (res.ok) {
+            const dataGuardada = await res.json();
+            if (dataGuardada && dataGuardada.id) {
+              nuevoEmp.id = dataGuardada.id;
+            }
+          }
+        } catch (err) {
+          console.log('Error de red, guardando temporalmente en LocalStorage.');
+          nuevoEmp.id = Date.now();
+        }
+
         empleadosData.push(nuevoEmp);
         localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
         cargarEmpleados();
       }
     }
 
-    function desactivarEmpleado(index) {
-      if (confirm(`¿Seguro que deseas desactivar a ${empleadosData[index].nombre}?`)) {
-        empleadosData.splice(index, 1);
-        localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
-        cargarEmpleados();
+    async function desactivarEmpleado(id, index) {
+      const emp = empleadosData[index];
+      if (!confirm(`¿Seguro que deseas desactivar a ${emp.nombre}?`)) return;
+
+      if (id && id !== 'undefined') {
+        try {
+          await fetch(`${API_EMPLEADOS_URL}?id=${id}`, { method: 'DELETE' });
+        } catch (e) {
+          console.log('Error al eliminar empleado en el servidor.');
+        }
       }
+
+      empleadosData.splice(index, 1);
+      localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+      cargarEmpleados();
     }
 
     async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
