@@ -3,635 +3,670 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Caja - Cobro y Emisión - TransAndino Perú</title>
+  <title>Panel de Gestión - TransAndino Perú</title>
   <style>
-    :root {
-      --bg-color: #0b192c;
-      --card-bg: #15233b;
-      --border-color: #1e293b;
-      --orange-accent: #ea580c;
-      --blue-accent: #0284c7;
-      --cyan-light: #38bdf8;
-      --green-accent: #16a34a;
-      --text-color: #ffffff;
-      --text-muted: #94a3b8;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    html { scrollbar-gutter: stable; }
+    body { background-color: #0b192c; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    header { background-color: #070f1e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+    .logo { font-size: 1.4rem; font-weight: bold; color: #ffffff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .logo span { color: #ea580c; }
 
-    html {
-      overflow-y: scroll;
-      scrollbar-gutter: stable;
-    }
+    nav { display: flex; align-items: center; gap: 1rem; }
+    nav a, nav button { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 6px; font-weight: 500; background: transparent; border: none; cursor: pointer; }
+    nav a:hover, nav button:hover { background: #1e293b; }
+    .btn-logout { background: #ef4444 !important; color: white !important; font-weight: bold; }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    main { max-width: 1200px; margin: 2.5rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    h1 { font-size: 2rem; color: #ea580c; margin-bottom: 1.5rem; text-align: center; }
 
-    header {
-      background-color: #070f1e;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-color);
-    }
+    .tab-buttons { display: flex; gap: 10px; margin-bottom: 1.5rem; justify-content: center; flex-wrap: wrap; }
+    .tab-btn { background: #15233b; border: 1px solid #1e293b; color: #fff; padding: 0.7rem 1.4rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+    .tab-btn.active { background: #ea580c; border-color: #ea580c; color: white; }
 
-    .logo {
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: var(--text-color);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-    .logo span { color: var(--cyan-light); }
+    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .btn-create { background: #22c55e; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-    .bus-emoji {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 24px;
-      text-align: center;
-    }
+    .table-container { background: #15233b; border: 1px solid #1e293b; border-radius: 12px; overflow-x: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.4); margin-bottom: 2rem; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 0.85rem; border-bottom: 1px solid #1e293b; font-size: 0.85rem; }
+    th { background: #070f1e; color: #ea580c; }
 
-    nav {
-      display: flex;
-      gap: 0.8rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+    .btn-action { padding: 0.35rem 0.6rem; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-right: 4px; }
+    .btn-update { background: #0284c7; color: white; }
+    .btn-delete { background: #ef4444; color: white; }
 
-    nav a {
-      color: #cbd5e1;
-      text-decoration: none;
-      font-size: 0.9rem;
-      padding: 0.5rem 0.9rem;
-      border-radius: 6px;
-      transition: background 0.3s ease;
-      font-weight: 500;
-    }
+    .user-badge { background: #38bdf8; color: #070f1e; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
 
-    nav a:hover {
-      color: #ffffff;
-      background: var(--border-color);
-    }
-
-    nav a.active {
-      background-color: var(--orange-accent);
-      color: #ffffff;
-      font-weight: bold;
-    }
-
-    main {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
-      flex: 1;
-      width: 100%;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      color: var(--cyan-light);
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .cajero-bar {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 1rem 1.5rem;
-      border-radius: 10px;
-      margin-bottom: 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .cajero-info {
-      font-size: 0.95rem;
-      color: var(--cyan-light);
-    }
-
-    .cajero-id-badge {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid var(--cyan-light);
-      padding: 0.3rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: bold;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-    }
-
-    .search-box {
-      display: flex;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-    }
-
-    .search-box input {
-      flex: 1;
-      min-width: 280px;
-      background: #070f1e;
-      border: 1px solid var(--border-color);
-      color: #ffffff;
-      padding: 0.8rem 1rem;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .search-box input:focus {
-      border-color: var(--cyan-light);
-    }
-
-    .btn-search {
-      background: var(--orange-accent);
-      color: #ffffff;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-search:hover {
-      background: #c2410c;
-    }
-
-    .table-container {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th, td {
-      padding: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.9rem;
-    }
-
-    th {
-      background: #070f1e;
-      color: var(--cyan-light);
-    }
-
-    .badge-pending {
-      background: #f59e0b;
-      color: #000000;
-      padding: 0.25rem 0.6rem;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 0.75rem;
-    }
-
-    .badge-paid {
-      background: var(--green-accent);
-      color: #ffffff;
-      padding: 0.25rem 0.6rem;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 0.75rem;
-    }
-
-    .btn-cobrar {
-      background: var(--green-accent);
-      color: #ffffff;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-cobrar:hover {
-      background: #15803d;
-    }
-
-    /* Modal de Boleto Físico */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      padding: 1rem;
-    }
-
-    .ticket-card {
-      background: #ffffff;
-      color: #1e293b;
-      width: 100%;
-      max-width: 420px;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      font-family: 'Courier New', Courier, monospace;
-    }
-
-    .ticket-header {
-      text-align: center;
-      border-bottom: 2px dashed #94a3b8;
-      padding-bottom: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .ticket-header h2 { font-size: 1.3rem; color: #0f172a; }
-
-    .ticket-body div {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-      font-size: 0.9rem;
-    }
-
-    .ticket-footer {
-      border-top: 2px dashed #94a3b8;
-      padding-top: 1rem;
-      margin-top: 1rem;
-      text-align: center;
-    }
-
-    .btn-print {
-      background: #0284c7;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-right: 0.5rem;
-    }
-
-    .btn-close-modal {
-      background: #64748b;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    footer {
-      background-color: #070f1e;
-      text-align: center;
-      padding: 1.5rem;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      border-top: 1px solid var(--border-color);
-      margin-top: auto;
-    }
+    footer { background-color: #070f1e; text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: auto; }
   </style>
 </head>
 <body>
 
   <header>
-    <a href="/panel.html" class="logo">
-      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
-    </a>
+    <a href="index.html" class="logo"><span>⚙️</span> Panel de Operaciones TransAndino</a>
     <nav>
-      <a href="/caja.html" class="active">🏢 Caja de Agencia</a>
-      <a href="/panel.html">⚙️ Panel de Gestión</a>
-      <button onclick="cerrarSesion()" style="background:#ef4444; color:white; border:none; padding:0.5rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:bold;">🚪 Salir</button>
+      <span id="user-info-badge" class="user-badge">Cargando...</span>
+      <a href="caja.html" style="color: #38bdf8; font-weight: bold;">🏢 Módulo de Caja</a>
+      <a href="index.html">🏠 Volver al Sitio</a>
+      <button class="btn-logout" onclick="cerrarSesion()">🚪 Salir</button>
     </nav>
   </header>
 
   <main>
-    <h1>🏢 Módulo de Caja y Emisión de Boletos</h1>
+    <h1 id="panel-title">Gestión de Operaciones</h1>
 
-    <div class="cajero-bar">
-      <div class="cajero-info">
-        👤 Cajero Activo: <strong id="lbl-cajero-nombre">Cargando...</strong>
-      </div>
-      <div class="cajero-id-badge">
-        ID Cajero: <span id="lbl-cajero-id">101</span>
-      </div>
+    <div class="tab-buttons">
+      <button id="tab-btn-pasajes" class="tab-btn admin-only active" onclick="switchTab('pasajes')">🎫 Precios y Pasajes</button>
+      <button id="tab-btn-empleados" class="tab-btn admin-only" onclick="switchTab('empleados')">👥 Empleados</button>
+      <button id="tab-btn-asientos" class="tab-btn" onclick="switchTab('asientos')">💺 Asientos de Bus</button>
+      <a href="caja.html" class="tab-btn" style="text-decoration: none; background: #0284c7; border-color: #0284c7;">🏢 Cobranza en Caja</a>
     </div>
 
-    <!-- Buscador ILIKE -->
-    <div class="card">
-      <h3 style="color: var(--cyan-light); margin-bottom: 0.8rem; font-size: 1rem;">🔎 Buscar Reserva Pendiente</h3>
-      <form onsubmit="buscarReservaILIKE(event)">
-        <div class="search-box">
-          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. RES-483456) o DNI / Nombre del Pasajero..." required>
-          <button type="submit" class="btn-search">🔍 Buscar Reserva</button>
-        </div>
-      </form>
-    </div>
+    <!-- SECCIÓN 1: Pasajes y Precios -->
+    <section id="tab-pasajes" class="tab-content admin-only active">
+      <div class="controls">
+        <span style="color: #94a3b8;">Control de Pasajes y Edición de Precios</span>
+        <button class="btn-create" onclick="crearNuevoRegistro()">➕ Crear Nuevo Pasaje</button>
+      </div>
 
-    <!-- Tabla de Resultados -->
-    <div class="card">
-      <h3 style="color: var(--cyan-light); margin-bottom: 1rem; font-size: 1rem;">📋 Reservas Encontradas</h3>
       <div class="table-container">
         <table>
           <thead>
             <tr>
-              <th>Código Reserva</th>
-              <th>Pasajero / DNI</th>
-              <th>Ruta</th>
-              <th>Fecha / Hora</th>
-              <th>Asiento / Piso</th>
-              <th>Equipaje (kg)</th>
-              <th>Monto Total</th>
+              <th>ID</th>
+              <th>Usuario ID</th>
+              <th>Atendido por / Turno</th>
+              <th>Origen</th>
+              <th>Destino</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Asiento</th>
+              <th>Precio (S/)</th>
               <th>Estado</th>
-              <th>Acción Presencial</th>
+              <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="tabla-reservas-tbody">
-            <tr>
-              <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                Ingrese un término de búsqueda para consultar reservas pendientes.
-              </td>
-            </tr>
-          </tbody>
+          <tbody id="panel-tbody"></tbody>
         </table>
       </div>
-    </div>
+    </section>
+
+    <!-- SECCIÓN 2: Gestión de Empleados -->
+    <section id="tab-empleados" class="tab-content admin-only">
+      <div class="controls">
+        <span style="color: #94a3b8;">Lista de Empleados Registrados</span>
+        <button class="btn-create" onclick="crearEmpleado()">➕ Registrar Empleado</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Turno / Horario</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="empleados-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: Gestión de Asientos -->
+    <section id="tab-asientos" class="tab-content">
+      <div class="controls">
+        <span style="color: #94a3b8;">Estado y Asignación de Asientos</span>
+        <button class="btn-action btn-update" onclick="cargarAsientos(true)">🔄 Recargar Tabla</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>N° Asiento</th>
+              <th>Pasajero (ID)</th>
+              <th>Ruta</th>
+              <th>Estado Asiento</th>
+              <th>Acción Empleado</th>
+            </tr>
+          </thead>
+          <tbody id="asientos-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
   </main>
 
-  <!-- Modal Ticket Boleto Físico -->
-  <div class="modal-overlay" id="modal-ticket">
-    <div class="ticket-card">
-      <div class="ticket-header">
-        <h2>🚌 TransAndino Perú</h2>
-        <p style="font-size: 0.8rem;">BOLETO DE VIAJE FÍSICO</p>
-        <p style="font-size: 0.75rem; color: #64748b;" id="t-fecha-emision"></p>
-      </div>
-      <div class="ticket-body">
-        <div><span>CÓDIGO:</span><strong id="t-codigo">RES-000000</strong></div>
-        <div><span>PASAJERO:</span><strong id="t-pasajero">Cliente</strong></div>
-        <div><span>RUTA:</span><strong id="t-ruta">Ica -> Lima</strong></div>
-        <div><span>FECHA VIAJE:</span><span id="t-fecha">2026-10-15</span></div>
-        <div><span>ASIENTO:</span><strong id="t-asiento">N° 12</strong></div>
-        <div><span>TIPO SERVICIO:</span><span id="t-tipo">Semicama (2º piso)</span></div>
-        <div><span>EQUIPAJE EXCESO:</span><span id="t-equipaje">0.0 kg</span></div>
-        <div><span>MONTO COBRADO:</span><strong id="t-monto" style="font-size: 1.1rem; color: #16a34a;">S/ 60.00</strong></div>
-        <div><span>FORMA DE PAGO:</span><span>EFECTIVO EN CAJA</span></div>
-        <div><span>CAJERO EMISOR:</span><span id="t-cajero">Cajero #101</span></div>
-      </div>
-      <div class="ticket-footer">
-        <p style="font-size: 0.75rem; margin-bottom: 1rem;">¡Gracias por viajar con TransAndino!</p>
-        <button class="btn-print" onclick="window.print()">🖨️ Imprimir Boleto</button>
-        <button class="btn-close-modal" onclick="cerrarModalTicket()">Cerrar</button>
-      </div>
-    </div>
-  </div>
-
   <footer>
-    <p>&copy; 2026 TransAndino Perú - Módulo de Cobranza en Agencia.</p>
+    <p>&copy; 2026 TransAndino Perú - Sistema de Gestión de Operaciones.</p>
   </footer>
 
   <script>
-    const API_COMPRAS_URL = '/api/compras';
-
-    let ID_CAJERO_ACTUAL = 101;
-    let NOMBRE_CAJERO_ACTUAL = 'Cajero Agencia';
+    const API_URL = '/api/compras';
+    const API_EMPLEADOS_URL = '/api/empleados';
+    let currentUserRole = 'empleado';
+    let currentUserEmail = '';
+    let pasajesData = [];
+    let empleadosData = [];
 
     document.addEventListener('DOMContentLoaded', () => {
-      const userObj = JSON.parse(localStorage.getItem('user'));
-      if (userObj) {
-        ID_CAJERO_ACTUAL = userObj.id || userObj.dni || 101;
-        NOMBRE_CAJERO_ACTUAL = userObj.nombre || userObj.email || 'Cajero Agencia';
-      } else {
-        const email = localStorage.getItem('userEmail');
-        if (email) {
-          NOMBRE_CAJERO_ACTUAL = email.split('@')[0];
-          ID_CAJERO_ACTUAL = 102;
-        }
+      if (verificarSesion()) {
+        cargarPasajes(true);
+        cargarEmpleados();
+        cargarAsientos(true);
       }
-
-      document.getElementById('lbl-cajero-nombre').textContent = NOMBRE_CAJERO_ACTUAL;
-      document.getElementById('lbl-cajero-id').textContent = ID_CAJERO_ACTUAL;
     });
 
-    async function buscarReservaILIKE(e) {
-      if (e) e.preventDefault();
-      const query = document.getElementById('txt-busqueda').value.trim();
-      if (!query) return;
+    function obtenerUsuarioActual() {
+      const userObj = JSON.parse(localStorage.getItem('user'));
+      if (userObj) {
+        return {
+          email: userObj.email || userObj.nombre || 'Usuario',
+          rol: userObj.rol || 'empleado'
+        };
+      }
 
-      const tbody = document.getElementById('tabla-reservas-tbody');
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--cyan-light);">🔎 Buscando reservas...</td></tr>';
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const userEmail = localStorage.getItem('userEmail');
+      const userRole = localStorage.getItem('userRole');
 
-      let resultados = [];
+      if (isLoggedIn && userEmail) {
+        return {
+          email: userEmail,
+          rol: userRole || 'empleado'
+        };
+      }
+
+      return null;
+    }
+
+    function verificarSesion() {
+      const user = obtenerUsuarioActual();
+      if (!user) {
+        alert('Debes iniciar sesión para acceder al panel.');
+        window.location.href = 'login.html';
+        return false;
+      }
+
+      currentUserEmail = user.email;
+      currentUserRole = user.rol;
+
+      document.getElementById('user-info-badge').textContent = `${currentUserEmail} (${currentUserRole.toUpperCase()})`;
+
+      if (currentUserRole !== 'admin') {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        switchTab('asientos');
+      }
+
+      return true;
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+      const targetSection = document.getElementById(`tab-${tabName}`);
+      const targetBtn = document.getElementById(`tab-btn-${tabName}`);
+
+      if (targetSection) targetSection.classList.add('active');
+      if (targetBtn) targetBtn.classList.add('active');
+    }
+
+    function generar40AsientosDefault() {
+      return Array.from({ length: 40 }, (_, i) => ({
+        id: i + 1,
+        usuario_id: `PAS-${String(i + 1).padStart(3, '0')}`,
+        asiento: `${i + 1}`,
+        num_asiento: `${i + 1}`,
+        origen: 'Ica',
+        destino: 'Lima',
+        precio: 50,
+        estado: 'disponible',
+        fecha_viaje: '2026-10-15',
+        hora_viaje: '09:00 AM',
+        empleado_atendio: currentUserEmail || 'Empleado'
+      }));
+    }
+
+    async function obtenerDatosPasajes(forzarRefresco = false) {
+      if (!forzarRefresco && pasajesData.length > 0) return pasajesData;
+
+      const localData = JSON.parse(localStorage.getItem('compras_pasajes')) || 
+                        JSON.parse(localStorage.getItem('asientos_bus'));
 
       try {
-        const res = await fetch(`${API_COMPRAS_URL}?q=${encodeURIComponent(query)}`);
+        const res = await fetch(API_URL);
         if (res.ok) {
-          resultados = await res.json();
-        } else {
-          resultados = buscarEnLocalStorage(query);
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            pasajesData = data;
+            localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+            localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
+            return pasajesData;
+          }
         }
       } catch (err) {
-        console.log('Servidor no disponible, realizando búsqueda local...');
-        resultados = buscarEnLocalStorage(query);
+        console.log('API no disponible o en modo local, usando datos persistidos.');
       }
 
-      if (!Array.isArray(resultados) || resultados.length === 0) {
-        resultados = buscarEnLocalStorage(query);
+      if (localData && localData.length > 0) {
+        pasajesData = localData;
+        return pasajesData;
       }
 
-      renderizarResultados(resultados);
+      pasajesData = generar40AsientosDefault();
+      localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
+
+      return pasajesData;
     }
 
-    function buscarEnLocalStorage(query) {
-      const q = query.toLowerCase();
-      const compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      return compras.filter(item => {
-        const codigo = String(item.codigo_reserva || item.codigo_seguimiento || item.id || '').toLowerCase();
-        const usuario = String(item.id_usuario || item.usuario_id || item.pasajero || '').toLowerCase();
-        return codigo.includes(q) || usuario.includes(q);
-      });
+    function obtenerColorEstado(estadoTexto) {
+      const est = String(estadoTexto || '').toLowerCase().trim();
+      if (est === 'disponible') return '#38bdf8'; 
+      if (est === 'registrado') return '#22c55e'; 
+      if (est === 'atendido') return '#a855f7';   
+      if (est === 'cancelado') return '#ef4444';  
+      return '#38bdf8';
     }
 
-    function renderizarResultados(lista) {
-      const tbody = document.getElementById('tabla-reservas-tbody');
+    function renderizarAsientosEnDOM() {
+      const tbody = document.getElementById('asientos-tbody');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
-      if (!lista || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #ef4444; padding: 2rem;">No se encontraron reservas con el criterio ingresado.</td></tr>';
+      if (!Array.isArray(pasajesData) || pasajesData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay asientos cargados.</td></tr>';
         return;
       }
 
-      lista.forEach((item, index) => {
+      pasajesData.forEach((item, index) => {
         const tr = document.createElement('tr');
-        const codigo = item.codigo_reserva || item.codigo_seguimiento || `RES-${item.id || index + 1}`;
-        const pasajero = item.id_usuario || item.usuario_id || item.pasajero || 'Cliente';
-        const ruta = `${item.origen || 'Ica'} ➔ ${item.destino || 'Lima'}`;
-        
-        const fechaRaw = item.fecha_viaje || item.fecha || '';
-        const fecha = fechaRaw ? fechaRaw.split('T')[0] : 'N/A';
-        const hora = item.hora_viaje || item.hora || '09:00 AM';
-        
-        const asiento = item.num_asiento || item.asiento || '-';
-        const tipoAsiento = item.tipo_asiento || 'semicama';
-        const esCama = String(tipoAsiento).toLowerCase().includes('cama') && !String(tipoAsiento).toLowerCase().includes('semi');
-
-        // 1. LECTURA PRIORITARIA DEL MONTO TOTAL GUARDADO
-        let montoTotalGuardado = parseFloat(item.monto_calculado || item.monto_total || item.total || item.precio || 0);
-
-        // 2. EQUIPAJE Y EXCESO
-        const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
-        let excesoKg = 0;
-        if (equipajeTotal > 20) {
-          excesoKg = equipajeTotal - 20;
-        } else if (item.exceso_kg) {
-          excesoKg = parseFloat(item.exceso_kg);
-        }
-
-        // 3. DETERMINACIÓN DEL MONTO FINAL A MOSTRAR
-        let monto = 0;
-        if (montoTotalGuardado > 0) {
-          monto = montoTotalGuardado;
-        } else {
-          const precioBase = esCama ? 85 : 60;
-          monto = precioBase + (excesoKg * 4);
-        }
-
-        const estado = String(item.estado || 'PENDIENTE').toUpperCase();
-        const badgeClass = (estado === 'PAGADO' || estado === 'ATENDIDO') ? 'badge-paid' : 'badge-pending';
-        
-        let botonAccion = '';
-        if (estado === 'PENDIENTE' || estado === 'REGISTRADO' || estado.includes('PENDIENTE')) {
-          botonAccion = `<button class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipajeTotal}, ${monto}, ${excesoKg})">💵 Cobrar y Emitir</button>`;
-        } else {
-          botonAccion = `<button class="btn-cobrar" style="background: #0284c7;" onclick="reimprimirBoleto('${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipajeTotal}, ${monto}, ${excesoKg})">🖨️ Reimprimir</button>`;
-        }
-
-        const txtEquipajeTabla = equipajeTotal > 0 ? `${equipajeTotal} kg` : (excesoKg > 0 ? `${excesoKg} kg exceso` : '0 kg');
+        const dbId = item.id || item.id_pasaje || '';
+        const nroAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || (index + 1);
+        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || 'Sin Asignar';
+        const orig = item.origen || 'Ica';
+        const dest = item.destino || 'Lima';
+        const ruta = `${orig} ➔ ${dest}`;
+        const estado = (item.estado || item['Estado Asiento'] || 'disponible').toLowerCase();
 
         tr.innerHTML = `
-          <td><strong style="color: var(--cyan-light);">${codigo}</strong></td>
-          <td><strong>${pasajero}</strong></td>
+          <td><strong>Asiento N° ${nroAsiento}</strong></td>
+          <td>${usuarioId}</td>
           <td>${ruta}</td>
-          <td>${fecha} (${hora})</td>
-          <td>N° ${asiento} (${tipoAsiento})</td>
-          <td>${txtEquipajeTabla}</td>
-          <td style="color: var(--green-accent); font-weight: bold;">S/ ${monto.toFixed(2)}</td>
-          <td><span class="${badgeClass}">${estado}</span></td>
-          <td>${botonAccion}</td>
+          <td>
+            <select onchange="cambiarEstadoAsientoDirecto('${dbId}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.3rem; border-radius:4px; cursor:pointer;">
+              <option value="disponible" ${estado === 'disponible' ? 'selected' : ''}>disponible</option>
+              <option value="registrado" ${estado === 'registrado' ? 'selected' : ''}>registrado</option>
+              <option value="atendido" ${estado === 'atendido' ? 'selected' : ''}>atendido</option>
+              <option value="cancelado" ${estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn-action btn-update" onclick="modificarNumeroAsiento('${dbId}', '${nroAsiento}', ${index})">✏ Cambiar N° Asiento</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    async function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg) {
-      if (!confirm(`¿Confirmar cobro presencial en EFECTIVO por S/ ${parseFloat(monto).toFixed(2)} para la reserva ${codigo}?`)) {
+    function renderizarPasajesEnDOM() {
+      const tbody = document.getElementById('panel-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!Array.isArray(pasajesData) || pasajesData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay pasajes registrados.</td></tr>';
         return;
       }
 
+      pasajesData.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        const dbId = item.id || item.id_pasaje || '';
+        const numAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || (index + 1);
+        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || 'PAS-001';
+        const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '2026-10-15');
+        const hora = item.hora_viaje || item.hora || '09:00 AM';
+
+        const empleado = item.empleado_atendio || item.atendido_por || 'Empleado';
+        const turno = item.turno || (new Date().getHours() < 13 ? 'Mañana' : 'Tarde');
+        const iconoTurno = turno.toLowerCase().includes('mañana') ? '☀️' : '🌙';
+
+        tr.innerHTML = `
+          <td>#${dbId || (index + 1)}</td>
+          <td><strong>ID: ${usuarioId}</strong></td>
+          <td>
+            <span style="color:#ea580c; font-weight:bold;">👤 ${empleado}</span><br>
+            <small style="color:#cbd5e1;">${iconoTurno} ${turno}</small>
+          </td>
+          <td>${item.origen || 'Ica'}</td>
+          <td>${item.destino || 'Lima'}</td>
+          <td>${fecha}</td>
+          <td>${hora}</td>
+          <td>${numAsiento}</td>
+          <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 50).toFixed(2)}</td>
+          <td>
+            <select onchange="cambiarEstado('${dbId}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(item.estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
+              <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
+              <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
+              <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
+              <option value="cancelado" ${item.estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn-action btn-update" onclick="editarPrecio('${dbId}', ${item.precio || 50}, ${index})">Editar Precio</button>
+            <button class="btn-action btn-delete" onclick="eliminarRegistro('${dbId}', ${index})">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function cargarPasajes(forzarRefresco = false) {
+      await obtenerDatosPasajes(forzarRefresco);
+      renderizarPasajesEnDOM();
+    }
+
+    async function cargarAsientos(forzarRefresco = false) {
+      await obtenerDatosPasajes(forzarRefresco);
+      renderizarAsientosEnDOM();
+    }
+
+    async function cambiarEstadoAsientoDirecto(id, nuevoEstado, indexFila) {
+      await actualizarServidorOLocal(id, { estado: nuevoEstado, ['Estado Asiento']: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
+      renderizarAsientosEnDOM();
+      if (currentUserRole === 'admin') renderizarPasajesEnDOM();
+    }
+
+    async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
+      const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
+      if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero.trim() !== String(nroAsientoActual)) {
+        const asientoLimpio = nuevoNumero.trim();
+        
+        await actualizarServidorOLocal(id, { 
+          asiento: asientoLimpio, 
+          num_asiento: asientoLimpio, 
+          'N° Asiento': asientoLimpio, 
+          empleado_atendio: currentUserEmail 
+        }, indexFila);
+
+        if (pasajesData[indexFila]) {
+          pasajesData[indexFila].asiento = asientoLimpio;
+          pasajesData[indexFila].num_asiento = asientoLimpio;
+          pasajesData[indexFila]['N° Asiento'] = asientoLimpio;
+          pasajesData[indexFila].empleado_atendio = currentUserEmail;
+        }
+
+        renderizarAsientosEnDOM();
+        if (currentUserRole === 'admin') renderizarPasajesEnDOM();
+      }
+    }
+
+    async function cargarEmpleados() {
+      const tbody = document.getElementById('empleados-tbody');
+      if (!tbody) return;
+
+      const localEmp = JSON.parse(localStorage.getItem('lista_empleados'));
+
       try {
-        const payload = {
-          id: id || codigo,
-          codigo_reserva: codigo,
-          id_cajero: ID_CAJERO_ACTUAL,
-          metodo_pago: 'EFECTIVO',
-          monto_calculado: monto,
-          estado: 'PAGADO'
-        };
-
-        const res = await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(id || codigo)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error('Fallo servidor');
+        const res = await fetch(API_EMPLEADOS_URL);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            empleadosData = data;
+            localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+          }
+        }
       } catch (err) {
-        console.log('Actualizando cobro localmente...');
+        console.log('Cargando empleados desde LocalStorage.');
       }
 
-      actualizarCobroLocal(id, codigo, monto);
+      if (!empleadosData || empleadosData.length === 0) {
+        empleadosData = localEmp || [
+          { id: 1, nombre: 'Juan Pérez', correo: 'empleado1@transandino.pe', rol: 'Empleado', turno: 'Mañana (08:00 AM - 02:00 PM)' },
+          { id: 2, nombre: 'María López', correo: 'empleado2@transandino.pe', rol: 'Empleado', turno: 'Tarde (02:00 PM - 08:00 PM)' }
+        ];
+        localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+      }
 
-      // Mostrar modal de emisión de boleto físico
-      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg);
-      
-      // Actualizar vista
-      buscarReservaILIKE(null);
-    }
+      tbody.innerHTML = '';
 
-    function actualizarCobroLocal(id, codigo, monto) {
-      let compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      compras = compras.map(c => {
-        if (String(c.id) === String(id) || c.codigo_reserva === codigo || c.codigo_seguimiento === codigo) {
-          return {
-            ...c,
-            estado: 'PAGADO',
-            metodo_pago: 'EFECTIVO',
-            monto_calculado: monto,
-            precio: monto,
-            id_cajero: ID_CAJERO_ACTUAL,
-            fecha_pago: new Date().toISOString()
-          };
-        }
-        return c;
+      if (!Array.isArray(empleadosData) || empleadosData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay empleados registrados.</td></tr>';
+        return;
+      }
+
+      empleadosData.forEach((emp, index) => {
+        const tr = document.createElement('tr');
+        const empId = emp.id || (index + 1);
+        tr.innerHTML = `
+          <td>${empId}</td>
+          <td><strong>${emp.nombre}</strong></td>
+          <td>${emp.correo}</td>
+          <td><span style="background:#0284c7; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.75rem;">${emp.rol || 'Empleado'}</span></td>
+          <td><strong style="color:#f59e0b;">☀ ${emp.turno || 'Mañana'}</strong></td>
+          <td>
+            <button class="btn-action btn-update" onclick="editarTurnoEmpleado('${emp.id}', ${index})">✏ Cambiar Turno</button>
+            <button class="btn-action btn-delete" onclick="desactivarEmpleado('${emp.id}', ${index})">Desactivar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
       });
-      localStorage.setItem('compras_pasajes', JSON.stringify(compras));
     }
 
-    function mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg = 0) {
-      document.getElementById('t-codigo').textContent = codigo;
-      document.getElementById('t-pasajero').textContent = pasajero;
-      document.getElementById('t-ruta').textContent = ruta;
-      document.getElementById('t-fecha').textContent = fecha;
-      document.getElementById('t-asiento').textContent = `N° ${asiento}`;
-      document.getElementById('t-tipo').textContent = tipo;
-      
-      const exKg = parseFloat(excesoKg || 0);
-      const txtEquipaje = exKg > 0 ? `${exKg} kg (+S/ ${(exKg * 4).toFixed(2)})` : `${equipaje} kg (Sin recargo)`;
-      document.getElementById('t-equipaje').textContent = txtEquipaje;
-      
-      document.getElementById('t-monto').textContent = `S/ ${parseFloat(monto).toFixed(2)}`;
-      document.getElementById('t-cajero').textContent = `${NOMBRE_CAJERO_ACTUAL} (#${ID_CAJERO_ACTUAL})`;
-      document.getElementById('t-fecha-emision').textContent = new Date().toLocaleString();
+    async function editarTurnoEmpleado(id, index) {
+      const emp = empleadosData[index];
+      const nuevoTurno = prompt(`Ingrese el nuevo horario/turno para ${emp.nombre}:`, emp.turno || 'Mañana (08:00 AM - 02:00 PM)');
 
-      document.getElementById('modal-ticket').style.display = 'flex';
+      if (nuevoTurno && nuevoTurno.trim() !== '') {
+        const turnoLimpio = nuevoTurno.trim();
+
+        if (id && id !== 'undefined') {
+          try {
+            await fetch(API_EMPLEADOS_URL, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id, turno: turnoLimpio })
+            });
+          } catch (e) {
+            console.log('Actualizado localmente.');
+          }
+        }
+
+        empleadosData[index].turno = turnoLimpio;
+        localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+        cargarEmpleados();
+        if (currentUserRole === 'admin') renderizarPasajesEnDOM();
+        alert(`Turno de ${emp.nombre} actualizado a: ${turnoLimpio}`);
+      }
     }
 
-    function reimprimirBoleto(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg) {
-      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg);
+    async function crearEmpleado() {
+      const nombre = prompt('Nombre del Empleado:');
+      const correo = prompt('Correo Electrónico:');
+      const turno = prompt('Turno / Horario:', 'Mañana (08:00 AM - 02:00 PM)');
+
+      if (nombre && correo) {
+        const nuevoEmp = {
+          nombre: nombre.trim(),
+          correo: correo.trim(),
+          rol: 'Empleado',
+          turno: turno ? turno.trim() : 'Mañana (08:00 AM - 02:00 PM)'
+        };
+
+        try {
+          const res = await fetch(API_EMPLEADOS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevoEmp)
+          });
+
+          if (res.ok) {
+            const dataGuardada = await res.json();
+            if (dataGuardada && dataGuardada.id) {
+              nuevoEmp.id = dataGuardada.id;
+            }
+          }
+        } catch (err) {
+          nuevoEmp.id = Date.now();
+        }
+
+        empleadosData.push(nuevoEmp);
+        localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+        cargarEmpleados();
+      }
     }
 
-    function cerrarModalTicket() {
-      document.getElementById('modal-ticket').style.display = 'none';
+    async function desactivarEmpleado(id, index) {
+      const emp = empleadosData[index];
+      if (!confirm(`¿Seguro que deseas desactivar a ${emp.nombre}?`)) return;
+
+      if (id && id !== 'undefined') {
+        try {
+          await fetch(`${API_EMPLEADOS_URL}?id=${id}`, { method: 'DELETE' });
+        } catch (e) {
+          console.log('Eliminado localmente.');
+        }
+      }
+
+      empleadosData.splice(index, 1);
+      localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
+      cargarEmpleados();
+    }
+
+    async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
+      let targetRecord = pasajesData[indexFila] || pasajesData.find(p => (p.id && String(p.id) === String(id)) || (p.id_pasaje && String(p.id_pasaje) === String(id)));
+
+      if (targetRecord) {
+        Object.assign(targetRecord, nuevoObjeto);
+      }
+
+      localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
+
+      const recordId = id || (targetRecord && (targetRecord.id || targetRecord.id_pasaje) ? (targetRecord.id || targetRecord.id_pasaje) : null);
+
+      if (recordId && String(recordId) !== '' && String(recordId) !== 'undefined') {
+        try {
+          const payload = { id: recordId, ...nuevoObjeto };
+          const response = await fetch(`${API_URL}?id=${recordId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          return response.ok;
+        } catch (err) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    async function cambiarEstado(id, nuevoEstado, indexFila) {
+      await actualizarServidorOLocal(id, { estado: nuevoEstado, ['Estado Asiento']: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
+      renderizarAsientosEnDOM();
+      if (currentUserRole === 'admin') renderizarPasajesEnDOM();
+    }
+
+    async function editarPrecio(id, precioActual, indexFila) {
+      if (currentUserRole !== 'admin') {
+        alert('Solo el Administrador puede cambiar precios.');
+        return;
+      }
+      const nuevoPrecio = prompt('Ingrese el nuevo precio (S/):', precioActual);
+      if (nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
+        await actualizarServidorOLocal(id, { precio: parseFloat(nuevoPrecio) }, indexFila);
+        renderizarPasajesEnDOM();
+      }
+    }
+
+    async function crearNuevoRegistro() {
+      const orig = prompt('Origen:', 'Ica');
+      const dest = prompt('Destino:', 'Lima');
+      const precio = prompt('Precio (S/):', '50');
+      const asiento = prompt('Número de asiento:', '1');
+
+      if (orig && dest && precio) {
+        const nuevoItem = {
+          id: Date.now(),
+          usuario_id: `PAS-${String(pasajesData.length + 1).padStart(3, '0')}`,
+          empleado_atendio: currentUserEmail || 'Admin',
+          turno: new Date().getHours() < 13 ? 'Mañana' : 'Tarde',
+          origen: orig,
+          destino: dest,
+          precio: parseFloat(precio),
+          asiento: String(asiento || '1'),
+          num_asiento: String(asiento || '1'),
+          'N° Asiento': String(asiento || '1'),
+          estado: 'registrado',
+          fecha_viaje: '2026-10-15',
+          hora_viaje: '09:00 AM'
+        };
+
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevoItem)
+          });
+          
+          if (res.ok) {
+            const dataGuardada = await res.json();
+            if (dataGuardada && (dataGuardada.id || dataGuardada.id_pasaje)) {
+              nuevoItem.id = dataGuardada.id || dataGuardada.id_pasaje;
+            }
+          }
+        } catch (err) {
+          console.log('Guardado en storage local.');
+        }
+
+        pasajesData.push(nuevoItem);
+        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+        localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
+
+        renderizarPasajesEnDOM();
+        renderizarAsientosEnDOM();
+      }
+    }
+
+    async function eliminarRegistro(id, indexFila) {
+      if (!confirm('¿Deseas eliminar este registro?')) return;
+
+      if (indexFila !== undefined && pasajesData[indexFila]) {
+        pasajesData.splice(indexFila, 1);
+      } else if (id) {
+        pasajesData = pasajesData.filter(p => String(p.id || p.id_pasaje) !== String(id));
+      }
+      localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
+      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
+
+      renderizarPasajesEnDOM();
+      renderizarAsientosEnDOM();
+
+      if (id) {
+        try {
+          await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
+        } catch (e) {
+          console.log('Error al eliminar en servidor:', e);
+        }
+      }
     }
 
     function cerrarSesion() {
-      localStorage.clear();
-      window.location.href = '/login.html';
+      localStorage.removeItem('user');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userRole');
+      window.location.href = 'login.html';
     }
   </script>
 </body>
