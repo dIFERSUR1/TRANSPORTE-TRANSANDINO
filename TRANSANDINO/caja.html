@@ -492,22 +492,45 @@
         const pasajero = item.id_usuario || item.usuario_id || item.pasajero || 'Cliente';
         const ruta = `${item.origen || 'Ica'} ➔ ${item.destino || 'Lima'}`;
         
-        // Formato limpio de fecha
         const fechaRaw = item.fecha_viaje || item.fecha || '';
         const fecha = fechaRaw ? fechaRaw.split('T')[0] : 'N/A';
         const hora = item.hora_viaje || item.hora || '09:00 AM';
         
         const asiento = item.num_asiento || item.asiento || '-';
         const tipoAsiento = item.tipo_asiento || 'semicama';
-        const equipaje = parseFloat(item.equipaje_kg || 0);
+        const esCama = String(tipoAsiento).toLowerCase().includes('cama') && !String(tipoAsiento).toLowerCase().includes('semi');
 
-        // CÁLCULO DE MONTO TOTAL (SI VIENE EN 0 O NULL DE LA BD)
-        let monto = parseFloat(item.monto_calculado || item.precio || 0);
-        if (!monto || monto === 0) {
-          const esCama = String(tipoAsiento).toLowerCase() === 'cama';
-          const base = esCama ? 85 : 60;
-          const exceso = Math.max(0, equipaje - 20);
-          monto = base + (exceso * 4);
+        // 1. PRECIO BASE DEL ASIENTO
+        let precioBase = parseFloat(item.precio || item.monto_base || 0);
+        if (!precioBase || precioBase === 0) {
+          precioBase = esCama ? 85 : 60;
+        }
+
+        // 2. EQUIPAJE Y EXCESO DE PESO (S/ 4.00 por kg adicional a los 20 kg libres)
+        const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
+        let excesoKg = 0;
+        let costoEquipaje = 0;
+
+        if (item.monto_equipaje && parseFloat(item.monto_equipaje) > 0) {
+          costoEquipaje = parseFloat(item.monto_equipaje);
+          excesoKg = costoEquipaje / 4;
+        } else {
+          if (equipajeTotal > 20) {
+            excesoKg = equipajeTotal - 20;
+          } else if (item.exceso_kg && parseFloat(item.exceso_kg) > 0) {
+            excesoKg = parseFloat(item.exceso_kg);
+          } else if (item.equipaje_exceso && parseFloat(item.equipaje_exceso) > 0) {
+            excesoKg = parseFloat(item.equipaje_exceso);
+          }
+          costoEquipaje = excesoKg * 4;
+        }
+
+        // 3. MONTO TOTAL SUMADO (ASIENTO + RECAGO DE EQUIPAJE)
+        let monto = precioBase + costoEquipaje;
+
+        // Si la base de datos ya traía un monto_calculado superior, se respeta
+        if (item.monto_calculado && parseFloat(item.monto_calculado) > monto) {
+          monto = parseFloat(item.monto_calculado);
         }
 
         const estado = String(item.estado || 'PENDIENTE').toUpperCase();
@@ -515,10 +538,12 @@
         
         let botonAccion = '';
         if (estado === 'PENDIENTE' || estado === 'REGISTRADO') {
-          botonAccion = `<button class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipaje}, ${monto})">💵 Cobrar y Emitir</button>`;
+          botonAccion = `<button class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipajeTotal}, ${monto}, ${excesoKg})">💵 Cobrar y Emitir</button>`;
         } else {
-          botonAccion = `<button class="btn-cobrar" style="background: #0284c7;" onclick="reimprimirBoleto('${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipaje}, ${monto})">🖨️ Reimprimir</button>`;
+          botonAccion = `<button class="btn-cobrar" style="background: #0284c7;" onclick="reimprimirBoleto('${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipajeTotal}, ${monto}, ${excesoKg})">🖨️ Reimprimir</button>`;
         }
+
+        const txtEquipajeTabla = equipajeTotal > 0 ? `${equipajeTotal} kg` : (excesoKg > 0 ? `${excesoKg} kg exceso` : '0 kg');
 
         tr.innerHTML = `
           <td><strong style="color: var(--cyan-light);">${codigo}</strong></td>
@@ -526,7 +551,7 @@
           <td>${ruta}</td>
           <td>${fecha} (${hora})</td>
           <td>N° ${asiento} (${tipoAsiento})</td>
-          <td>${equipaje} kg</td>
+          <td>${txtEquipajeTabla}</td>
           <td style="color: var(--green-accent); font-weight: bold;">S/ ${monto.toFixed(2)}</td>
           <td><span class="${badgeClass}">${estado}</span></td>
           <td>${botonAccion}</td>
@@ -535,7 +560,7 @@
       });
     }
 
-    async function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
+    async function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg) {
       if (!confirm(`¿Confirmar cobro presencial en EFECTIVO por S/ ${parseFloat(monto).toFixed(2)} para la reserva ${codigo}?`)) {
         return;
       }
@@ -564,7 +589,7 @@
       actualizarCobroLocal(id, codigo, monto);
 
       // Mostrar modal de emisión de boleto físico
-      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto);
+      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg);
       
       // Actualizar vista
       buscarReservaILIKE(null);
@@ -589,14 +614,18 @@
       localStorage.setItem('compras_pasajes', JSON.stringify(compras));
     }
 
-    function mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
+    function mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg = 0) {
       document.getElementById('t-codigo').textContent = codigo;
       document.getElementById('t-pasajero').textContent = pasajero;
       document.getElementById('t-ruta').textContent = ruta;
       document.getElementById('t-fecha').textContent = fecha;
       document.getElementById('t-asiento').textContent = `N° ${asiento}`;
       document.getElementById('t-tipo').textContent = tipo;
-      document.getElementById('t-equipaje').textContent = `${equipaje} kg`;
+      
+      const exKg = parseFloat(excesoKg || 0);
+      const txtEquipaje = exKg > 0 ? `${exKg} kg (+S/ ${(exKg * 4).toFixed(2)})` : `${equipaje} kg (Sin recargo)`;
+      document.getElementById('t-equipaje').textContent = txtEquipaje;
+      
       document.getElementById('t-monto').textContent = `S/ ${parseFloat(monto).toFixed(2)}`;
       document.getElementById('t-cajero').textContent = `${NOMBRE_CAJERO_ACTUAL} (#${ID_CAJERO_ACTUAL})`;
       document.getElementById('t-fecha-emision').textContent = new Date().toLocaleString();
@@ -604,8 +633,8 @@
       document.getElementById('modal-ticket').style.display = 'flex';
     }
 
-    function reimprimirBoleto(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
-      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto);
+    function reimprimirBoleto(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg) {
+      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg);
     }
 
     function cerrarModalTicket() {
