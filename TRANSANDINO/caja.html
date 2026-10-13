@@ -68,7 +68,7 @@
 
     nav {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.8rem;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -320,19 +320,13 @@
 <body>
 
   <header>
-    <a href="index.html" class="logo">
+    <a href="panel.html" class="logo">
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="index.html">🏠 Inicio</a>
-      <a href="compra-pasajes.html">🎟 Reserva / Horarios</a>
-      <a href="mis-compras.html">📋 Mis Pasajes</a>
       <a href="caja.html" class="active">🏢 Caja de Agencia</a>
-      <a href="panel-empleado.html">⚙️ Panel Empleado</a>
-
-      <div id="auth-buttons">
-        <button onclick="cerrarSesion()" style="background:#ef4444; color:white; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; font-weight:bold;">Cerrar Sesión</button>
-      </div>
+      <a href="panel.html">⚙️ Panel de Gestión</a>
+      <button onclick="cerrarSesion()" style="background:#ef4444; color:white; border:none; padding:0.5rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:bold;">🚪 Salir</button>
     </nav>
   </header>
 
@@ -423,8 +417,6 @@
 
   <script>
     const API_COMPRAS_URL = '/api/compras';
-    const API_CAJA_BUSCAR = '/api/caja/buscar';
-    const API_CAJA_COBRAR = '/api/caja/cobrar';
 
     let ID_CAJERO_ACTUAL = 101;
     let NOMBRE_CAJERO_ACTUAL = 'Cajero Agencia';
@@ -446,26 +438,27 @@
       document.getElementById('lbl-cajero-id').textContent = ID_CAJERO_ACTUAL;
     });
 
-    // RF-22.12: Búsqueda flexible ILIKE
+    // RF-22.12: Búsqueda flexible ILIKE llamando directamente a /api/compras
     async function buscarReservaILIKE(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const query = document.getElementById('txt-busqueda').value.trim();
       if (!query) return;
 
       const tbody = document.getElementById('tabla-reservas-tbody');
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--cyan-light);">🔎 Buscando reservas...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--cyan-light);">🔎 Buscando reservas en la base de datos...</td></tr>';
 
       let resultados = [];
 
       try {
-        const res = await fetch(`${API_CAJA_BUSCAR}?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API_COMPRAS_URL}?q=${encodeURIComponent(query)}`);
         if (res.ok) {
           resultados = await res.json();
-        } else {
-          resultados = buscarEnLocalStorage(query);
         }
       } catch (err) {
-        console.log('Servidor no disponible, realizando búsqueda local...');
+        console.log('Servidor no disponible, realizando búsqueda en almacenamiento local...');
+      }
+
+      if (!resultados || resultados.length === 0) {
         resultados = buscarEnLocalStorage(query);
       }
 
@@ -476,7 +469,7 @@
       const q = query.toLowerCase();
       const compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
       return compras.filter(item => {
-        const codigo = String(item.codigo_reserva || item.id || '').toLowerCase();
+        const codigo = String(item.codigo_reserva || item.codigo_seguimiento || item.id || '').toLowerCase();
         const usuario = String(item.id_usuario || item.usuario_id || item.pasajero || '').toLowerCase();
         return codigo.includes(q) || usuario.includes(q);
       });
@@ -493,7 +486,7 @@
 
       lista.forEach((item, index) => {
         const tr = document.createElement('tr');
-        const codigo = item.codigo_reserva || `RES-${item.id || index + 1}`;
+        const codigo = item.codigo_reserva || item.codigo_seguimiento || `RES-${item.id || index + 1}`;
         const pasajero = item.id_usuario || item.usuario_id || item.pasajero || 'Cliente';
         const ruta = `${item.origen || 'Ica'} ➔ ${item.destino || 'Lima'}`;
         const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || 'N/A');
@@ -528,45 +521,43 @@
       });
     }
 
-    // RF-22.12: Procesar cobro presencial con id_cajero
+    // RF-22.12: Procesar cobro presencial en Neon PostgreSQL
     async function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
       if (!confirm(`¿Confirmar cobro presencial en EFECTIVO por S/ ${parseFloat(monto).toFixed(2)} para la reserva ${codigo}?`)) {
         return;
       }
 
-      try {
-        const res = await fetch(API_CAJA_COBRAR, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            reservaId: id || codigo,
-            codigo_reserva: codigo,
-            id_cajero: ID_CAJERO_ACTUAL,
-            metodo_pago: 'EFECTIVO'
-          })
-        });
+      const payload = {
+        estado: 'PAGADO',
+        metodo_pago: 'EFECTIVO',
+        id_cajero: ID_CAJERO_ACTUAL,
+        codigo_reserva: codigo
+      };
 
-        if (!res.ok) throw new Error('Fallo servidor');
+      try {
+        const targetId = id || codigo;
+        await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(targetId)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
       } catch (err) {
-        console.log('Actualizando cobro localmente...');
-        actualizarCobroLocal(id, codigo);
+        console.log('Actualizando cobro localmente por falla de red...');
       }
+
+      actualizarCobroLocal(id, codigo);
 
       // Mostrar modal de emisión de boleto físico
       mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto);
       
-      // Actualizar vista
-      const txtBusqueda = document.getElementById('txt-busqueda').value;
-      if (txtBusqueda) {
-        const lista = buscarEnLocalStorage(txtBusqueda);
-        renderizarResultados(lista);
-      }
+      // Actualizar tabla en vivo
+      buscarReservaILIKE(null);
     }
 
     function actualizarCobroLocal(id, codigo) {
       let compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
       compras = compras.map(c => {
-        if (String(c.id) === String(id) || c.codigo_reserva === codigo) {
+        if (String(c.id) === String(id) || c.codigo_reserva === codigo || c.codigo_seguimiento === codigo) {
           return {
             ...c,
             estado: 'PAGADO',
