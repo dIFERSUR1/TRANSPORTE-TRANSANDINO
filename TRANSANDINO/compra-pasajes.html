@@ -149,8 +149,15 @@
       margin-bottom: 1.2rem;
     }
 
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
     @media (max-width: 650px) {
-      .form-grid { grid-template-columns: 1fr; }
+      .form-grid, .form-grid-2 { grid-template-columns: 1fr; }
     }
 
     .form-group {
@@ -173,6 +180,10 @@
       border-radius: 8px;
       font-size: 0.95rem;
       outline: none;
+    }
+
+    .form-group select:focus, .form-group input:focus {
+      border-color: var(--cyan-light);
     }
 
     .btn-search {
@@ -265,6 +276,29 @@
       cursor: not-allowed;
     }
 
+    /* Estilos del Cotizador en Vivo y Pasarela de Pago */
+    .cotizacion-box {
+      background: rgba(56, 189, 248, 0.06);
+      border: 1px dashed var(--cyan-light);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .pago-seccion {
+      border-top: 1px solid var(--border-color);
+      margin-top: 1.5rem;
+      padding-top: 1.2rem;
+    }
+
+    .pago-metodo-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 0.8rem;
+    }
+
     footer {
       text-align: center;
       padding: 1.5rem;
@@ -334,7 +368,38 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-search">🔍 Buscar Pasajes</button>
+        <!-- RF-22.09: Campos del Cotizador en Vivo -->
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="tipo_asiento">Tipo de Asiento / Piso</label>
+            <select id="tipo_asiento" required onchange="actualizarCotizacion()">
+              <option value="semicama" selected>Semicama (2.º piso) - S/ 60.00</option>
+              <option value="cama">Cama (1.er piso) - S/ 85.00</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="equipaje_kg">Equipaje por Pasajero (kg)</label>
+            <input type="number" id="equipaje_kg" min="0" max="60" value="0" step="0.5" placeholder="Ej. 26" oninput="actualizarCotizacion()" required>
+          </div>
+        </div>
+
+        <!-- RF-22.09: Resumen de Cotización Dinámica -->
+        <div class="cotizacion-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <strong style="color: var(--cyan-light);">📊 Cotización por Boleto:</strong>
+              <div id="lbl-desglose" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+                Base: S/ 60.00 | Exceso: S/ 0.00 (0.0 kg sobre 20 kg libres)
+              </div>
+            </div>
+            <div style="font-size: 1.1rem; font-weight: bold; color: #16a34a;">
+              S/ <span id="lbl-monto-unitario">60.00</span> c/u
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-search" style="margin-top: 1.2rem;">🔍 Buscar Pasajes</button>
       </form>
     </div>
 
@@ -360,12 +425,61 @@
         <div class="seats-grid" id="seats-grid"></div>
       </div>
 
-      <div class="checkout-bar">
+      <!-- HU-22.10 / HU-22.11 / HU-22.12: Pasarela de Pago -->
+      <div class="pago-seccion">
+        <h3 style="font-size: 1.1rem; color: var(--cyan-light); margin-bottom: 0.8rem;">💳 Método de Pago</h3>
+        
+        <div class="form-group">
+          <label for="metodo_pago">Seleccione Forma de Pago</label>
+          <select id="metodo_pago" onchange="cambiarMetodoPago()">
+            <option value="TARJETA" selected>💳 Tarjeta de Crédito / Débito (En línea)</option>
+            <option value="BILLETERA">📱 Billetera Electrónica (Yape / Plin)</option>
+            <option value="EFECTIVO">🏢 Reserva Pendiente (Pago presencial en Caja)</option>
+          </select>
+        </div>
+
+        <!-- Campos para Tarjeta -->
+        <div id="pago-tarjeta-box" class="pago-metodo-box">
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label>Número de Tarjeta</label>
+            <input type="text" id="tarjeta_numero" maxlength="16" placeholder="4557 0000 0000 0000">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+            <div class="form-group">
+              <label>Expiración</label>
+              <input type="text" id="tarjeta_exp" placeholder="MM/AA" maxlength="5">
+            </div>
+            <div class="form-group">
+              <label>CVV</label>
+              <input type="password" id="tarjeta_cvv" placeholder="123" maxlength="4">
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos para Billetera Electrónica -->
+        <div id="pago-billetera-box" class="pago-metodo-box" style="display: none;">
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label>Número Celular Billetera (Yape / Plin)</label>
+            <input type="text" id="billetera_celular" maxlength="9" placeholder="987654321">
+          </div>
+          <div class="form-group">
+            <label>Código de Operación / Token</label>
+            <input type="text" id="billetera_token" placeholder="Ej. 849201">
+          </div>
+        </div>
+
+        <!-- Mensaje Pago Presencial -->
+        <div id="pago-caja-box" class="pago-metodo-box" style="display: none; color: #f59e0b; font-size: 0.9rem;">
+          ℹ️ Se generará un código de reserva con estado <strong>PENDIENTE</strong> para que el cajero pueda realizar el cobro y la emisión física en <code>caja.html</code> (RF-22.12).
+        </div>
+      </div>
+
+      <div class="checkout-bar" style="margin-top: 1.5rem;">
         <div>
           <p style="font-size: 0.9rem; color: var(--text-muted);">Asientos seleccionados: <strong id="lbl-asientos" style="color: #ffffff;">Ninguno</strong></p>
-          <p style="font-size: 1.1rem; font-weight: bold; margin-top: 0.2rem;">Total: <span style="color: #16a34a;">S/ <span id="lbl-total">0.00</span></span></p>
+          <p style="font-size: 1.1rem; font-weight: bold; margin-top: 0.2rem;">Total Calculado: <span style="color: #16a34a;">S/ <span id="lbl-total">0.00</span></span></p>
         </div>
-        <button id="btn-reservar" class="btn-reserve" disabled onclick="confirmarReserva()">Confirmar Reserva</button>
+        <button id="btn-reservar" class="btn-reserve" disabled onclick="confirmarReserva()">Confirmar y Pagar</button>
       </div>
     </div>
   </main>
@@ -375,8 +489,53 @@
   </footer>
 
   <script>
-    const PRECIO_PASAJE = 50.00;
     let seleccionados = [];
+
+    // RF-22.09: Cotizador de precio según reglas de negocio
+    function calcularCotizacionUnitario() {
+      const tipoAsiento = document.getElementById('tipo_asiento').value;
+      const equipajeKg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
+
+      // Regla de Negocio: Semicama 2.º piso S/ 60.00, Cama 1.er piso S/ 85.00
+      const precioBase = (tipoAsiento === 'cama') ? 85.00 : 60.00;
+      
+      // Regla de Negocio: S/ 4.00 por kg sobre 20 kg
+      const LIMITE_GRATIS = 20;
+      const TARIFA_EXCESO = 4.00;
+
+      const kgExceso = Math.max(0, equipajeKg - LIMITE_GRATIS);
+      const montoExceso = kgExceso * TARIFA_EXCESO;
+      const totalUnitario = precioBase + montoExceso;
+
+      return {
+        precioBase,
+        equipajeKg,
+        kgExceso,
+        montoExceso,
+        totalUnitario
+      };
+    }
+
+    function actualizarCotizacion() {
+      const cot = calcularCotizacionUnitario();
+      
+      const lblDesglose = document.getElementById('lbl-desglose');
+      const lblUnitario = document.getElementById('lbl-monto-unitario');
+
+      if (lblDesglose && lblUnitario) {
+        lblDesglose.innerHTML = `Base (${document.getElementById('tipo_asiento').value}): <strong>S/ ${cot.precioBase.toFixed(2)}</strong> | Exceso equipaje: <strong>S/ ${cot.montoExceso.toFixed(2)}</strong> (${cot.kgExceso} kg extra)`;
+        lblUnitario.innerText = cot.totalUnitario.toFixed(2);
+      }
+
+      actualizarResumen();
+    }
+
+    function cambiarMetodoPago() {
+      const metodo = document.getElementById('metodo_pago').value;
+      document.getElementById('pago-tarjeta-box').style.display = (metodo === 'TARJETA') ? 'block' : 'none';
+      document.getElementById('pago-billetera-box').style.display = (metodo === 'BILLETERA') ? 'block' : 'none';
+      document.getElementById('pago-caja-box').style.display = (metodo === 'EFECTIVO') ? 'block' : 'none';
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -410,6 +569,8 @@
           <button onclick="cerrarSesion()" class="btn-logout-red">Cerrar Sesión</button>
         `;
       }
+
+      actualizarCotizacion();
     });
 
     function cerrarSesion() {
@@ -496,6 +657,8 @@
       const lblAsientos = document.getElementById('lbl-asientos');
       const lblTotal = document.getElementById('lbl-total');
       const btnReservar = document.getElementById('btn-reservar');
+      
+      const cot = calcularCotizacionUnitario();
 
       if (seleccionados.length === 0) {
         lblAsientos.innerText = 'Ninguno';
@@ -504,19 +667,68 @@
       } else {
         seleccionados.sort((a, b) => a - b);
         lblAsientos.innerText = seleccionados.join(', ');
-        lblTotal.innerText = (seleccionados.length * PRECIO_PASAJE).toFixed(2);
+        
+        const totalPagar = seleccionados.length * cot.totalUnitario;
+        lblTotal.innerText = totalPagar.toFixed(2);
         btnReservar.disabled = false;
       }
+    }
+
+    // Validaciones JS para pagos (RF-22.10 y RF-22.11)
+    function validarFormularioPago(metodo) {
+      if (metodo === 'TARJETA') {
+        const num = document.getElementById('tarjeta_numero').value.replace(/\s+/g, '');
+        const exp = document.getElementById('tarjeta_exp').value;
+        const cvv = document.getElementById('tarjeta_cvv').value;
+
+        if (num.length < 16 || isNaN(num)) {
+          alert('Por favor, ingrese un número de tarjeta válido (16 dígitos).');
+          return false;
+        }
+        if (!exp.includes('/') || exp.length < 5) {
+          alert('Ingrese una fecha de expiración válida (MM/AA).');
+          return false;
+        }
+        if (cvv.length < 3 || isNaN(cvv)) {
+          alert('Ingrese un código CVV válido.');
+          return false;
+        }
+      } else if (metodo === 'BILLETERA') {
+        const cel = document.getElementById('billetera_celular').value.trim();
+        const token = document.getElementById('billetera_token').value.trim();
+
+        if (cel.length !== 9 || isNaN(cel) || !cel.startsWith('9')) {
+          alert('Ingrese un número de celular válido de 9 dígitos.');
+          return false;
+        }
+        if (!token) {
+          alert('Ingrese el código de transacción/operación de la billetera electrónica.');
+          return false;
+        }
+      }
+      return true;
     }
 
     async function confirmarReserva() {
       const origen = document.getElementById('origen').value;
       const destino = document.getElementById('destino').value;
       const fecha_viaje = document.getElementById('fecha').value;
+      const tipo_asiento = document.getElementById('tipo_asiento').value;
+      const equipaje_kg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
+      const metodo_pago = document.getElementById('metodo_pago').value;
       const btnReservar = document.getElementById('btn-reservar');
 
+      // Validar datos de pago según el método seleccionado
+      if (!validarFormularioPago(metodo_pago)) {
+        return;
+      }
+
+      const cot = calcularCotizacionUnitario();
+      const estadoCompra = (metodo_pago === 'EFECTIVO') ? 'PENDIENTE' : 'PAGADO';
+      const codigoReserva = 'RES-' + Math.floor(100000 + Math.random() * 900000);
+
       btnReservar.disabled = true;
-      btnReservar.innerText = 'Guardando...';
+      btnReservar.innerText = 'Procesando...';
 
       try {
         for (const asientoNum of seleccionados) {
@@ -525,6 +737,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               id_usuario: 1,
+              codigo_reserva: codigoReserva,
               origen: origen,
               destino: destino,
               fecha: fecha_viaje,
@@ -533,20 +746,29 @@
               hora_viaje: '09:00 AM',
               asiento: String(asientoNum),
               num_asiento: asientoNum,
-              precio: PRECIO_PASAJE,
-              estado: 'registrado',
+              tipo_asiento: tipo_asiento,             // Exigido por RF-22.09
+              equipaje_kg: equipaje_kg,               // Exigido por RF-22.09
+              monto_calculado: cot.totalUnitario,     // Exigido por RF-22.09
+              precio: cot.totalUnitario,
+              metodo_pago: metodo_pago,               // Exigido por RF-22.10 y RF-22.11
+              estado: estadoCompra,                   // 'PAGADO' para Tarjeta/Billetera, 'PENDIENTE' para Caja
               registrado_por: 'Cliente Web'
             })
           });
         }
 
-        alert(`¡Reserva realizada con éxito!\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}`);
+        if (estadoCompra === 'PAGADO') {
+          alert(`¡Pago completado con éxito! 🎉\nCódigo Reserva: ${codigoReserva}\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}\nTotal: S/ ${(seleccionados.length * cot.totalUnitario).toFixed(2)}`);
+        } else {
+          alert(`¡Reserva realizada con éxito! 📋\nCódigo Reserva: ${codigoReserva}\nEstado: PENDIENTE DE PAGO EN CAJA\nPresente su código en la agencia (caja.html) para cancelar S/ ${(seleccionados.length * cot.totalUnitario).toFixed(2)}.`);
+        }
+
         await cargarAsientos();
       } catch (err) {
-        console.error('Error al guardar la reserva:', err);
-        alert('Ocurrió un problema al guardar la reserva.');
+        console.error('Error al procesar la compra/reserva:', err);
+        alert('Ocurrió un problema al procesar la reserva.');
       } finally {
-        btnReservar.innerText = 'Confirmar Reserva';
+        btnReservar.innerText = 'Confirmar y Pagar';
       }
     }
   </script>
