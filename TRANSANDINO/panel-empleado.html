@@ -240,6 +240,7 @@
     }
 
     .status-registrado { background: #0284c7; color: white; }
+    .status-pagado     { background: #16a34a; color: white; }
     .status-atendido   { background: #a855f7; color: white; }
     .status-disponible { background: #38bdf8; color: #070f1e; }
     .status-cancelado  { background: #ef4444; color: white; }
@@ -364,7 +365,7 @@
         <div class="number" style="color:#0284c7;" id="stat-pendientes">0</div>
       </div>
       <div class="stat-card">
-        <h3>Atendidos</h3>
+        <h3>Atendidos / Pagados</h3>
         <div class="number" style="color:#a855f7;" id="stat-atendidos">0</div>
       </div>
       <div class="stat-card">
@@ -390,8 +391,8 @@
             <th>Atendido por / Turno</th>
             <th>Ruta</th>
             <th>Fecha / Hora</th>
-            <th>Asiento</th>
-            <th>Precio</th>
+            <th>Asiento / Tipo</th>
+            <th>Precio / Método</th>
             <th>Estado</th>
             <th>Acciones Empleado</th>
           </tr>
@@ -418,6 +419,9 @@
           document.getElementById('lbl-empleado').textContent = user.nombre || user.email;
         }
         cargarPasajesGlobales();
+
+        // RF-22.13: Refresco continuo cada 15 segundos (15000 ms) para verificar pagos en línea del día
+        setInterval(cargarPasajesGlobales, 15000);
       }
     });
 
@@ -534,6 +538,7 @@
         asiento: asiento,
         num_asiento: asiento,
         precio: precio,
+        monto_calculado: precio,
         estado: 'registrado'
       };
 
@@ -565,15 +570,15 @@
     function actualizarMetricas(pasajes) {
       document.getElementById('stat-total').textContent = pasajes.length;
       
-      const pendientes = pasajes.filter(p => p.estado === 'registrado').length;
+      const pendientes = pasajes.filter(p => p.estado === 'registrado' || p.estado === 'PENDIENTE').length;
       document.getElementById('stat-pendientes').textContent = pendientes;
 
-      const atendidos = pasajes.filter(p => p.estado === 'atendido').length;
+      const atendidos = pasajes.filter(p => p.estado === 'atendido' || p.estado === 'PAGADO' || p.estado === 'pagado').length;
       document.getElementById('stat-atendidos').textContent = atendidos;
 
       const totalDinero = pasajes
         .filter(p => p.estado !== 'cancelado')
-        .reduce((acc, curr) => acc + (Number(curr.precio) || 0), 0);
+        .reduce((acc, curr) => acc + (Number(curr.monto_calculado || curr.precio) || 0), 0);
 
       document.getElementById('stat-dinero').textContent = `S/ ${totalDinero.toFixed(2)}`;
     }
@@ -600,8 +605,13 @@
 
         let claseBadge = 'status-registrado';
         if (estadoLimpio === 'atendido') claseBadge = 'status-atendido';
+        if (estadoLimpio === 'pagado') claseBadge = 'status-pagado';
         if (estadoLimpio === 'disponible') claseBadge = 'status-disponible';
         if (estadoLimpio === 'cancelado') claseBadge = 'status-cancelado';
+
+        const tipoAsientoDetalle = item.tipo_asiento ? ` (${item.tipo_asiento})` : '';
+        const metodoPagoDetalle = item.metodo_pago ? `<br><small style="color:#94a3b8;">${item.metodo_pago}</small>` : '';
+        const montoTotal = parseFloat(item.monto_calculado || item.precio || 0);
 
         tr.innerHTML = `
           <td>#${item.id || (index + 1)}</td>
@@ -612,9 +622,9 @@
           </td>
           <td>${item.origen || 'Ica'} ➔ ${item.destino || 'Lima'}</td>
           <td>${fecha} (${hora})</td>
-          <td>N° ${numAsiento}</td>
-          <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 0).toFixed(2)}</td>
-          <td><span class="status-badge ${claseBadge}">${estadoLimpio}</span></td>
+          <td>N° ${numAsiento}${tipoAsientoDetalle}</td>
+          <td style="color:#22c55e; font-weight:bold;">S/ ${montoTotal.toFixed(2)}${metodoPagoDetalle}</td>
+          <td><span class="status-badge ${claseBadge}">${estadoLimpio.toUpperCase()}</span></td>
           <td>
             <button class="btn-status" onclick="cambiarEstado('${item.id || ''}', '${numAsiento}', ${index})">
               ⚙ Estado
@@ -638,7 +648,7 @@
         const empleadoNombre = user ? (user.nombre || user.email) : 'Empleado';
         const estadoActual = todosLosPasajes[index].estado || 'registrado';
         
-        const nuevoEstado = prompt(`Nuevo estado para Asiento N° ${nroAsiento} (disponible / registrado / atendido / cancelado):`, estadoActual);
+        const nuevoEstado = prompt(`Nuevo estado para Asiento N° ${nroAsiento} (disponible / registrado / pagado / atendido / cancelado):`, estadoActual);
 
         if (nuevoEstado) {
           const estadoLimpio = nuevoEstado.toLowerCase().trim();
