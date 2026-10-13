@@ -332,7 +332,7 @@
   </header>
 
   <main>
-    <h1>🏢 Módulo de Caja y Emisión de Boletos (RF-22.12)</h1>
+    <h1>🏢 Módulo de Caja y Emisión de Boletos </h1>
 
     <div class="cajero-bar">
       <div class="cajero-info">
@@ -441,7 +441,6 @@
       document.getElementById('lbl-cajero-id').textContent = ID_CAJERO_ACTUAL;
     });
 
-    // RF-22.12: Búsqueda flexible ILIKE
     async function buscarReservaILIKE(e) {
       e.preventDefault();
       const query = document.getElementById('txt-busqueda').value.trim();
@@ -523,7 +522,6 @@
       });
     }
 
-    // RF-22.12: Procesar cobro presencial con id_cajero
     async function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
       if (!confirm(`¿Confirmar cobro presencial en EFECTIVO por S/ ${parseFloat(monto).toFixed(2)} para la reserva ${codigo}?`)) {
         return;
