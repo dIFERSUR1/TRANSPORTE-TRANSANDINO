@@ -320,18 +320,18 @@
 <body>
 
   <header>
-    <a href="panel.html" class="logo">
+    <a href="/panel.html" class="logo">
       <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
     </a>
     <nav>
-      <a href="caja.html" class="active">🏢 Caja de Agencia</a>
-      <a href="panel.html">⚙️ Panel de Gestión</a>
+      <a href="/caja.html" class="active">🏢 Caja de Agencia</a>
+      <a href="/panel.html">⚙️ Panel de Gestión</a>
       <button onclick="cerrarSesion()" style="background:#ef4444; color:white; border:none; padding:0.5rem 0.9rem; border-radius:6px; cursor:pointer; font-weight:bold;">🚪 Salir</button>
     </nav>
   </header>
 
   <main>
-    <h1>🏢 Módulo de Caja y Emisión de Boletos (RF-22.12)</h1>
+    <h1>🏢 Módulo de Caja y Emisión de Boletos</h1>
 
     <div class="cajero-bar">
       <div class="cajero-info">
@@ -438,14 +438,13 @@
       document.getElementById('lbl-cajero-id').textContent = ID_CAJERO_ACTUAL;
     });
 
-    // RF-22.12: Búsqueda flexible ILIKE llamando directamente a /api/compras
     async function buscarReservaILIKE(e) {
       if (e) e.preventDefault();
       const query = document.getElementById('txt-busqueda').value.trim();
       if (!query) return;
 
       const tbody = document.getElementById('tabla-reservas-tbody');
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--cyan-light);">🔎 Buscando reservas en la base de datos...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--cyan-light);">🔎 Buscando reservas...</td></tr>';
 
       let resultados = [];
 
@@ -453,12 +452,15 @@
         const res = await fetch(`${API_COMPRAS_URL}?q=${encodeURIComponent(query)}`);
         if (res.ok) {
           resultados = await res.json();
+        } else {
+          resultados = buscarEnLocalStorage(query);
         }
       } catch (err) {
-        console.log('Servidor no disponible, realizando búsqueda en almacenamiento local...');
+        console.log('Servidor no disponible, realizando búsqueda local...');
+        resultados = buscarEnLocalStorage(query);
       }
 
-      if (!resultados || resultados.length === 0) {
+      if (!Array.isArray(resultados) || resultados.length === 0) {
         resultados = buscarEnLocalStorage(query);
       }
 
@@ -489,14 +491,26 @@
         const codigo = item.codigo_reserva || item.codigo_seguimiento || `RES-${item.id || index + 1}`;
         const pasajero = item.id_usuario || item.usuario_id || item.pasajero || 'Cliente';
         const ruta = `${item.origen || 'Ica'} ➔ ${item.destino || 'Lima'}`;
-        const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || 'N/A');
+        
+        // Formato limpio de fecha
+        const fechaRaw = item.fecha_viaje || item.fecha || '';
+        const fecha = fechaRaw ? fechaRaw.split('T')[0] : 'N/A';
         const hora = item.hora_viaje || item.hora || '09:00 AM';
+        
         const asiento = item.num_asiento || item.asiento || '-';
         const tipoAsiento = item.tipo_asiento || 'semicama';
-        const equipaje = item.equipaje_kg || 0;
-        const monto = parseFloat(item.monto_calculado || item.precio || 0);
-        const estado = String(item.estado || 'PENDIENTE').toUpperCase();
+        const equipaje = parseFloat(item.equipaje_kg || 0);
 
+        // CÁLCULO DE MONTO TOTAL (SI VIENE EN 0 O NULL DE LA BD)
+        let monto = parseFloat(item.monto_calculado || item.precio || 0);
+        if (!monto || monto === 0) {
+          const esCama = String(tipoAsiento).toLowerCase() === 'cama';
+          const base = esCama ? 85 : 60;
+          const exceso = Math.max(0, equipaje - 20);
+          monto = base + (exceso * 4);
+        }
+
+        const estado = String(item.estado || 'PENDIENTE').toUpperCase();
         const badgeClass = (estado === 'PAGADO' || estado === 'ATENDIDO') ? 'badge-paid' : 'badge-pending';
         
         let botonAccion = '';
@@ -521,40 +535,42 @@
       });
     }
 
-    // RF-22.12: Procesar cobro presencial en Neon PostgreSQL
     async function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
       if (!confirm(`¿Confirmar cobro presencial en EFECTIVO por S/ ${parseFloat(monto).toFixed(2)} para la reserva ${codigo}?`)) {
         return;
       }
 
-      const payload = {
-        estado: 'PAGADO',
-        metodo_pago: 'EFECTIVO',
-        id_cajero: ID_CAJERO_ACTUAL,
-        codigo_reserva: codigo
-      };
-
       try {
-        const targetId = id || codigo;
-        await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(targetId)}`, {
+        const payload = {
+          id: id || codigo,
+          codigo_reserva: codigo,
+          id_cajero: ID_CAJERO_ACTUAL,
+          metodo_pago: 'EFECTIVO',
+          monto_calculado: monto,
+          estado: 'PAGADO'
+        };
+
+        const res = await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(id || codigo)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+
+        if (!res.ok) throw new Error('Fallo servidor');
       } catch (err) {
-        console.log('Actualizando cobro localmente por falla de red...');
+        console.log('Actualizando cobro localmente...');
       }
 
-      actualizarCobroLocal(id, codigo);
+      actualizarCobroLocal(id, codigo, monto);
 
       // Mostrar modal de emisión de boleto físico
       mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto);
       
-      // Actualizar tabla en vivo
+      // Actualizar vista
       buscarReservaILIKE(null);
     }
 
-    function actualizarCobroLocal(id, codigo) {
+    function actualizarCobroLocal(id, codigo, monto) {
       let compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
       compras = compras.map(c => {
         if (String(c.id) === String(id) || c.codigo_reserva === codigo || c.codigo_seguimiento === codigo) {
@@ -562,6 +578,8 @@
             ...c,
             estado: 'PAGADO',
             metodo_pago: 'EFECTIVO',
+            monto_calculado: monto,
+            precio: monto,
             id_cajero: ID_CAJERO_ACTUAL,
             fecha_pago: new Date().toISOString()
           };
@@ -596,7 +614,7 @@
 
     function cerrarSesion() {
       localStorage.clear();
-      window.location.href = 'login.html';
+      window.location.href = '/login.html';
     }
   </script>
 </body>
