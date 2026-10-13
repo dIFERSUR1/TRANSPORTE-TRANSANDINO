@@ -347,7 +347,7 @@
       <h3 style="color: var(--cyan-light); margin-bottom: 0.8rem; font-size: 1rem;">🔎 Buscar Reserva Pendiente</h3>
       <form onsubmit="buscarReservaILIKE(event)">
         <div class="search-box">
-          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. RES-849201) o DNI / Nombre del Pasajero..." required>
+          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. RES-483456) o DNI / Nombre del Pasajero..." required>
           <button type="submit" class="btn-search">🔍 Buscar Reserva</button>
         </div>
       </form>
@@ -500,44 +500,32 @@
         const tipoAsiento = item.tipo_asiento || 'semicama';
         const esCama = String(tipoAsiento).toLowerCase().includes('cama') && !String(tipoAsiento).toLowerCase().includes('semi');
 
-        // 1. PRECIO BASE DEL ASIENTO
-        let precioBase = parseFloat(item.precio || item.monto_base || 0);
-        if (!precioBase || precioBase === 0) {
-          precioBase = esCama ? 85 : 60;
-        }
+        // 1. LECTURA PRIORITARIA DEL MONTO TOTAL GUARDADO
+        let montoTotalGuardado = parseFloat(item.monto_calculado || item.monto_total || item.total || item.precio || 0);
 
-        // 2. EQUIPAJE Y EXCESO DE PESO (S/ 4.00 por kg adicional a los 20 kg libres)
+        // 2. EQUIPAJE Y EXCESO
         const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
         let excesoKg = 0;
-        let costoEquipaje = 0;
-
-        if (item.monto_equipaje && parseFloat(item.monto_equipaje) > 0) {
-          costoEquipaje = parseFloat(item.monto_equipaje);
-          excesoKg = costoEquipaje / 4;
-        } else {
-          if (equipajeTotal > 20) {
-            excesoKg = equipajeTotal - 20;
-          } else if (item.exceso_kg && parseFloat(item.exceso_kg) > 0) {
-            excesoKg = parseFloat(item.exceso_kg);
-          } else if (item.equipaje_exceso && parseFloat(item.equipaje_exceso) > 0) {
-            excesoKg = parseFloat(item.equipaje_exceso);
-          }
-          costoEquipaje = excesoKg * 4;
+        if (equipajeTotal > 20) {
+          excesoKg = equipajeTotal - 20;
+        } else if (item.exceso_kg) {
+          excesoKg = parseFloat(item.exceso_kg);
         }
 
-        // 3. MONTO TOTAL SUMADO (ASIENTO + RECAGO DE EQUIPAJE)
-        let monto = precioBase + costoEquipaje;
-
-        // Si la base de datos ya traía un monto_calculado superior, se respeta
-        if (item.monto_calculado && parseFloat(item.monto_calculado) > monto) {
-          monto = parseFloat(item.monto_calculado);
+        // 3. DETERMINACIÓN DEL MONTO FINAL A MOSTRAR
+        let monto = 0;
+        if (montoTotalGuardado > 0) {
+          monto = montoTotalGuardado;
+        } else {
+          const precioBase = esCama ? 85 : 60;
+          monto = precioBase + (excesoKg * 4);
         }
 
         const estado = String(item.estado || 'PENDIENTE').toUpperCase();
         const badgeClass = (estado === 'PAGADO' || estado === 'ATENDIDO') ? 'badge-paid' : 'badge-pending';
         
         let botonAccion = '';
-        if (estado === 'PENDIENTE' || estado === 'REGISTRADO') {
+        if (estado === 'PENDIENTE' || estado === 'REGISTRADO' || estado.includes('PENDIENTE')) {
           botonAccion = `<button class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipajeTotal}, ${monto}, ${excesoKg})">💵 Cobrar y Emitir</button>`;
         } else {
           botonAccion = `<button class="btn-cobrar" style="background: #0284c7;" onclick="reimprimirBoleto('${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipajeTotal}, ${monto}, ${excesoKg})">🖨️ Reimprimir</button>`;
