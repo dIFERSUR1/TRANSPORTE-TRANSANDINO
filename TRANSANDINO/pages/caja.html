@@ -3,30 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Caja - Cobro de Pasajes - TransAndino Perú</title>
+  <title>Caja - Cobro y Emisión - TransAndino Perú</title>
   <style>
     :root {
-      --bg-color: #050b14;
-      --card-bg: #0d1626;
-      --border-color: rgba(255, 255, 255, 0.08);
+      --bg-color: #0b192c;
+      --card-bg: #15233b;
+      --border-color: #1e293b;
       --orange-accent: #ea580c;
+      --blue-accent: #0284c7;
       --cyan-light: #38bdf8;
-      --text-color: #f8fafc;
+      --green-accent: #16a34a;
+      --text-color: #ffffff;
       --text-muted: #94a3b8;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    html {
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
+    }
 
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       min-height: 100vh;
-      padding: 2rem;
+      display: flex;
+      flex-direction: column;
     }
 
-    .container { max-width: 900px; margin: 0 auto; }
-    h1 { color: var(--cyan-light); margin-bottom: 1.5rem; }
+    header {
+      background-color: #070f1e;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .logo span { color: var(--cyan-light); }
+
+    .bus-emoji {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 24px;
+      text-align: center;
+    }
+
+    nav {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 6px;
+      transition: background 0.3s ease;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      color: #ffffff;
+      background: var(--border-color);
+    }
+
+    nav a.active {
+      background-color: var(--orange-accent);
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--cyan-light);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cajero-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cajero-info {
+      font-size: 0.95rem;
+      color: var(--cyan-light);
+    }
+
+    .cajero-id-badge {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--cyan-light);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
 
     .card {
       background: var(--card-bg);
@@ -34,134 +144,468 @@
       border-radius: 12px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
 
-    .search-box { display: flex; gap: 0.5rem; }
-    input, select {
-      background: var(--bg-color);
+    .search-box {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box input {
+      flex: 1;
+      min-width: 280px;
+      background: #070f1e;
       border: 1px solid var(--border-color);
-      color: var(--text-color);
-      padding: 0.7rem;
+      color: #ffffff;
+      padding: 0.8rem 1rem;
       border-radius: 8px;
       font-size: 0.95rem;
+      outline: none;
     }
-    input { flex: 1; }
 
-    .btn {
+    .search-box input:focus {
+      border-color: var(--cyan-light);
+    }
+
+    .btn-search {
       background: var(--orange-accent);
-      color: white;
+      color: #ffffff;
       border: none;
-      padding: 0.7rem 1.2rem;
+      padding: 0.8rem 1.5rem;
       border-radius: 8px;
       font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-search:hover {
+      background: #c2410c;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #070f1e;
+      color: var(--cyan-light);
+    }
+
+    .badge-pending {
+      background: #f59e0b;
+      color: #000000;
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.75rem;
+    }
+
+    .badge-paid {
+      background: var(--green-accent);
+      color: #ffffff;
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.75rem;
+    }
+
+    .btn-cobrar {
+      background: var(--green-accent);
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-cobrar:hover {
+      background: #15803d;
+    }
+
+    /* Modal de Boleto Físico */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .ticket-card {
+      background: #ffffff;
+      color: #1e293b;
+      width: 100%;
+      max-width: 420px;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .ticket-header {
+      text-align: center;
+      border-bottom: 2px dashed #94a3b8;
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .ticket-header h2 { font-size: 1.3rem; color: #0f172a; }
+
+    .ticket-body div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .ticket-footer {
+      border-top: 2px dashed #94a3b8;
+      padding-top: 1rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .btn-print {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+
+    .btn-close-modal {
+      background: #64748b;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid var(--border-color); }
-    th { color: var(--cyan-light); }
-    .badge-pending { color: #f59e0b; font-weight: bold; }
-    .btn-pay { background: #16a34a; }
+    footer {
+      background-color: #070f1e;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>🏢 Modulo de Caja (Cobro Presencial)</h1>
+  <header>
+    <a href="index.html" class="logo">
+      <span class="bus-emoji">🚌</span> <span>TransAndino Perú</span>
+    </a>
+    <nav>
+      <a href="index.html">🏠 Inicio</a>
+      <a href="compra-pasajes.html">🎟 Reserva / Horarios</a>
+      <a href="mis-compras.html">📋 Mis Pasajes</a>
+      <a href="caja.html" class="active">🏢 Caja de Agencia</a>
+      <a href="panel-empleado.html">⚙️ Panel Empleado</a>
 
-    <div class="card">
-      <label style="display:block; margin-bottom: 0.5rem; color: var(--text-muted);">Buscar Reserva Pendiente (Código de Reserva o DNI):</label>
-      <div class="search-box">
-        <input type="text" id="txt-busqueda" placeholder="Ej. RES-849201 o DNI del pasajero...">
-        <button class="btn" onclick="buscarReserva()">🔍 Buscar (ILIKE)</button>
+      <div id="auth-buttons">
+        <button onclick="cerrarSesion()" style="background:#ef4444; color:white; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; font-weight:bold;">Cerrar Sesión</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>🏢 Módulo de Caja y Emisión de Boletos (RF-22.12)</h1>
+
+    <div class="cajero-bar">
+      <div class="cajero-info">
+        👤 Cajero Activo: <strong id="lbl-cajero-nombre">Cargando...</strong>
+      </div>
+      <div class="cajero-id-badge">
+        ID Cajero: <span id="lbl-cajero-id">101</span>
       </div>
     </div>
 
+    <!-- Buscador ILIKE -->
     <div class="card">
-      <h3>Resultados de Búsqueda</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Ruta</th>
-            <th>Asiento</th>
-            <th>Tipo</th>
-            <th>Equipaje</th>
-            <th>Monto</th>
-            <th>Estado</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-reservas">
-          <tr><td colspan="8" style="text-align:center; color: var(--text-muted);">Ingrese un código o DNI para buscar.</td></tr>
-        </tbody>
-      </table>
+      <h3 style="color: var(--cyan-light); margin-bottom: 0.8rem; font-size: 1rem;">🔎 Buscar Reserva Pendiente</h3>
+      <form onsubmit="buscarReservaILIKE(event)">
+        <div class="search-box">
+          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. RES-849201) o DNI / Nombre del Pasajero..." required>
+          <button type="submit" class="btn-search">🔍 Buscar Reserva</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabla de Resultados -->
+    <div class="card">
+      <h3 style="color: var(--cyan-light); margin-bottom: 1rem; font-size: 1rem;">📋 Reservas Encontradas</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Código Reserva</th>
+              <th>Pasajero / DNI</th>
+              <th>Ruta</th>
+              <th>Fecha / Hora</th>
+              <th>Asiento / Piso</th>
+              <th>Equipaje (kg)</th>
+              <th>Monto Total</th>
+              <th>Estado</th>
+              <th>Acción Presencial</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-reservas-tbody">
+            <tr>
+              <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                Ingrese un término de búsqueda para consultar reservas pendientes.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Ticket Boleto Físico -->
+  <div class="modal-overlay" id="modal-ticket">
+    <div class="ticket-card">
+      <div class="ticket-header">
+        <h2>🚌 TransAndino Perú</h2>
+        <p style="font-size: 0.8rem;">BOLETO DE VIAJE FÍSICO</p>
+        <p style="font-size: 0.75rem; color: #64748b;" id="t-fecha-emision"></p>
+      </div>
+      <div class="ticket-body">
+        <div><span>CÓDIGO:</span><strong id="t-codigo">RES-000000</strong></div>
+        <div><span>PASAJERO:</span><strong id="t-pasajero">Cliente</strong></div>
+        <div><span>RUTA:</span><strong id="t-ruta">Ica -> Lima</strong></div>
+        <div><span>FECHA VIAJE:</span><span id="t-fecha">2026-10-15</span></div>
+        <div><span>ASIENTO:</span><strong id="t-asiento">N° 12</strong></div>
+        <div><span>TIPO SERVICIO:</span><span id="t-tipo">Semicama (2º piso)</span></div>
+        <div><span>EQUIPAJE EXCESO:</span><span id="t-equipaje">0.0 kg</span></div>
+        <div><span>MONTO COBRADO:</span><strong id="t-monto" style="font-size: 1.1rem; color: #16a34a;">S/ 60.00</strong></div>
+        <div><span>FORMA DE PAGO:</span><span>EFECTIVO EN CAJA</span></div>
+        <div><span>CAJERO EMISOR:</span><span id="t-cajero">Cajero #101</span></div>
+      </div>
+      <div class="ticket-footer">
+        <p style="font-size: 0.75rem; margin-bottom: 1rem;">¡Gracias por viajar con TransAndino!</p>
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir Boleto</button>
+        <button class="btn-close-modal" onclick="cerrarModalTicket()">Cerrar</button>
+      </div>
     </div>
   </div>
 
+  <footer>
+    <p>&copy; 2026 TransAndino Perú - Módulo de Cobranza en Agencia.</p>
+  </footer>
+
   <script>
-    const ID_CAJERO_ACTUAL = localStorage.getItem('userId') || 101; // ID del cajero autenticado
+    const API_COMPRAS_URL = '/api/compras';
+    const API_CAJA_BUSCAR = '/api/caja/buscar';
+    const API_CAJA_COBRAR = '/api/caja/cobrar';
 
-    async function buscarReserva() {
+    let ID_CAJERO_ACTUAL = 101;
+    let NOMBRE_CAJERO_ACTUAL = 'Cajero Agencia';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const userObj = JSON.parse(localStorage.getItem('user'));
+      if (userObj) {
+        ID_CAJERO_ACTUAL = userObj.id || userObj.dni || 101;
+        NOMBRE_CAJERO_ACTUAL = userObj.nombre || userObj.email || 'Cajero Agencia';
+      } else {
+        const email = localStorage.getItem('userEmail');
+        if (email) {
+          NOMBRE_CAJERO_ACTUAL = email.split('@')[0];
+          ID_CAJERO_ACTUAL = 102;
+        }
+      }
+
+      document.getElementById('lbl-cajero-nombre').textContent = NOMBRE_CAJERO_ACTUAL;
+      document.getElementById('lbl-cajero-id').textContent = ID_CAJERO_ACTUAL;
+    });
+
+    // RF-22.12: Búsqueda flexible ILIKE
+    async function buscarReservaILIKE(e) {
+      e.preventDefault();
       const query = document.getElementById('txt-busqueda').value.trim();
-      if (!query) return alert('Ingrese un término de búsqueda.');
+      if (!query) return;
 
-      const tbody = document.getElementById('tabla-reservas');
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Buscando...</td></tr>';
+      const tbody = document.getElementById('tabla-reservas-tbody');
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--cyan-light);">🔎 Buscando reservas...</td></tr>';
+
+      let resultados = [];
 
       try {
-        // RF-22.12: Búsqueda flexible ILIKE
-        const res = await fetch(`/api/caja/buscar?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-
-        if (!data || data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No se encontraron reservas pendientes.</td></tr>';
-          return;
+        const res = await fetch(`${API_CAJA_BUSCAR}?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          resultados = await res.json();
+        } else {
+          resultados = buscarEnLocalStorage(query);
         }
-
-        tbody.innerHTML = data.map(item => `
-          <tr>
-            <td><strong>${item.codigo_reserva || 'N/A'}</strong></td>
-            <td>${item.origen} ➔ ${item.destino}</td>
-            <td>${item.asiento}</td>
-            <td>${item.tipo_asiento || 'semicama'}</td>
-            <td>${item.equipaje_kg || 0} kg</td>
-            <td style="color: #16a34a; font-weight: bold;">S/ ${(parseFloat(item.monto_calculado || item.precio)).toFixed(2)}</td>
-            <td><span class="badge-pending">${item.estado}</span></td>
-            <td>
-              <button class="btn btn-pay" onclick="cobrarEnCaja('${item.id || item.codigo_reserva}')">💵 Cobrar y Emitir</button>
-            </td>
-          </tr>
-        `).join('');
       } catch (err) {
-        console.error('Error al buscar:', err);
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#ef4444;">Error de conexión con el servidor.</td></tr>';
+        console.log('Servidor no disponible, realizando búsqueda local...');
+        resultados = buscarEnLocalStorage(query);
       }
+
+      renderizarResultados(resultados);
     }
 
-    async function cobrarEnCaja(reservaId) {
-      if (!confirm('¿Confirmar cobro en efectivo y emisión de boleto físico?')) return;
+    function buscarEnLocalStorage(query) {
+      const q = query.toLowerCase();
+      const compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      return compras.filter(item => {
+        const codigo = String(item.codigo_reserva || item.id || '').toLowerCase();
+        const usuario = String(item.id_usuario || item.usuario_id || item.pasajero || '').toLowerCase();
+        return codigo.includes(q) || usuario.includes(q);
+      });
+    }
+
+    function renderizarResultados(lista) {
+      const tbody = document.getElementById('tabla-reservas-tbody');
+      tbody.innerHTML = '';
+
+      if (!lista || lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #ef4444; padding: 2rem;">No se encontraron reservas con el criterio ingresado.</td></tr>';
+        return;
+      }
+
+      lista.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        const codigo = item.codigo_reserva || `RES-${item.id || index + 1}`;
+        const pasajero = item.id_usuario || item.usuario_id || item.pasajero || 'Cliente';
+        const ruta = `${item.origen || 'Ica'} ➔ ${item.destino || 'Lima'}`;
+        const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || 'N/A');
+        const hora = item.hora_viaje || item.hora || '09:00 AM';
+        const asiento = item.num_asiento || item.asiento || '-';
+        const tipoAsiento = item.tipo_asiento || 'semicama';
+        const equipaje = item.equipaje_kg || 0;
+        const monto = parseFloat(item.monto_calculado || item.precio || 0);
+        const estado = String(item.estado || 'PENDIENTE').toUpperCase();
+
+        const badgeClass = (estado === 'PAGADO' || estado === 'ATENDIDO') ? 'badge-paid' : 'badge-pending';
+        
+        let botonAccion = '';
+        if (estado === 'PENDIENTE' || estado === 'REGISTRADO') {
+          botonAccion = `<button class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipaje}, ${monto})">💵 Cobrar y Emitir</button>`;
+        } else {
+          botonAccion = `<button class="btn-cobrar" style="background: #0284c7;" onclick="reimprimirBoleto('${codigo}', '${pasajero}', '${ruta}', '${fecha}', '${asiento}', '${tipoAsiento}', ${equipaje}, ${monto})">🖨️ Reimprimir</button>`;
+        }
+
+        tr.innerHTML = `
+          <td><strong style="color: var(--cyan-light);">${codigo}</strong></td>
+          <td><strong>${pasajero}</strong></td>
+          <td>${ruta}</td>
+          <td>${fecha} (${hora})</td>
+          <td>N° ${asiento} (${tipoAsiento})</td>
+          <td>${equipaje} kg</td>
+          <td style="color: var(--green-accent); font-weight: bold;">S/ ${monto.toFixed(2)}</td>
+          <td><span class="${badgeClass}">${estado}</span></td>
+          <td>${botonAccion}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // RF-22.12: Procesar cobro presencial con id_cajero
+    async function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
+      if (!confirm(`¿Confirmar cobro presencial en EFECTIVO por S/ ${parseFloat(monto).toFixed(2)} para la reserva ${codigo}?`)) {
+        return;
+      }
 
       try {
-        // RF-22.12: Registrar cobro presencial con id_cajero
-        const res = await fetch('/api/caja/cobrar', {
+        const res = await fetch(API_CAJA_COBRAR, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            reservaId: reservaId,
-            id_cajero: ID_CAJERO_ACTUAL
+            reservaId: id || codigo,
+            codigo_reserva: codigo,
+            id_cajero: ID_CAJERO_ACTUAL,
+            metodo_pago: 'EFECTIVO'
           })
         });
 
-        if (res.ok) {
-          alert('¡Boleto cobrado y emitido con éxito!');
-          buscarReserva();
-        } else {
-          alert('No se pudo procesar el cobro.');
-        }
+        if (!res.ok) throw new Error('Fallo servidor');
       } catch (err) {
-        console.error('Error al cobrar:', err);
+        console.log('Actualizando cobro localmente...');
+        actualizarCobroLocal(id, codigo);
       }
+
+      // Mostrar modal de emisión de boleto físico
+      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto);
+      
+      // Actualizar vista
+      const txtBusqueda = document.getElementById('txt-busqueda').value;
+      if (txtBusqueda) {
+        const lista = buscarEnLocalStorage(txtBusqueda);
+        renderizarResultados(lista);
+      }
+    }
+
+    function actualizarCobroLocal(id, codigo) {
+      let compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      compras = compras.map(c => {
+        if (String(c.id) === String(id) || c.codigo_reserva === codigo) {
+          return {
+            ...c,
+            estado: 'PAGADO',
+            metodo_pago: 'EFECTIVO',
+            id_cajero: ID_CAJERO_ACTUAL,
+            fecha_pago: new Date().toISOString()
+          };
+        }
+        return c;
+      });
+      localStorage.setItem('compras_pasajes', JSON.stringify(compras));
+    }
+
+    function mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
+      document.getElementById('t-codigo').textContent = codigo;
+      document.getElementById('t-pasajero').textContent = pasajero;
+      document.getElementById('t-ruta').textContent = ruta;
+      document.getElementById('t-fecha').textContent = fecha;
+      document.getElementById('t-asiento').textContent = `N° ${asiento}`;
+      document.getElementById('t-tipo').textContent = tipo;
+      document.getElementById('t-equipaje').textContent = `${equipaje} kg`;
+      document.getElementById('t-monto').textContent = `S/ ${parseFloat(monto).toFixed(2)}`;
+      document.getElementById('t-cajero').textContent = `${NOMBRE_CAJERO_ACTUAL} (#${ID_CAJERO_ACTUAL})`;
+      document.getElementById('t-fecha-emision').textContent = new Date().toLocaleString();
+
+      document.getElementById('modal-ticket').style.display = 'flex';
+    }
+
+    function reimprimirBoleto(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto) {
+      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto);
+    }
+
+    function cerrarModalTicket() {
+      document.getElementById('modal-ticket').style.display = 'none';
+    }
+
+    function cerrarSesion() {
+      localStorage.clear();
+      window.location.href = 'login.html';
     }
   </script>
 </body>
