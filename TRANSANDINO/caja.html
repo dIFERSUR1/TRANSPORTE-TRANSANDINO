@@ -617,6 +617,13 @@
         elNombreCajero.textContent = NOMBRE_CAJERO_ACTUAL;
       }
 
+      // Configurar input de fecha con la fecha actual por defecto y evento de actualización
+      const inputFecha = document.getElementById('fecha-caja');
+      if (inputFecha) {
+        inputFecha.value = new Date().toISOString().split('T')[0];
+        inputFecha.addEventListener('change', actualizarCierreDeCaja);
+      }
+
       // Cargar reservas y calcular total recaudado al iniciar la vista
       cargarInicialYResumen();
     });
@@ -626,7 +633,7 @@
       await actualizarCierreDeCaja();
     }
 
-    // Calcula y renderiza el Total Recaudado en Cierre de Caja
+    // Calcula y renderiza el Total Recaudado en Cierre de Caja (FILTRADO POR DÍA)
     async function actualizarCierreDeCaja() {
       let todas = [];
       try {
@@ -644,15 +651,26 @@
         todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
       }
 
-      // Filtrar compras que estén PAGADAS / ATENDIDAS / EMITIDAS
-      const pagadas = todas.filter(item => {
+      // 1. Obtener la fecha del input #fecha-caja o por defecto la fecha actual del sistema
+      const inputFecha = document.getElementById('fecha-caja');
+      const hoyStr = new Date().toISOString().split('T')[0];
+      const fechaFiltro = (inputFecha && inputFecha.value) ? inputFecha.value : hoyStr;
+
+      // 2. Filtrar únicamente boletos PAGADOS / ATENDIDOS / EMITIDOS de la fecha seleccionada
+      const pagadasHoy = todas.filter(item => {
         const est = String(item.estado || '').toUpperCase();
-        return est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO';
+        const esPagado = (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO');
+        if (!esPagado) return false;
+
+        const fechaRaw = item.fecha_pago || item.fecha || item.fecha_viaje || item.created_at || '';
+        const fechaItem = typeof fechaRaw === 'string' ? fechaRaw.split('T')[0] : '';
+
+        return fechaItem === fechaFiltro || (!fechaItem && fechaFiltro === hoyStr);
       });
 
-      // Suma total de dinero recaudado
+      // 3. Suma total de dinero recaudado en la fecha seleccionada
       let totalRecaudado = 0;
-      pagadas.forEach(item => {
+      pagadasHoy.forEach(item => {
         let monto = parseFloat(item.monto_calculado || item.precio || 0);
 
         if (isNaN(monto) || monto === 0) {
@@ -667,20 +685,20 @@
         totalRecaudado += monto;
       });
 
-      // Actualizar span/strong del total en pantalla
+      // 4. Actualizar span/strong del total en pantalla
       const elTotalDia = document.getElementById('total-dia');
       if (elTotalDia) {
         elTotalDia.textContent = `S/ ${totalRecaudado.toFixed(2)}`;
       }
 
-      // Actualizar la tabla del Cierre de Caja
+      // 5. Actualizar la tabla del Cierre de Caja
       const tbodyResumen = document.querySelector('#tabla-resumen tbody');
       if (tbodyResumen) {
         tbodyResumen.innerHTML = `
           <tr>
             <td>Agencia / Web</td>
             <td>Efectivo / Tarjeta / Pasarela</td>
-            <td>${pagadas.length} operaciones</td>
+            <td>${pagadasHoy.length} operaciones (${fechaFiltro})</td>
             <td style="color: var(--green-accent); font-weight: bold;">S/ ${totalRecaudado.toFixed(2)}</td>
           </tr>
         `;
@@ -714,7 +732,7 @@
         resultados = buscarEnLocalStorage(query);
       }
 
-      // Si es búsqueda por texto y no hay query, filtrar en local
+      // Si es búsqueda por texto y hay query, filtrar en local
       if (query) {
         const q = query.toLowerCase();
         resultados = resultados.filter(item => {
@@ -829,7 +847,8 @@
           id_cajero: ID_CAJERO_ACTUAL,
           metodo_pago: 'EFECTIVO',
           monto_calculado: monto,
-          estado: 'PAGADO'
+          estado: 'PAGADO',
+          fecha_pago: new Date().toISOString()
         };
 
         const res = await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(id || codigo)}`, {
