@@ -291,12 +291,119 @@
       padding-top: 1.2rem;
     }
 
+    .metodos-opciones {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .metodo-opcion {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .metodo-opcion input {
+      display: none;
+    }
+
+    .metodo-caja {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--text-color);
+      transition: all 0.2s;
+    }
+
+    .metodo-caja svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .metodo-opcion input:checked + .metodo-caja {
+      border-color: var(--cyan-light);
+      background: rgba(56, 189, 248, 0.1);
+      color: #ffffff;
+      font-weight: bold;
+    }
+
     .pago-metodo-box {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 1rem;
-      margin-top: 0.8rem;
+      padding: 1.2rem;
+      margin-top: 1rem;
+    }
+
+    /* Estilos para la Tarjeta Vista Interactiva */
+    .tarjeta-vista {
+      width: 100%;
+      max-width: 320px;
+      height: 185px;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      margin: 0 auto 1.5rem auto;
+      color: #ffffff;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tarjeta-vista::after {
+      content: '';
+      position: absolute;
+      right: -30px;
+      top: -30px;
+      width: 150px;
+      height: 150px;
+      background: rgba(56, 189, 248, 0.08);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .vista-chip {
+      width: 42px;
+      height: 30px;
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      border-radius: 6px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+    }
+
+    .vista-numero {
+      font-size: 1.15rem;
+      letter-spacing: 2.5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      word-spacing: 3px;
+    }
+
+    .vista-pie {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.8rem;
+    }
+
+    .vista-pie span {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .vista-marca {
+      font-weight: bold;
+      font-style: italic;
+      color: var(--cyan-light);
     }
 
     footer {
@@ -425,32 +532,67 @@
         <div class="seats-grid" id="seats-grid"></div>
       </div>
 
-      <!-- HU-22.10 / HU-22.11 / HU-22.12: Pasarela de Pago -->
+      <!-- HU-22.10 / HU-22.11 / HU-22.12: Pasarela de Pago con Selección por Radios -->
       <div class="pago-seccion">
         <h3 style="font-size: 1.1rem; color: var(--cyan-light); margin-bottom: 0.8rem;">💳 Método de Pago</h3>
         
-        <div class="form-group">
-          <label for="metodo_pago">Seleccione Forma de Pago</label>
-          <select id="metodo_pago" onchange="cambiarMetodoPago()">
-            <option value="TARJETA" selected>💳 Tarjeta de Crédito / Débito (En línea)</option>
-            <option value="BILLETERA">📱 Billetera Electrónica (Yape / Plin)</option>
-            <option value="EFECTIVO">🏢 Reserva Pendiente (Pago presencial en Caja)</option>
-          </select>
-        </div>
-
-        <!-- Campos para Tarjeta -->
-        <div id="pago-tarjeta-box" class="pago-metodo-box">
-          <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label>Número de Tarjeta</label>
-            <input type="text" id="tarjeta_numero" maxlength="16" placeholder="4557 0000 0000 0000">
+        <fieldset class="metodos" style="border: none; padding: 0;">
+          <legend style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Seleccione Medio de Pago</legend>
+          <div class="metodos-opciones">
+            <label class="metodo-opcion">
+              <input type="radio" name="metodo" value="tarjeta" checked onchange="cambiarMetodoPago()">
+              <span class="metodo-caja">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>
+                Tarjeta de débito o crédito
+              </span>
+            </label>
+            <label class="metodo-opcion">
+              <input type="radio" name="metodo" value="billetera" onchange="cambiarMetodoPago()">
+              <span class="metodo-caja">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></svg>
+                Billetera electrónica
+              </span>
+            </label>
+            <label class="metodo-opcion">
+              <input type="radio" name="metodo" value="efectivo" onchange="cambiarMetodoPago()">
+              <span class="metodo-caja">
+                <span>🏢</span> Reserva para Pago en Caja
+              </span>
+            </label>
           </div>
+        </fieldset>
+
+        <!-- Formulario e Previsualización de Tarjeta (Snippet Integrado) -->
+        <div id="pago-tarjeta-box" class="pago-metodo-box">
+          
+          <!-- Elemento vista-tarjeta del fragmento proporcionado -->
+          <div id="vista-tarjeta" class="tarjeta-vista" data-marca="" aria-hidden="true">
+            <span class="vista-chip"></span>
+            <span class="vista-numero" id="vista-numero">•••• •••• •••• ••••</span>
+            <span class="vista-pie">
+              <span id="vista-titular">NOMBRE DEL TITULAR</span>
+              <span id="vista-venc">MM/AA</span>
+              <span class="vista-marca" id="vista-marca">VISA</span>
+            </span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label for="tarjeta_numero">Número de tarjeta</label>
+            <input type="text" id="tarjeta_numero" maxlength="19" placeholder="4557 0000 0000 0000" oninput="actualizarTarjetaVista()">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label for="tarjeta_titular">Nombre del titular</label>
+            <input type="text" id="tarjeta_titular" placeholder="EJ. JUAN PEREZ" oninput="actualizarTarjetaVista()">
+          </div>
+
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
             <div class="form-group">
-              <label>Expiración</label>
-              <input type="text" id="tarjeta_exp" placeholder="MM/AA" maxlength="5">
+              <label for="tarjeta_exp">Vencimiento (MM/AA)</label>
+              <input type="text" id="tarjeta_exp" placeholder="MM/AA" maxlength="5" oninput="actualizarTarjetaVista()">
             </div>
             <div class="form-group">
-              <label>CVV</label>
+              <label for="tarjeta_cvv">CVV</label>
               <input type="password" id="tarjeta_cvv" placeholder="123" maxlength="4">
             </div>
           </div>
@@ -459,18 +601,18 @@
         <!-- Campos para Billetera Electrónica -->
         <div id="pago-billetera-box" class="pago-metodo-box" style="display: none;">
           <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label>Número Celular Billetera (Yape / Plin)</label>
+            <label for="billetera_celular">Número celular asociado (Yape / Plin / AndiPay)</label>
             <input type="text" id="billetera_celular" maxlength="9" placeholder="987654321">
           </div>
           <div class="form-group">
-            <label>Código de Operación / Token</label>
-            <input type="text" id="billetera_token" placeholder="Ej. 849201">
+            <label for="billetera_token">Código de aprobación (6 dígitos)</label>
+            <input type="text" id="billetera_token" maxlength="6" placeholder="Ej. 849201">
           </div>
         </div>
 
         <!-- Mensaje Pago Presencial -->
         <div id="pago-caja-box" class="pago-metodo-box" style="display: none; color: #f59e0b; font-size: 0.9rem;">
-          ℹ️ Se generará un código de reserva con estado <strong>PENDIENTE</strong> para que el cajero pueda realizar el cobro y la emisión física en <code>caja.html</code> (RF-22.12).
+          ℹ️ Se generará un código de reserva con estado <strong>PENDIENTE</strong> para abonar en la agencia en <code>caja.html</code>.
         </div>
       </div>
 
@@ -488,14 +630,53 @@
     © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
 
-  <!-- Script ES Module integrado con los módulos JS de Pago y Pasarela -->
   <script type="module">
     import { procesarPagoPasarela } from '../js/pago/pasarela.js';
     import { validarDatosPago } from '../js/pago/validaciones.js';
 
     let seleccionados = [];
 
-    // Exposicion de funciones al scope global para que los atributos HTML (onclick/onchange) sigan funcionando
+    // Actualizador dinámico de la vista previa de tarjeta
+    window.actualizarTarjetaVista = function() {
+      const inputNum = document.getElementById('tarjeta_numero');
+      const inputTitular = document.getElementById('tarjeta_titular');
+      const inputExp = document.getElementById('tarjeta_exp');
+
+      const vistaNum = document.getElementById('vista-numero');
+      const vistaTitular = document.getElementById('vista-titular');
+      const vistaVenc = document.getElementById('vista-venc');
+      const vistaMarca = document.getElementById('vista-marca');
+
+      if (inputNum && vistaNum) {
+        let val = inputNum.value.replace(/\D/g, '').substring(0, 16);
+        let formattedInput = val.replace(/(.{4})/g, '$1 ').trim();
+        inputNum.value = formattedInput;
+
+        let padded = val.padEnd(16, '•');
+        vistaNum.textContent = padded.replace(/(.{4})/g, '$1 ').trim();
+
+        if (vistaMarca) {
+          if (val.startsWith('4')) vistaMarca.textContent = 'VISA';
+          else if (val.startsWith('5')) vistaMarca.textContent = 'MASTERCARD';
+          else if (val.startsWith('3')) vistaMarca.textContent = 'AMEX';
+          else vistaMarca.textContent = 'TARJETA';
+        }
+      }
+
+      if (inputTitular && vistaTitular) {
+        vistaTitular.textContent = inputTitular.value.trim().toUpperCase() || 'NOMBRE DEL TITULAR';
+      }
+
+      if (inputExp && vistaVenc) {
+        let valExp = inputExp.value.replace(/\D/g, '');
+        if (valExp.length >= 2) {
+          valExp = valExp.substring(0, 2) + '/' + valExp.substring(2, 4);
+        }
+        inputExp.value = valExp;
+        vistaVenc.textContent = valExp || 'MM/AA';
+      }
+    };
+
     window.calcularCotizacionUnitario = function() {
       const tipoAsiento = document.getElementById('tipo_asiento').value;
       const equipajeKg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
@@ -508,14 +689,7 @@
       const montoExceso = kgExceso * TARIFA_EXCESO;
       const totalUnitario = precioBase + montoExceso;
 
-      return {
-        precioBase,
-        equipajeKg,
-        kgExceso,
-        montoExceso,
-        totalUnitario
-      };
-
+      return { precioBase, equipajeKg, kgExceso, montoExceso, totalUnitario };
     };
 
     window.actualizarCotizacion = function() {
@@ -532,10 +706,12 @@
     };
 
     window.cambiarMetodoPago = function() {
-      const metodo = document.getElementById('metodo_pago').value;
-      document.getElementById('pago-tarjeta-box').style.display = (metodo === 'TARJETA') ? 'block' : 'none';
-      document.getElementById('pago-billetera-box').style.display = (metodo === 'BILLETERA') ? 'block' : 'none';
-      document.getElementById('pago-caja-box').style.display = (metodo === 'EFECTIVO') ? 'block' : 'none';
+      const radioSeleccionado = document.querySelector('input[name="metodo"]:checked');
+      const metodo = radioSeleccionado ? radioSeleccionado.value : 'tarjeta';
+
+      document.getElementById('pago-tarjeta-box').style.display = (metodo === 'tarjeta') ? 'block' : 'none';
+      document.getElementById('pago-billetera-box').style.display = (metodo === 'billetera') ? 'block' : 'none';
+      document.getElementById('pago-caja-box').style.display = (metodo === 'efectivo') ? 'block' : 'none';
     };
 
     window.cerrarSesion = function() {
@@ -675,7 +851,6 @@
       }
     }
 
-    // Validaciones modularizadas utilizando validaciones.js
     function validarFormularioPago(metodo) {
       const datosPago = {
         tarjeta_numero: document.getElementById('tarjeta_numero').value,
@@ -685,7 +860,7 @@
         billetera_token: document.getElementById('billetera_token').value
       };
 
-      const res = validarDatosPago(metodo, datosPago);
+      const res = validarDatosPago(metodo.toUpperCase(), datosPago);
       if (!res.valido) {
         alert(res.mensaje);
         return false;
@@ -699,7 +874,9 @@
       const fecha_viaje = document.getElementById('fecha').value;
       const tipo_asiento = document.getElementById('tipo_asiento').value;
       const equipaje_kg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
-      const metodo_pago = document.getElementById('metodo_pago').value;
+      
+      const radioSel = document.querySelector('input[name="metodo"]:checked');
+      const metodo_pago = radioSel ? radioSel.value : 'tarjeta';
       const btnReservar = document.getElementById('btn-reservar');
 
       if (!validarFormularioPago(metodo_pago)) {
@@ -716,10 +893,9 @@
       let idTransaccion = null;
       let codigoAutorizacion = null;
 
-      // Integración de Pasarela Simulada para pagos en línea
-      if (metodo_pago === 'TARJETA' || metodo_pago === 'BILLETERA') {
+      if (metodo_pago === 'tarjeta' || metodo_pago === 'billetera') {
         const datosPasarela = {
-          metodo: metodo_pago,
+          metodo: metodo_pago.toUpperCase(),
           monto: montoTotalPagar,
           tarjeta_numero: document.getElementById('tarjeta_numero').value,
           tarjeta_exp: document.getElementById('tarjeta_exp').value,
@@ -764,7 +940,7 @@
             monto_equipaje: cot.montoExceso,
             monto_calculado: cot.totalUnitario,
             precio: cot.totalUnitario,
-            metodo_pago: metodo_pago,
+            metodo_pago: metodo_pago.toUpperCase(),
             estado: estadoCompra,
             id_transaccion: idTransaccion,
             codigo_autorizacion: codigoAutorizacion,
