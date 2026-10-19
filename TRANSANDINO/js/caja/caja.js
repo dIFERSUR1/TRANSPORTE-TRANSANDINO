@@ -1,4 +1,4 @@
-// js/caja/caja.js — Lógica completa del módulo del cajero
+// js/caja/caja.js — Módulo de Cobranza y Cierre de Caja Optimizado
 
 const API_COMPRAS_URL = '/api/compras';
 
@@ -38,13 +38,11 @@ let solicitudEnCobro = null;
 let listaCompras = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Cargar usuario/cajero activo
   const userObj = JSON.parse(localStorage.getItem('user')) || {};
   const emailObj = localStorage.getItem('userEmail');
   const nombreCajero = userObj.nombre || (emailObj ? emailObj.split('@')[0] : 'Cajero Agencia');
   if (elNombreCajero) elNombreCajero.textContent = nombreCajero;
 
-  // 2. Establecer fecha por defecto en el filtro de caja (Hoy YYYY-MM-DD)
   const hoyStr = new Date().toISOString().split('T')[0];
   if (inputFechaCaja) {
     inputFechaCaja.value = hoyStr;
@@ -55,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     chkSoloVerificar.addEventListener('change', renderizarModuloCaja);
   }
 
-  // 3. Listener para cerrar sesión
   if (btnCerrarSesion) {
     btnCerrarSesion.addEventListener('click', () => {
       localStorage.clear();
@@ -63,7 +60,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 4. Búsqueda presencial
   if (formBuscar) {
     formBuscar.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -71,7 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 5. Control del modal <dialog> y cambio de medio de pago
   if (selMetodoCaja) {
     selMetodoCaja.addEventListener('change', alternarCamposPago);
   }
@@ -90,11 +85,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     formCobro.addEventListener('submit', procesarCobroPresencial);
   }
 
-  // 6. Carga inicial de datos
   await cargarDatos();
 });
 
-// Carga las compras desde la API o LocalStorage
 async function cargarDatos() {
   try {
     const res = await fetch(API_COMPRAS_URL);
@@ -116,7 +109,6 @@ function renderizarModuloCaja() {
   renderizarResumenCierre();
 }
 
-// Renderiza solicitudes pendientes en la Sección 1
 function renderizarPendientes(criterio = '') {
   if (!tablaPendientesBody) return;
   tablaPendientesBody.innerHTML = '';
@@ -138,7 +130,7 @@ function renderizarPendientes(criterio = '') {
   });
 
   if (pendientes.length === 0) {
-    tablaPendientesBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted, #94a3b8); padding: 1rem;">No hay solicitudes pendientes de pago.</td></tr>';
+    tablaPendientesBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 1rem;">No hay solicitudes pendientes de pago.</td></tr>';
     return;
   }
 
@@ -169,7 +161,6 @@ function renderizarPendientes(criterio = '') {
   });
 }
 
-// Abre el modal nativo <dialog>
 function abrirDialogoCobro(item, monto) {
   solicitudEnCobro = { ...item, _montoCobro: monto };
 
@@ -205,7 +196,6 @@ function calcularVuelto() {
   outputVuelto.textContent = `S/ ${vuelto.toFixed(2)}`;
 }
 
-// Procesa el cobro y actualiza la base de datos
 async function procesarCobroPresencial(e) {
   e.preventDefault();
   if (!solicitudEnCobro) return;
@@ -247,7 +237,6 @@ async function procesarCobroPresencial(e) {
     console.log('Actualizando datos en almacenamiento local...');
   }
 
-  // Actualizar en memoria y LocalStorage
   listaCompras = listaCompras.map(c => {
     if (String(c.id) === String(solicitudEnCobro.id)) {
       return { ...c, ...payloadUpdate };
@@ -262,7 +251,7 @@ async function procesarCobroPresencial(e) {
   renderizarModuloCaja();
 }
 
-// Renderiza las operaciones web/pasarela en la Sección 2
+// Renderizado de Pagos por Pasarela (Compatibilidad flexible de fecha)
 function renderizarEnLinea() {
   if (!tablaEnLineaBody) return;
   tablaEnLineaBody.innerHTML = '';
@@ -272,14 +261,15 @@ function renderizarEnLinea() {
 
   const enLinea = listaCompras.filter(item => {
     const metodo = String(item.metodo_pago || '').toUpperCase();
-    const esOnline = (metodo === 'TARJETA' || metodo === 'BILLETERA' || item.id_transaccion);
+    const esOnline = (metodo === 'TARJETA' || metodo === 'BILLETERA' || item.id_transaccion || item.codigo_autorizacion);
     if (!esOnline) return false;
 
-    const fechaRaw = item.fecha_pago || item.created_at || item.fecha || '';
-    const fechaItem = typeof fechaRaw === 'string' ? fechaRaw.split('T')[0] : '';
+    // Obtener la fecha relevante
+    const hoyISO = new Date().toISOString().split('T')[0];
+    const fechaRaw = item.fecha_pago || item.created_at || hoyISO;
+    const fechaItem = typeof fechaRaw === 'string' ? fechaRaw.split('T')[0] : hoyISO;
 
-    if (fechaItem && fechaItem !== fechaFiltro) return false;
-
+    if (fechaItem !== fechaFiltro) return false;
     if (soloVerificar && item.verificado) return false;
 
     return true;
@@ -288,20 +278,20 @@ function renderizarEnLinea() {
   if (avisoNuevos) {
     avisoNuevos.textContent = enLinea.length > 0 
       ? `Se encontraron ${enLinea.length} operaciones en línea.` 
-      : 'No hay operaciones registadas en esta fecha.';
+      : 'No hay operaciones registradas en esta fecha.';
   }
 
   if (enLinea.length === 0) {
-    tablaEnLineaBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted, #94a3b8); padding: 1rem;">Sin operaciones en línea para mostrar.</td></tr>';
+    tablaEnLineaBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 1rem;">Sin operaciones en línea para mostrar en esta fecha.</td></tr>';
     return;
   }
 
   enLinea.forEach(item => {
     const tr = document.createElement('tr');
-    const hora = item.fecha_pago ? new Date(item.fecha_pago).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '09:00 AM';
-    const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${item.id}`;
-    const solicitud = item.codigo_seguimiento || item.codigo_reserva || `SOL-${item.id}`;
-    const cliente = item.registrado_por || item.id_usuario || 'Cliente';
+    const hora = item.fecha_pago ? new Date(item.fecha_pago).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Ahora';
+    const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${item.id || '001'}`;
+    const solicitud = item.codigo_seguimiento || item.codigo_reserva || `SOL-${item.id || '001'}`;
+    const cliente = item.registrado_por || item.id_usuario || 'Cliente Web';
     const medio = item.metodo_pago || 'TARJETA';
     const monto = parseFloat(item.monto_calculado || item.precio || 0);
 
@@ -322,7 +312,6 @@ function renderizarEnLinea() {
   });
 }
 
-// Renderiza el Resumen del día y Cierre de caja en la Sección 3
 function renderizarResumenCierre() {
   if (!tablaResumenBody) return;
   tablaResumenBody.innerHTML = '';
@@ -331,16 +320,9 @@ function renderizarResumenCierre() {
 
   const pagadosFecha = listaCompras.filter(item => {
     const est = String(item.estado || '').toUpperCase();
-    const esPagado = (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO');
-    if (!esPagado) return false;
-
-    const fechaRaw = item.fecha_pago || item.fecha || item.created_at || '';
-    const fechaItem = typeof fechaRaw === 'string' ? fechaRaw.split('T')[0] : '';
-
-    return fechaItem === fechaFiltro || !fechaItem;
+    return (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO');
   });
 
-  // Agrupar por canal y medio
   const resumenMap = {};
 
   pagadosFecha.forEach(item => {
@@ -365,7 +347,7 @@ function renderizarResumenCierre() {
   const filas = Object.values(resumenMap);
 
   if (filas.length === 0) {
-    tablaResumenBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted, #94a3b8); padding: 1rem;">No hay cobranzas registradas para la fecha seleccionada.</td></tr>';
+    tablaResumenBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 1rem;">No hay cobranzas registradas para la fecha seleccionada.</td></tr>';
   } else {
     filas.forEach(row => {
       totalGeneral += row.total;
