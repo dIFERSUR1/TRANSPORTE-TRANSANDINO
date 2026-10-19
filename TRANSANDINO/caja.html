@@ -402,7 +402,7 @@
       </div>
     </div>
 
-    <!-- Buscador ILIKE de Código 1 -->
+    <!-- Buscador ILIKE -->
     <div class="card">
       <h3 style="color: var(--cyan-light); margin-bottom: 0.8rem; font-size: 1rem;">🔎 Buscar Reserva Pendiente</h3>
       <form onsubmit="buscarReservaILIKE(event)">
@@ -413,7 +413,7 @@
       </form>
     </div>
 
-    <!-- Tabla de Resultados de Código 1 -->
+    <!-- Tabla de Resultados -->
     <div class="card">
       <h3 style="color: var(--cyan-light); margin-bottom: 1rem; font-size: 1rem;">📋 Reservas Encontradas</h3>
       <div class="table-container">
@@ -442,7 +442,7 @@
       </div>
     </div>
 
-    <!-- Sección de Cobro Presencial del Código 2 -->
+    <!-- Sección de Cobro Presencial -->
     <section aria-labelledby="t-cobro">
       <h2 id="t-cobro">Cobro presencial</h2>
       <form id="form-buscar" role="search">
@@ -467,7 +467,7 @@
       </div>
     </section>
 
-    <!-- Sección de Pasarela en Línea del Código 2 -->
+    <!-- Sección de Pasarela en Línea -->
     <section aria-labelledby="t-linea">
       <h2 id="t-linea">Pagos recibidos por la pasarela</h2>
       <p id="aviso-nuevos" role="status" aria-live="polite"></p>
@@ -498,7 +498,7 @@
       </div>
     </section>
 
-    <!-- Sección de Resumen Cierre de Caja del Código 2 -->
+    <!-- Sección de Resumen Cierre de Caja -->
     <section aria-labelledby="t-resumen">
       <h2 id="t-resumen">Resumen del día (cierre de caja)</h2>
       <div class="table-container">
@@ -514,7 +514,7 @@
           <tbody>
             <tr>
               <td>Agencia / Web</td>
-              <td>Efectivo / Tarjeta</td>
+              <td>Efectivo / Tarjeta / Pasarela</td>
               <td>0 operaciones</td>
               <td style="color: var(--green-accent); font-weight: bold;">S/ 0.00</td>
             </tr>
@@ -525,7 +525,7 @@
     </section>
   </main>
 
-  <!-- Diálogo Modal de Registro de Cobro del Código 2 -->
+  <!-- Diálogo Modal de Registro de Cobro -->
   <dialog id="dialogo-cobro" aria-labelledby="t-dialogo">
     <form id="form-cobro">
       <h2 id="t-dialogo">Registrar cobro</h2>
@@ -557,7 +557,7 @@
     </form>
   </dialog>
 
-  <!-- Modal Ticket Boleto Físico del Código 1 -->
+  <!-- Modal Ticket Boleto Físico -->
   <div class="modal-overlay" id="modal-ticket">
     <div class="ticket-card">
       <div class="ticket-header">
@@ -617,14 +617,12 @@
         elNombreCajero.textContent = NOMBRE_CAJERO_ACTUAL;
       }
 
-      // Configurar input de fecha con la fecha actual por defecto y evento de actualización
       const inputFecha = document.getElementById('fecha-caja');
       if (inputFecha) {
         inputFecha.value = new Date().toISOString().split('T')[0];
         inputFecha.addEventListener('change', actualizarCierreDeCaja);
       }
 
-      // Cargar reservas y calcular total recaudado al iniciar la vista
       cargarInicialYResumen();
     });
 
@@ -633,7 +631,7 @@
       await actualizarCierreDeCaja();
     }
 
-    // Calcula y renderiza el Total Recaudado en Cierre de Caja (FILTRADO POR DÍA)
+    // Calcula y renderiza el Cierre de Caja sumando todos los pasajes pagados
     async function actualizarCierreDeCaja() {
       let todas = [];
       try {
@@ -651,26 +649,29 @@
         todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
       }
 
-      // 1. Obtener la fecha del input #fecha-caja o por defecto la fecha actual del sistema
+      // Obtener la fecha seleccionada en la pantalla
       const inputFecha = document.getElementById('fecha-caja');
       const hoyStr = new Date().toISOString().split('T')[0];
       const fechaFiltro = (inputFecha && inputFecha.value) ? inputFecha.value : hoyStr;
 
-      // 2. Filtrar únicamente boletos PAGADOS / ATENDIDOS / EMITIDOS de la fecha seleccionada
-      const pagadasHoy = todas.filter(item => {
+      // 1. Filtrar registros que tengan estado PAGADO, ATENDIDO o EMITIDO
+      const pagadas = todas.filter(item => {
         const est = String(item.estado || '').toUpperCase();
-        const esPagado = (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO');
-        if (!esPagado) return false;
-
-        const fechaRaw = item.fecha_pago || item.fecha || item.fecha_viaje || item.created_at || '';
-        const fechaItem = typeof fechaRaw === 'string' ? fechaRaw.split('T')[0] : '';
-
-        return fechaItem === fechaFiltro || (!fechaItem && fechaFiltro === hoyStr);
+        return est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO';
       });
 
-      // 3. Suma total de dinero recaudado en la fecha seleccionada
+      // 2. Si un registro tiene fecha de pago explícita se compara; de lo contrario se incluye como pagado
+      const pagadasFinal = pagadas.filter(item => {
+        if (item.fecha_pago) {
+          const fPago = typeof item.fecha_pago === 'string' ? item.fecha_pago.split('T')[0] : '';
+          return fPago === fechaFiltro;
+        }
+        return true;
+      });
+
+      // 3. Sumar el total recaudado
       let totalRecaudado = 0;
-      pagadasHoy.forEach(item => {
+      pagadasFinal.forEach(item => {
         let monto = parseFloat(item.monto_calculado || item.precio || 0);
 
         if (isNaN(monto) || monto === 0) {
@@ -685,20 +686,20 @@
         totalRecaudado += monto;
       });
 
-      // 4. Actualizar span/strong del total en pantalla
+      // 4. Renderizar el total acumulado en pantalla
       const elTotalDia = document.getElementById('total-dia');
       if (elTotalDia) {
         elTotalDia.textContent = `S/ ${totalRecaudado.toFixed(2)}`;
       }
 
-      // 5. Actualizar la tabla del Cierre de Caja
+      // 5. Renderizar en la tabla de cierre de caja
       const tbodyResumen = document.querySelector('#tabla-resumen tbody');
       if (tbodyResumen) {
         tbodyResumen.innerHTML = `
           <tr>
             <td>Agencia / Web</td>
             <td>Efectivo / Tarjeta / Pasarela</td>
-            <td>${pagadasHoy.length} operaciones (${fechaFiltro})</td>
+            <td>${pagadasFinal.length} operaciones</td>
             <td style="color: var(--green-accent); font-weight: bold;">S/ ${totalRecaudado.toFixed(2)}</td>
           </tr>
         `;
@@ -732,7 +733,6 @@
         resultados = buscarEnLocalStorage(query);
       }
 
-      // Si es búsqueda por texto y hay query, filtrar en local
       if (query) {
         const q = query.toLowerCase();
         resultados = resultados.filter(item => {
@@ -840,6 +840,8 @@
         return;
       }
 
+      const hoyISO = new Date().toISOString().split('T')[0];
+
       try {
         const payload = {
           id: id || codigo,
@@ -848,7 +850,7 @@
           metodo_pago: 'EFECTIVO',
           monto_calculado: monto,
           estado: 'PAGADO',
-          fecha_pago: new Date().toISOString()
+          fecha_pago: hoyISO
         };
 
         const res = await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(id || codigo)}`, {
@@ -869,6 +871,7 @@
     }
 
     function actualizarCobroLocal(id, codigo, monto) {
+      const hoyISO = new Date().toISOString().split('T')[0];
       let compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
       compras = compras.map(c => {
         if (String(c.id) === String(id) || c.codigo_reserva === codigo || c.codigo_seguimiento === codigo) {
@@ -879,7 +882,7 @@
             monto_calculado: monto,
             precio: monto,
             id_cajero: ID_CAJERO_ACTUAL,
-            fecha_pago: new Date().toISOString()
+            fecha_pago: hoyISO
           };
         }
         return c;
@@ -920,7 +923,7 @@
     }
   </script>
 
-  <!-- Inclusión de Script Módulo JS del Código 2 -->
+  <!-- Inclusión de Script Módulo JS de Caja -->
   <script type="module" src="js/caja/caja.js"></script>
 
 </body>
