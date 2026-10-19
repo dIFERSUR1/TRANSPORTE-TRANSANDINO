@@ -488,18 +488,19 @@
     © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
 
-  <script>
+  <!-- Script ES Module integrado con los módulos JS de Pago y Pasarela -->
+  <script type="module">
+    import { procesarPagoPasarela } from '../js/pago/pasarela.js';
+    import { validarDatosPago } from '../js/pago/validaciones.js';
+
     let seleccionados = [];
 
-    // RF-22.09: Cotizador de precio según reglas de negocio
-    function calcularCotizacionUnitario() {
+    // Exposicion de funciones al scope global para que los atributos HTML (onclick/onchange) sigan funcionando
+    window.calcularCotizacionUnitario = function() {
       const tipoAsiento = document.getElementById('tipo_asiento').value;
       const equipajeKg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
 
-      // Regla de Negocio: Semicama 2.º piso S/ 60.00, Cama 1.er piso S/ 85.00
       const precioBase = (tipoAsiento === 'cama') ? 85.00 : 60.00;
-      
-      // Regla de Negocio: S/ 4.00 por kg sobre 20 kg
       const LIMITE_GRATIS = 20;
       const TARIFA_EXCESO = 4.00;
 
@@ -514,11 +515,11 @@
         montoExceso,
         totalUnitario
       };
-    }
 
-    function actualizarCotizacion() {
-      const cot = calcularCotizacionUnitario();
-      
+    };
+
+    window.actualizarCotizacion = function() {
+      const cot = window.calcularCotizacionUnitario();
       const lblDesglose = document.getElementById('lbl-desglose');
       const lblUnitario = document.getElementById('lbl-monto-unitario');
 
@@ -527,15 +528,55 @@
         lblUnitario.innerText = cot.totalUnitario.toFixed(2);
       }
 
-      actualizarResumen();
-    }
+      window.actualizarResumen();
+    };
 
-    function cambiarMetodoPago() {
+    window.cambiarMetodoPago = function() {
       const metodo = document.getElementById('metodo_pago').value;
       document.getElementById('pago-tarjeta-box').style.display = (metodo === 'TARJETA') ? 'block' : 'none';
       document.getElementById('pago-billetera-box').style.display = (metodo === 'BILLETERA') ? 'block' : 'none';
       document.getElementById('pago-caja-box').style.display = (metodo === 'EFECTIVO') ? 'block' : 'none';
-    }
+    };
+
+    window.cerrarSesion = function() {
+      localStorage.clear();
+      window.location.reload();
+    };
+
+    window.toggleAsiento = function(numero, boton) {
+      const index = seleccionados.indexOf(numero);
+      if (index > -1) {
+        seleccionados.splice(index, 1);
+        boton.classList.remove('seleccionado');
+        boton.classList.add('disponible');
+      } else {
+        seleccionados.push(numero);
+        boton.classList.remove('disponible');
+        boton.classList.add('seleccionado');
+      }
+      window.actualizarResumen();
+    };
+
+    window.actualizarResumen = function() {
+      const lblAsientos = document.getElementById('lbl-asientos');
+      const lblTotal = document.getElementById('lbl-total');
+      const btnReservar = document.getElementById('btn-reservar');
+      
+      const cot = window.calcularCotizacionUnitario();
+
+      if (seleccionados.length === 0) {
+        lblAsientos.innerText = 'Ninguno';
+        lblTotal.innerText = '0.00';
+        btnReservar.disabled = true;
+      } else {
+        seleccionados.sort((a, b) => a - b);
+        lblAsientos.innerText = seleccionados.join(', ');
+        
+        const totalPagar = seleccionados.length * cot.totalUnitario;
+        lblTotal.innerText = totalPagar.toFixed(2);
+        btnReservar.disabled = false;
+      }
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -570,13 +611,8 @@
         `;
       }
 
-      actualizarCotizacion();
+      window.actualizarCotizacion();
     });
-
-    function cerrarSesion() {
-      localStorage.clear();
-      window.location.reload();
-    }
 
     document.getElementById('form-busqueda').addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -593,7 +629,7 @@
       grid.innerHTML = '<p style="grid-column: span 4; text-align: center; color: var(--cyan-light);">Cargando asientos...</p>';
       seccion.style.display = 'block';
       seleccionados = [];
-      actualizarResumen();
+      window.actualizarResumen();
 
       let ocupados = [];
       try {
@@ -632,84 +668,32 @@
           btn.disabled = true;
         } else {
           btn.className = 'seat-btn disponible';
-          btn.onclick = () => toggleAsiento(i, btn);
+          btn.onclick = () => window.toggleAsiento(i, btn);
         }
 
         grid.appendChild(btn);
       }
     }
 
-    function toggleAsiento(numero, boton) {
-      const index = seleccionados.indexOf(numero);
-      if (index > -1) {
-        seleccionados.splice(index, 1);
-        boton.classList.remove('seleccionado');
-        boton.classList.add('disponible');
-      } else {
-        seleccionados.push(numero);
-        boton.classList.remove('disponible');
-        boton.classList.add('seleccionado');
-      }
-      actualizarResumen();
-    }
-
-    function actualizarResumen() {
-      const lblAsientos = document.getElementById('lbl-asientos');
-      const lblTotal = document.getElementById('lbl-total');
-      const btnReservar = document.getElementById('btn-reservar');
-      
-      const cot = calcularCotizacionUnitario();
-
-      if (seleccionados.length === 0) {
-        lblAsientos.innerText = 'Ninguno';
-        lblTotal.innerText = '0.00';
-        btnReservar.disabled = true;
-      } else {
-        seleccionados.sort((a, b) => a - b);
-        lblAsientos.innerText = seleccionados.join(', ');
-        
-        const totalPagar = seleccionados.length * cot.totalUnitario;
-        lblTotal.innerText = totalPagar.toFixed(2);
-        btnReservar.disabled = false;
-      }
-    }
-
-    // Validaciones JS para pagos (RF-22.10 y RF-22.11)
+    // Validaciones modularizadas utilizando validaciones.js
     function validarFormularioPago(metodo) {
-      if (metodo === 'TARJETA') {
-        const num = document.getElementById('tarjeta_numero').value.replace(/\s+/g, '');
-        const exp = document.getElementById('tarjeta_exp').value;
-        const cvv = document.getElementById('tarjeta_cvv').value;
+      const datosPago = {
+        tarjeta_numero: document.getElementById('tarjeta_numero').value,
+        tarjeta_exp: document.getElementById('tarjeta_exp').value,
+        tarjeta_cvv: document.getElementById('tarjeta_cvv').value,
+        billetera_celular: document.getElementById('billetera_celular').value,
+        billetera_token: document.getElementById('billetera_token').value
+      };
 
-        if (num.length < 16 || isNaN(num)) {
-          alert('Por favor, ingrese un número de tarjeta válido (16 dígitos).');
-          return false;
-        }
-        if (!exp.includes('/') || exp.length < 5) {
-          alert('Ingrese una fecha de expiración válida (MM/AA).');
-          return false;
-        }
-        if (cvv.length < 3 || isNaN(cvv)) {
-          alert('Ingrese un código CVV válido.');
-          return false;
-        }
-      } else if (metodo === 'BILLETERA') {
-        const cel = document.getElementById('billetera_celular').value.trim();
-        const token = document.getElementById('billetera_token').value.trim();
-
-        if (cel.length !== 9 || isNaN(cel) || !cel.startsWith('9')) {
-          alert('Ingrese un número de celular válido de 9 dígitos.');
-          return false;
-        }
-        if (!token) {
-          alert('Ingrese el código de transacción/operación de la billetera electrónica.');
-          return false;
-        }
+      const res = validarDatosPago(metodo, datosPago);
+      if (!res.valido) {
+        alert(res.mensaje);
+        return false;
       }
       return true;
     }
 
-    async function confirmarReserva() {
+    window.confirmarReserva = async function() {
       const origen = document.getElementById('origen').value;
       const destino = document.getElementById('destino').value;
       const fecha_viaje = document.getElementById('fecha').value;
@@ -718,17 +702,47 @@
       const metodo_pago = document.getElementById('metodo_pago').value;
       const btnReservar = document.getElementById('btn-reservar');
 
-      // Validar datos de pago según el método seleccionado
       if (!validarFormularioPago(metodo_pago)) {
         return;
       }
 
-      const cot = calcularCotizacionUnitario();
-      const estadoCompra = (metodo_pago === 'EFECTIVO') ? 'PENDIENTE' : 'PAGADO';
-      const codigoReserva = 'RES-' + Math.floor(100000 + Math.random() * 900000);
+      const cot = window.calcularCotizacionUnitario();
+      const montoTotalPagar = seleccionados.length * cot.totalUnitario;
 
       btnReservar.disabled = true;
-      btnReservar.innerText = 'Procesando...';
+      btnReservar.innerText = 'Procesando con la Pasarela...';
+
+      let estadoCompra = 'PENDIENTE';
+      let idTransaccion = null;
+      let codigoAutorizacion = null;
+
+      // Integración de Pasarela Simulada para pagos en línea
+      if (metodo_pago === 'TARJETA' || metodo_pago === 'BILLETERA') {
+        const datosPasarela = {
+          metodo: metodo_pago,
+          monto: montoTotalPagar,
+          tarjeta_numero: document.getElementById('tarjeta_numero').value,
+          tarjeta_exp: document.getElementById('tarjeta_exp').value,
+          tarjeta_cvv: document.getElementById('tarjeta_cvv').value,
+          billetera_celular: document.getElementById('billetera_celular').value,
+          billetera_token: document.getElementById('billetera_token').value
+        };
+
+        const resPasarela = await procesarPagoPasarela(datosPasarela);
+
+        if (!resPasarela.exito) {
+          alert(`❌ Transacción Rechazada: ${resPasarela.mensaje}`);
+          btnReservar.disabled = false;
+          btnReservar.innerText = 'Confirmar y Pagar';
+          return;
+        }
+
+        estadoCompra = 'PAGADO';
+        idTransaccion = resPasarela.idTransaccion;
+        codigoAutorizacion = resPasarela.codigoAutorizacion;
+      }
+
+      const codigoReserva = 'RES-' + Math.floor(100000 + Math.random() * 900000);
 
       try {
         for (const asientoNum of seleccionados) {
@@ -743,15 +757,18 @@
             hora_viaje: '09:00 AM',
             asiento: String(asientoNum),
             num_asiento: asientoNum,
-            tipo_asiento: tipo_asiento,             // Exigido por RF-22.09
-            equipaje_kg: equipaje_kg,               // Exigido por RF-22.09
-            equipaje: equipaje_kg,                  // Cobertura nombre alternativo
-            peso: equipaje_kg,                      // Cobertura nombre alternativo
-            monto_equipaje: cot.montoExceso,        // Costo calculado de exceso
-            monto_calculado: cot.totalUnitario,     // Exigido por RF-22.09
+            tipo_asiento: tipo_asiento,
+            equipaje_kg: equipaje_kg,
+            equipaje: equipaje_kg,
+            peso: equipaje_kg,
+            monto_equipaje: cot.montoExceso,
+            monto_calculado: cot.totalUnitario,
             precio: cot.totalUnitario,
-            metodo_pago: metodo_pago,               // Exigido por RF-22.10 y RF-22.11
-            estado: estadoCompra,                   // 'PAGADO' para Tarjeta/Billetera, 'PENDIENTE' para Caja
+            metodo_pago: metodo_pago,
+            estado: estadoCompra,
+            id_transaccion: idTransaccion,
+            codigo_autorizacion: codigoAutorizacion,
+            fecha_pago: (estadoCompra === 'PAGADO') ? new Date().toISOString() : null,
             registrado_por: 'Cliente Web'
           };
 
@@ -761,16 +778,15 @@
             body: JSON.stringify(payload)
           });
 
-          // Respaldo local
           const comprasLocales = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
           comprasLocales.push(payload);
           localStorage.setItem('compras_pasajes', JSON.stringify(comprasLocales));
         }
 
         if (estadoCompra === 'PAGADO') {
-          alert(`¡Pago completado con éxito! 🎉\nCódigo Reserva: ${codigoReserva}\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}\nTotal: S/ ${(seleccionados.length * cot.totalUnitario).toFixed(2)}`);
+          alert(`¡Pago completado con éxito! 🎉\nCódigo Autorización: ${codigoAutorizacion}\nCódigo Reserva: ${codigoReserva}\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}\nTotal: S/ ${montoTotalPagar.toFixed(2)}`);
         } else {
-          alert(`¡Reserva realizada con éxito! 📋\nCódigo Reserva: ${codigoReserva}\nEstado: PENDIENTE DE PAGO EN CAJA\nPresente su código en la agencia (caja.html) para cancelar S/ ${(seleccionados.length * cot.totalUnitario).toFixed(2)}.`);
+          alert(`¡Reserva realizada con éxito! 📋\nCódigo Reserva: ${codigoReserva}\nEstado: PENDIENTE DE PAGO EN CAJA\nPresente su código en la agencia (caja.html) para cancelar S/ ${montoTotalPagar.toFixed(2)}.`);
         }
 
         await cargarAsientos();
@@ -780,7 +796,7 @@
       } finally {
         btnReservar.innerText = 'Confirmar y Pagar';
       }
-    }
+    };
   </script>
 
 </body>
