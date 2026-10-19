@@ -732,29 +732,39 @@
 
       try {
         for (const asientoNum of seleccionados) {
+          const payload = {
+            id_usuario: 1,
+            codigo_reserva: codigoReserva,
+            origen: origen,
+            destino: destino,
+            fecha: fecha_viaje,
+            fecha_viaje: fecha_viaje,
+            hora: '09:00 AM',
+            hora_viaje: '09:00 AM',
+            asiento: String(asientoNum),
+            num_asiento: asientoNum,
+            tipo_asiento: tipo_asiento,             // Exigido por RF-22.09
+            equipaje_kg: equipaje_kg,               // Exigido por RF-22.09
+            equipaje: equipaje_kg,                  // Cobertura nombre alternativo
+            peso: equipaje_kg,                      // Cobertura nombre alternativo
+            monto_equipaje: cot.montoExceso,        // Costo calculado de exceso
+            monto_calculado: cot.totalUnitario,     // Exigido por RF-22.09
+            precio: cot.totalUnitario,
+            metodo_pago: metodo_pago,               // Exigido por RF-22.10 y RF-22.11
+            estado: estadoCompra,                   // 'PAGADO' para Tarjeta/Billetera, 'PENDIENTE' para Caja
+            registrado_por: 'Cliente Web'
+          };
+
           await fetch('/api/compras', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id_usuario: 1,
-              codigo_reserva: codigoReserva,
-              origen: origen,
-              destino: destino,
-              fecha: fecha_viaje,
-              fecha_viaje: fecha_viaje,
-              hora: '09:00 AM',
-              hora_viaje: '09:00 AM',
-              asiento: String(asientoNum),
-              num_asiento: asientoNum,
-              tipo_asiento: tipo_asiento,             // Exigido por RF-22.09
-              equipaje_kg: equipaje_kg,               // Exigido por RF-22.09
-              monto_calculado: cot.totalUnitario,     // Exigido por RF-22.09
-              precio: cot.totalUnitario,
-              metodo_pago: metodo_pago,               // Exigido por RF-22.10 y RF-22.11
-              estado: estadoCompra,                   // 'PAGADO' para Tarjeta/Billetera, 'PENDIENTE' para Caja
-              registrado_por: 'Cliente Web'
-            })
+            body: JSON.stringify(payload)
           });
+
+          // Respaldo local
+          const comprasLocales = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+          comprasLocales.push(payload);
+          localStorage.setItem('compras_pasajes', JSON.stringify(comprasLocales));
         }
 
         if (estadoCompra === 'PAGADO') {
