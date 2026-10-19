@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Caja - Cobro y Emisión - TransAndino Perú</title>
   
-  <!-- EstiLos-->
+  <!-- Estilos -->
   <link rel="stylesheet" href="css/caja.css">
 
   <style>
@@ -407,7 +407,7 @@
       <h3 style="color: var(--cyan-light); margin-bottom: 0.8rem; font-size: 1rem;">🔎 Buscar Reserva Pendiente</h3>
       <form onsubmit="buscarReservaILIKE(event)">
         <div class="search-box">
-          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. RES-849201) o DNI / Nombre del Pasajero..." required>
+          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. RES-849201) o DNI / Nombre del Pasajero...">
           <button type="submit" class="btn-search">🔍 Buscar Reserva</button>
         </div>
       </form>
@@ -434,7 +434,7 @@
           <tbody id="tabla-reservas-tbody">
             <tr>
               <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                Ingrese un término de búsqueda para consultar reservas pendientes.
+                Cargando datos de reservas...
               </td>
             </tr>
           </tbody>
@@ -511,7 +511,14 @@
               <th scope="col">Total</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+            <tr>
+              <td>Agencia / Web</td>
+              <td>Efectivo / Tarjeta</td>
+              <td>0 operaciones</td>
+              <td style="color: var(--green-accent); font-weight: bold;">S/ 0.00</td>
+            </tr>
+          </tbody>
         </table>
       </div>
       <p style="margin-top: 1rem; font-size: 1.1rem;">Total recaudado: <strong id="total-dia" style="color: var(--green-accent);">S/ 0.00</strong></p>
@@ -582,7 +589,7 @@
     <p>&copy; 2026 TransAndino Perú - Módulo de Cobranza en Agencia.</p>
   </footer>
 
-  <!-- Lógica JavaScript del Código 1 -->
+  <!-- Lógica JavaScript del Módulo de Caja -->
   <script>
     const API_COMPRAS_URL = '/api/compras';
 
@@ -609,12 +616,81 @@
       if (elNombreCajero) {
         elNombreCajero.textContent = NOMBRE_CAJERO_ACTUAL;
       }
+
+      // Cargar reservas y calcular total recaudado al iniciar la vista
+      cargarInicialYResumen();
     });
 
-    async function buscarReservaILIKE(e) {
+    async function cargarInicialYResumen() {
+      await buscarReservaILIKE(null, true);
+      await actualizarCierreDeCaja();
+    }
+
+    // Calcula y renderiza el Total Recaudado en Cierre de Caja
+    async function actualizarCierreDeCaja() {
+      let todas = [];
+      try {
+        const res = await fetch(API_COMPRAS_URL);
+        if (res.ok) {
+          todas = await res.json();
+        } else {
+          todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+        }
+      } catch (err) {
+        todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      }
+
+      if (!Array.isArray(todas)) {
+        todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      }
+
+      // Filtrar compras que estén PAGADAS / ATENDIDAS / EMITIDAS
+      const pagadas = todas.filter(item => {
+        const est = String(item.estado || '').toUpperCase();
+        return est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO';
+      });
+
+      // Suma total de dinero recaudado
+      let totalRecaudado = 0;
+      pagadas.forEach(item => {
+        let monto = parseFloat(item.monto_calculado || item.precio || 0);
+
+        if (isNaN(monto) || monto === 0) {
+          const tipo = String(item.tipo_asiento || '').toLowerCase();
+          const esCama = tipo.includes('cama') && !tipo.includes('semi');
+          const base = esCama ? 85 : 60;
+          const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
+          const exceso = Math.max(0, equipajeTotal - 20);
+          monto = base + (exceso * 4);
+        }
+
+        totalRecaudado += monto;
+      });
+
+      // Actualizar span/strong del total en pantalla
+      const elTotalDia = document.getElementById('total-dia');
+      if (elTotalDia) {
+        elTotalDia.textContent = `S/ ${totalRecaudado.toFixed(2)}`;
+      }
+
+      // Actualizar la tabla del Cierre de Caja
+      const tbodyResumen = document.querySelector('#tabla-resumen tbody');
+      if (tbodyResumen) {
+        tbodyResumen.innerHTML = `
+          <tr>
+            <td>Agencia / Web</td>
+            <td>Efectivo / Tarjeta / Pasarela</td>
+            <td>${pagadas.length} operaciones</td>
+            <td style="color: var(--green-accent); font-weight: bold;">S/ ${totalRecaudado.toFixed(2)}</td>
+          </tr>
+        `;
+      }
+    }
+
+    async function buscarReservaILIKE(e, esCargaInicial = false) {
       if (e) e.preventDefault();
-      const query = document.getElementById('txt-busqueda').value.trim();
-      if (!query) return;
+      const input = document.getElementById('txt-busqueda');
+      const query = input ? input.value.trim() : '';
 
       const tbody = document.getElementById('tabla-reservas-tbody');
       tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--cyan-light);">🔎 Buscando reservas...</td></tr>';
@@ -622,7 +698,8 @@
       let resultados = [];
 
       try {
-        const res = await fetch(`${API_COMPRAS_URL}?q=${encodeURIComponent(query)}`);
+        const url = query ? `${API_COMPRAS_URL}?q=${encodeURIComponent(query)}` : API_COMPRAS_URL;
+        const res = await fetch(url);
         if (res.ok) {
           resultados = await res.json();
         } else {
@@ -637,12 +714,23 @@
         resultados = buscarEnLocalStorage(query);
       }
 
+      // Si es búsqueda por texto y no hay query, filtrar en local
+      if (query) {
+        const q = query.toLowerCase();
+        resultados = resultados.filter(item => {
+          const codigo = String(item.codigo_reserva || item.codigo_seguimiento || item.id || '').toLowerCase();
+          const usuario = String(item.id_usuario || item.usuario_id || item.pasajero || '').toLowerCase();
+          return codigo.includes(q) || usuario.includes(q);
+        });
+      }
+
       renderizarResultados(resultados);
     }
 
     function buscarEnLocalStorage(query) {
-      const q = query.toLowerCase();
+      const q = (query || '').toLowerCase();
       const compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      if (!q) return compras;
       return compras.filter(item => {
         const codigo = String(item.codigo_reserva || item.codigo_seguimiento || item.id || '').toLowerCase();
         const usuario = String(item.id_usuario || item.usuario_id || item.pasajero || '').toLowerCase();
@@ -756,8 +844,9 @@
       }
 
       actualizarCobroLocal(id, codigo, monto);
+      await actualizarCierreDeCaja();
       mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg);
-      buscarReservaILIKE(null);
+      await buscarReservaILIKE(null);
     }
 
     function actualizarCobroLocal(id, codigo, monto) {
