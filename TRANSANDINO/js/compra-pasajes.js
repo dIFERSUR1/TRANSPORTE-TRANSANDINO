@@ -73,6 +73,14 @@ async function confirmarReserva() {
   const fecha = document.getElementById('fecha')?.value || '2026-10-02';
   const btnReservar = document.getElementById('btn-reservar');
 
+  // Captura el peso de equipaje ingresado por el usuario (revisa varios posibles IDs)
+  const inputEquipaje = document.getElementById('txt-equipaje') || 
+                        document.getElementById('equipaje') || 
+                        document.getElementById('equipaje_kg') ||
+                        document.getElementById('input-equipaje');
+  
+  const equipajeKg = parseFloat(inputEquipaje?.value || 0);
+
   if (seleccionados.length === 0) return;
 
   if (btnReservar) {
@@ -93,13 +101,14 @@ async function confirmarReserva() {
           hora: '09:00 AM',
           asiento: String(asientoNum),
           precio: PRECIO_PASAJE,
+          equipaje_kg: equipajeKg, // 👈 ENVÍA EL PESO DEL EQUIPAJE AL BACKEND
           estado: 'registrado',
           registrado_por: 'Cliente Web'
         })
       });
     }
 
-    alert(`¡Reserva realizada con éxito!\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}\nTotal: S/ ${(seleccionados.length * PRECIO_PASAJE).toFixed(2)}`);
+    alert(`¡Reserva realizada con éxito!\nRuta: ${origen} -> ${destino}\nAsientos: ${seleccionados.join(', ')}\nEquipaje: ${equipajeKg} kg\nTotal: S/ ${(seleccionados.length * PRECIO_PASAJE).toFixed(2)}`);
     
     seleccionados = [];
     actualizarResumen();
