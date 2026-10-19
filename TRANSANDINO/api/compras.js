@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       return res.status(200).json(result.rows);
     }
 
-    // POST: Insertar pasaje (Empleado / Venta Presencial)
+    // POST: Insertar pasaje (Empleado / Venta Presencial / Cliente Web)
     if (req.method === 'POST') {
       const {
         id_usuario,
@@ -57,6 +57,9 @@ export default async function handler(req, res) {
         num_asiento,
         asiento,
         precio,
+        equipaje_kg,
+        equipaje,
+        peso,
         estado,
         codigo_seguimiento
       } = req.body;
@@ -67,12 +70,13 @@ export default async function handler(req, res) {
       const fViaje = fecha_viaje || fecha || '2026-10-15';
       const hViaje = hora_viaje || hora || '08:00 AM';
       const nAsiento = String(num_asiento !== undefined ? num_asiento : (asiento || '1'));
+      const kilosEquipaje = parseFloat(equipaje_kg ?? equipaje ?? peso ?? 0);
       const codSeguimiento = codigo_seguimiento || `TA-${Math.floor(100000 + Math.random() * 900000)}`;
 
       const query = `
         INSERT INTO compras_pasajes 
-        (id_usuario, empleado_atendio, turno, origen, destino, fecha, hora, asiento, precio, estado, codigo_seguimiento)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        (id_usuario, empleado_atendio, turno, origen, destino, fecha, hora, asiento, precio, equipaje_kg, estado, codigo_seguimiento)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING *;
       `;
       const values = [
@@ -85,6 +89,7 @@ export default async function handler(req, res) {
         hViaje,
         nAsiento,
         parseFloat(precio) || 50.00,
+        kilosEquipaje,
         estado || 'registrado',
         codSeguimiento
       ];
@@ -94,7 +99,7 @@ export default async function handler(req, res) {
       return res.status(201).json(result.rows[0]);
     }
 
-    // PUT: Actualizar pasaje (Empleado / Edición)
+    // PUT: Actualizar pasaje (Empleado / Edición / Cobro en Caja)
     if (req.method === 'PUT') {
       const rawId = req.query.id || (req.body && req.body.id);
 
@@ -118,13 +123,17 @@ export default async function handler(req, res) {
         hora_viaje,
         hora,
         empleado_atendio,
-        turno
+        turno,
+        equipaje_kg,
+        equipaje,
+        peso
       } = req.body;
       
       const nuevoAsiento = asiento !== undefined ? asiento : num_asiento;
       const nuevaFecha = fecha_viaje !== undefined ? fecha_viaje : fecha;
       const nuevaHora = hora_viaje !== undefined ? hora_viaje : hora;
       const pasajeroRef = id_usuario !== undefined ? id_usuario : usuario_id;
+      const nuevoEquipaje = equipaje_kg ?? equipaje ?? peso;
 
       let fields = [];
       let values = [];
@@ -169,6 +178,10 @@ export default async function handler(req, res) {
       if (turno !== undefined && turno !== null) {
         fields.push(`turno = $${index++}`);
         values.push(String(turno));
+      }
+      if (nuevoEquipaje !== undefined && nuevoEquipaje !== null) {
+        fields.push(`equipaje_kg = $${index++}`);
+        values.push(parseFloat(nuevoEquipaje));
       }
 
       if (fields.length === 0) {
