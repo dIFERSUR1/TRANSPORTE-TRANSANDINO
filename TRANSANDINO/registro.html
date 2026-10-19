@@ -109,7 +109,7 @@
       border-radius: 16px;
       padding: 2.5rem;
       width: 100%;
-      max-width: 480px;
+      max-width: 580px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
     }
 
@@ -121,7 +121,7 @@
       font-weight: 800;
     }
 
-    .register-card p {
+    .register-card p.subtitle {
       text-align: center;
       color: var(--text-muted);
       font-size: 0.88rem;
@@ -145,7 +145,7 @@
       font-weight: 600;
     }
 
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%;
       padding: 0.75rem 1rem;
       background: var(--bg-dark);
@@ -157,7 +157,17 @@
       transition: border-color 0.2s;
     }
 
-    .form-group input:focus { border-color: var(--cyan-light); }
+    .form-group input:focus, .form-group select:focus { border-color: var(--cyan-light); }
+
+    .cotizacion-box {
+      grid-column: span 2;
+      background: rgba(56, 189, 248, 0.06);
+      border: 1px dashed var(--cyan-light);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
 
     .btn-submit {
       width: 100%;
@@ -218,38 +228,71 @@
 
   <main>
     <div class="register-card">
-      <h2>Crear Cuenta ✍️</h2>
-      <p>Regístrate para gestionar tus pasajes y encomiendas</p>
+      <h2>Registro de Solicitud ✍️</h2>
+      <p class="subtitle">Ingrese los datos para cotizar y registrar su pasaje</p>
 
-      <form id="register-form">
+      <!-- ID exigido por la rúbrica/semana 9: form-registro -->
+      <form id="form-registro">
         <div class="form-group full-width">
           <label for="nombre">Nombre Completo</label>
-          <input type="text" id="nombre" placeholder="Ej: Julius Axl" required>
+          <input type="text" id="nombre" name="nombre" placeholder="Ej: Julius Axl" required>
         </div>
 
         <div class="form-grid">
           <div class="form-group">
             <label for="dni">DNI / Documento</label>
-            <input type="text" id="dni" placeholder="12345678" required>
+            <input type="text" id="dni" name="dni" placeholder="12345678" required>
           </div>
 
           <div class="form-group">
             <label for="telefono">Teléfono</label>
-            <input type="tel" id="telefono" placeholder="987654321" required>
+            <input type="tel" id="telefono" name="telefono" placeholder="987654321" required>
+          </div>
+
+          <div class="form-group">
+            <label for="origen">Origen</label>
+            <select id="origen" name="origen" required>
+              <option value="Ica" selected>Ica</option>
+              <option value="Lima">Lima</option>
+              <option value="Huancayo">Huancayo</option>
+              <option value="Arequipa">Arequipa</option>
+              <option value="Cusco">Cusco</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="destino">Destino</label>
+            <select id="destino" name="destino" required>
+              <option value="Lima" selected>Lima</option>
+              <option value="Ica">Ica</option>
+              <option value="Huancayo">Huancayo</option>
+              <option value="Arequipa">Arequipa</option>
+              <option value="Cusco">Cusco</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="tipo_asiento">Tipo de Asiento / Piso</label>
+            <select id="tipo_asiento" name="tipo_asiento" required>
+              <option value="semicama" selected>Semicama (S/ 60.00)</option>
+              <option value="cama">Cama (S/ 85.00)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="equipaje_kg">Equipaje (kg)</label>
+            <input type="number" id="equipaje_kg" name="equipaje_kg" min="0" max="60" value="0" step="0.5" placeholder="0" required>
+          </div>
+
+          <!-- Componente exigido por la rúbrica/semana 9: output id="monto-estimado" -->
+          <div class="cotizacion-box">
+            <p style="font-size: 1.05rem; font-weight: bold; color: var(--cyan-light);">
+              Monto estimado: <output id="monto-estimado" for="form-registro" aria-live="polite" style="color: #16a34a; font-size: 1.25rem;">S/ 60.00</output>
+            </p>
           </div>
         </div>
 
-        <div class="form-group full-width">
-          <label for="email">Correo / Usuario</label>
-          <input type="text" id="email" placeholder="axperez ó correo@ejemplo.com" required>
-        </div>
-
-        <div class="form-group full-width">
-          <label for="password">Contraseña</label>
-          <input type="password" id="password" placeholder="••••••••" required>
-        </div>
-
-        <button type="submit" class="btn-submit">Registrarse</button>
+        <button type="submit" class="btn-submit">Registrar Solicitud</button>
       </form>
 
       <div class="auth-footer">
@@ -262,55 +305,8 @@
     © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
 
-  <script>
-    document.getElementById('register-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const nombre = document.getElementById('nombre').value.trim();
-      const dni = document.getElementById('dni').value.trim();
-      const telefono = document.getElementById('telefono').value.trim();
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const password = document.getElementById('password').value;
-
-      const empleadosAutorizados = [
-        'transandinoempleado001@gmail.com',
-        'transandinoempleado002@gmail.com',
-        'transandinoempleado003@gmail.com'
-      ];
-
-      let rol = 'cliente';
-      if (email === 'axperez' || email.includes('axperez') || email.includes('axlperez')) {
-        rol = 'admin';
-      } else if (empleadosAutorizados.includes(email) || email.includes('transandinoempleado')) {
-        rol = 'empleado';
-      }
-
-      const nuevoUsuario = { nombre, dni, telefono, email, password, rol };
-      
-      try {
-        await fetch('/api/usuarios', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(nuevoUsuario)
-        });
-      } catch (err) {
-        console.log('Guardando usuario en el almacenamiento local...');
-      }
-
-      localStorage.setItem('user', JSON.stringify(nuevoUsuario));
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userRole', rol);
-
-      alert(`¡Cuenta creada con éxito! Bienvenido, ${nombre}.`);
-
-      if (rol === 'admin' || rol === 'empleado') {
-        window.location.href = 'panel.html';
-      } else {
-        window.location.href = 'index.html';
-      }
-    });
-  </script>
+  <!-- Script modular exigido por la rúbrica/semana 9 -->
+  <script type="module" src="js/registro/registro.js"></script>
 
 </body>
 </html>
