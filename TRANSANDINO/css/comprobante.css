@@ -1,0 +1,167 @@
+:root {
+  --bg-color: #050b14;
+  --card-bg: #0d1626;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --orange-accent: #ea580c;
+  --blue-accent: #0284c7;
+  --cyan-light: #38bdf8;
+  --green-accent: #16a34a;
+  --text-color: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: #030710;
+  padding: 0.8rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--cyan-light);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+main {
+  flex: 1;
+  padding: 2.5rem 1.5rem;
+  max-width: 650px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+h1 {
+  font-size: 1.8rem;
+  color: var(--cyan-light);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+#comprobante {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.voucher-header {
+  text-align: center;
+  border-bottom: 2px dashed var(--border-color);
+  padding-bottom: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.voucher-header h2 { color: #ffffff; font-size: 1.4rem; }
+.voucher-header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem; }
+
+.voucher-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.voucher-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.voucher-item label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.voucher-item span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.voucher-total {
+  border-top: 2px dashed var(--border-color);
+  padding-top: 1.2rem;
+  margin-top: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.voucher-total label { font-size: 1.1rem; font-weight: bold; }
+.voucher-total span { font-size: 1.5rem; font-weight: bold; color: var(--green-accent); }
+
+.acciones {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: center;
+}
+
+.acciones button, .acciones a {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  transition: opacity 0.2s;
+}
+
+#imprimir {
+  background: var(--blue-accent);
+  color: #ffffff;
+}
+
+.acciones a {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+}
+
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  background: #030710;
+  margin-top: auto;
+}
+
+/* Fragmento CSS para impresión limpia */
+@media print {
+  header, nav, footer, .acciones { display: none !important; }
+  body { background: #ffffff !important; color: #000000 !important; }
+  main { padding: 0 !important; max-width: 100% !important; }
+  #comprobante {
+    border: 1px solid #000000 !important;
+    padding: 1.5rem !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+  }
+  .voucher-header h2, .voucher-item span { color: #000000 !important; }
+  .voucher-header p, .voucher-item label { color: #444444 !important; }
+  .voucher-total span { color: #000000 !important; }
+}
