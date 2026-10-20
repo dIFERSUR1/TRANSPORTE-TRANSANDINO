@@ -530,7 +530,9 @@
     <!-- Sección de Resumen Cierre de Caja -->
     <section aria-labelledby="t-resumen">
       <h2 id="t-resumen">Resumen del día (cierre de caja)</h2>
-      <div class="table-container">
+      
+      <!-- Resumen Agrupado por Medio de Pago -->
+      <div class="table-container" style="max-height: none; margin-bottom: 1.2rem;">
         <table id="tabla-resumen">
           <thead>
             <tr>
@@ -550,6 +552,28 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Tabla con Scroll de Movimientos Detallados -->
+      <h3 style="color: var(--cyan-light); font-size: 0.95rem; margin-top: 1rem; margin-bottom: 0.4rem;">📜 Detalle Individual de Movimientos que suman la Recaudación:</h3>
+      <div class="table-container" style="max-height: 250px;">
+        <table id="tabla-detalle-resumen">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Código Reserva</th>
+              <th>Cliente</th>
+              <th>Medio de Pago</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1rem;">Cargando movimientos de cierre...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <p style="margin-top: 1rem; font-size: 1.1rem;">Total recaudado: <strong id="total-dia" style="color: var(--green-accent);">S/ 0.00</strong></p>
     </section>
   </main>
@@ -660,7 +684,6 @@
       await actualizarCierreDeCaja();
     }
 
-    // Calcula y renderiza el Cierre de Caja sumando todos los pasajes pagados
     async function actualizarCierreDeCaja() {
       let todas = [];
       try {
@@ -796,7 +819,19 @@
         
         const fechaRaw = item.fecha_viaje || item.fecha || '';
         const fecha = fechaRaw ? fechaRaw.split('T')[0] : 'N/A';
-        const hora = item.hora_viaje || item.hora || '09:00 AM';
+
+        // Obtener Hora Real de Emisión o Marca de Tiempo de Pago
+        let hora = item.hora_emision || item.hora_registro || item.hora;
+        if (!hora || hora === '09:00 AM') {
+          const fStr = item.fecha_pago || item.created_at;
+          if (fStr) {
+            const d = new Date(fStr);
+            if (!isNaN(d.getTime())) {
+              hora = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            }
+          }
+        }
+        if (!hora) hora = item.hora_viaje || '09:00 AM';
         
         const asiento = item.num_asiento || item.asiento || '-';
         const tipoAsiento = item.tipo_asiento || 'semicama';
@@ -863,7 +898,9 @@
         return;
       }
 
-      const hoyISO = new Date().toISOString().split('T')[0];
+      const ahora = new Date();
+      const horaRealEmision = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      const hoyISO = ahora.toISOString();
 
       try {
         const payload = {
@@ -873,6 +910,7 @@
           metodo_pago: 'EFECTIVO',
           monto_calculado: monto,
           estado: 'PAGADO',
+          hora_emision: horaRealEmision,
           fecha_pago: hoyISO
         };
 
@@ -894,7 +932,10 @@
     }
 
     function actualizarCobroLocal(id, codigo, monto) {
-      const hoyISO = new Date().toISOString().split('T')[0];
+      const ahora = new Date();
+      const horaRealEmision = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      const hoyISO = ahora.toISOString();
+
       let compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
       compras = compras.map(c => {
         if (String(c.id) === String(id) || c.codigo_reserva === codigo || c.codigo_seguimiento === codigo) {
@@ -905,6 +946,7 @@
             monto_calculado: monto,
             precio: monto,
             id_cajero: ID_CAJERO_ACTUAL,
+            hora_emision: horaRealEmision,
             fecha_pago: hoyISO
           };
         }
