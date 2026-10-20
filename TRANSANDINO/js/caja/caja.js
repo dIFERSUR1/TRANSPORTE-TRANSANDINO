@@ -1,4 +1,4 @@
-// js/caja/caja.js — Módulo de Cobranza con Detección Automática de Pasarela
+// js/caja/caja.js — Módulo de Cobranza (Filtro Corregido para Pasarela)
 
 const API_COMPRAS_URL = '/api/compras';
 
@@ -37,24 +37,13 @@ const btnCancelarCobro = document.getElementById('cancelar-cobro');
 let solicitudEnCobro = null;
 let listaCompras = [];
 
-function obtenerFechaFormato(f) {
-  if (!f) return '';
-  if (typeof f === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(f)) return f;
-  const d = new Date(f);
-  if (isNaN(d.getTime())) return String(f).split('T')[0];
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
   const userObj = JSON.parse(localStorage.getItem('user')) || {};
   const emailObj = localStorage.getItem('userEmail');
   const nombreCajero = userObj.nombre || (emailObj ? emailObj.split('@')[0] : 'Cajero Agencia');
   if (elNombreCajero) elNombreCajero.textContent = nombreCajero;
 
-  const hoyStr = obtenerFechaFormato(new Date());
+  const hoyStr = new Date().toISOString().split('T')[0];
   if (inputFechaCaja) {
     inputFechaCaja.value = hoyStr;
     inputFechaCaja.addEventListener('change', renderizarModuloCaja);
@@ -107,7 +96,7 @@ async function cargarDatos() {
     const res = await fetch(API_COMPRAS_URL);
     if (res.ok) dbCompras = await res.json();
   } catch (err) {
-    console.warn('Error fetching API, usando local data...');
+    console.warn('Cargando desde datos locales...');
   }
 
   try {
@@ -238,7 +227,7 @@ async function procesarCobroPresencial(e) {
     }
   }
 
-  const hoyISO = obtenerFechaFormato(new Date());
+  const hoyISO = new Date().toISOString().split('T')[0];
   const payloadUpdate = {
     id: solicitudEnCobro.id,
     estado: 'PAGADO',
@@ -256,7 +245,7 @@ async function procesarCobroPresencial(e) {
       body: JSON.stringify(payloadUpdate)
     });
   } catch (err) {
-    console.log('Actualizando datos en almacenamiento local...');
+    console.log('Actualizando datos locales...');
   }
 
   listaCompras = listaCompras.map(c => {
@@ -273,29 +262,21 @@ async function procesarCobroPresencial(e) {
   renderizarModuloCaja();
 }
 
-// Renderizado de Pagos por Pasarela (Detección flexible de PAGADO en línea)
+// Renderizado de Pagos por Pasarela (Sin bloqueo estricto de fecha)
 function renderizarEnLinea() {
   if (!tablaEnLineaBody) return;
   tablaEnLineaBody.innerHTML = '';
 
-  const fechaFiltro = inputFechaCaja ? inputFechaCaja.value : '';
   const soloVerificar = chkSoloVerificar ? chkSoloVerificar.checked : false;
 
   const enLinea = listaCompras.filter(item => {
     const est = String(item.estado || '').toUpperCase();
-    const metodo = String(item.metodo_pago || item.metodo || '').toUpperCase();
+    const metodo = String(item.metodo_pago || item.metodo || item.referencia_pago || '').toUpperCase();
 
-    // Si está PAGADO y NO fue cobrado presencialmente en caja con EFECTIVO
-    const esOnline = (est === 'PAGADO' || est === 'ATENDIDO') && metodo !== 'EFECTIVO-CAJA';
+    // Filtra todas las compras realizadas en línea (PAGADO/ATENDIDO) que no sean cobro presencial en caja
+    const esOnline = (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO') && metodo !== 'EFECTIVO-CAJA';
 
     if (!esOnline) return false;
-
-    // Comparar con filtro de fecha si se especificó
-    if (fechaFiltro) {
-      const fPago = obtenerFechaFormato(item.fecha_pago || item.created_at || item.fecha_viaje || item.fecha);
-      if (fPago && fPago !== fechaFiltro) return false;
-    }
-
     if (soloVerificar && item.verificado) return false;
 
     return true;
@@ -303,23 +284,38 @@ function renderizarEnLinea() {
 
   if (avisoNuevos) {
     avisoNuevos.textContent = enLinea.length > 0 
-      ? `Se encontraron ${enLinea.length} operaciones en línea.` 
-      : 'No hay operaciones registradas en esta fecha.';
+      ? `Se encontraron ${enLinea.length} operaciones realizadas por la pasarela.` 
+      : 'No hay operaciones en línea registradas.';
   }
 
   if (enLinea.length === 0) {
-    tablaEnLineaBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 1rem;">Sin operaciones en línea para mostrar en esta fecha.</td></tr>';
+    tablaEnLineaBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 1rem;">Sin operaciones en línea para mostrar.</td></tr>';
     return;
   }
 
   enLinea.forEach((item, index) => {
     const tr = document.createElement('tr');
-    const hora = item.fecha_pago ? new Date(item.fecha_pago).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '07:00 PM';
-    const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${100000 + index}`;
+    
+    let hora = '07:08 PM';
+    if (item.fecha_pago) {
+      try {
+        hora = new Date(item.fecha_pago).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch(e) {}
+    } else if (item.hora || item.hora_viaje) {
+      hora = item.hora || item.hora_viaje;
+    }
+
+    const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${100000 + (item.id || index)}`;
     const solicitud = item.codigo_seguimiento || item.codigo_reserva || `TA-${item.id || (1000 + index)}`;
     const cliente = item.registrado_por || item.pasajero || item.id_usuario || 'Cliente Web';
-    const medio = item.metodo_pago || item.metodo || 'TARJETA';
-    const monto = parseFloat(item.monto_calculado || item.precio || 85);
+    let medio = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
+    if (medio === 'EFECTIVO') medio = 'TARJETA';
+
+    let monto = parseFloat(item.monto_calculado || item.precio || 0);
+    if (isNaN(monto) || monto === 0) {
+      const esCama = String(item.tipo_asiento || '').toLowerCase().includes('cama');
+      monto = esCama ? 85 : 60;
+    }
 
     const estadoVerificacion = item.verificado ? '✅ Verificado' : '⏳ Pendiente';
 
@@ -350,9 +346,9 @@ function renderizarResumenCierre() {
   const resumenMap = {};
 
   pagados.forEach(item => {
-    const metodo = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
+    let metodo = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
     let canal = 'Web / Pasarela';
-    if (metodo === 'EFECTIVO-CAJA' || metodo === 'EFECTIVO') canal = 'Agencia';
+    if (metodo === 'EFECTIVO-CAJA') canal = 'Agencia';
 
     const clave = `${canal} - ${metodo}`;
 
