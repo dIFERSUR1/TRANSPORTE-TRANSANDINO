@@ -298,14 +298,8 @@
       flex-wrap: wrap;
     }
 
-    .metodo-opcion {
-      flex: 1;
-      cursor: pointer;
-    }
-
-    .metodo-opcion input {
-      display: none;
-    }
+    .metodo-opcion { flex: 1; cursor: pointer; }
+    .metodo-opcion input { display: none; }
 
     .metodo-caja {
       display: flex;
@@ -320,10 +314,7 @@
       transition: all 0.2s;
     }
 
-    .metodo-caja svg {
-      width: 20px;
-      height: 20px;
-    }
+    .metodo-caja svg { width: 20px; height: 20px; }
 
     .metodo-opcion input:checked + .metodo-caja {
       border-color: var(--cyan-light);
@@ -340,36 +331,67 @@
       margin-top: 1rem;
     }
 
-    /* Estilos para la Tarjeta Vista Interactiva */
+    /* Estilos de la Tarjeta con Animación Giro 3D */
+    .card-preview-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+      perspective: 1000px;
+    }
+
     .tarjeta-vista {
       width: 100%;
       max-width: 320px;
       height: 185px;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .tarjeta-vista.flipped { transform: rotateY(180deg); }
+
+    .tarjeta-cara {
+      position: absolute;
+      width: 100%;
+      height: 100%;
       border-radius: 16px;
       padding: 1.2rem 1.5rem;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      margin: 0 auto 1.5rem auto;
-      color: #ffffff;
-      font-family: 'Courier New', Courier, monospace;
+      backface-visibility: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      position: relative;
+      color: #ffffff;
+      font-family: 'Courier New', Courier, monospace;
       overflow: hidden;
     }
 
-    .tarjeta-vista::after {
-      content: '';
-      position: absolute;
-      right: -30px;
-      top: -30px;
-      width: 150px;
-      height: 150px;
-      background: rgba(56, 189, 248, 0.08);
-      border-radius: 50%;
-      pointer-events: none;
+    .tarjeta-cara.dorso {
+      transform: rotateY(180deg);
+      padding: 1.2rem 0;
+    }
+
+    .banda-magnetica {
+      width: 100%;
+      height: 40px;
+      background: #000000;
+      margin-top: 10px;
+    }
+
+    .cvv-box-display {
+      background: #ffffff;
+      color: #000000;
+      width: 80%;
+      margin: 15px auto 0 auto;
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-align: right;
+      font-weight: bold;
+      letter-spacing: 2px;
+      font-size: 0.95rem;
     }
 
     .vista-chip {
@@ -404,6 +426,32 @@
       font-weight: bold;
       font-style: italic;
       color: var(--cyan-light);
+    }
+
+    /* Caja de Datos de Prueba */
+    .test-cards-box {
+      background: rgba(2, 132, 199, 0.08);
+      border: 1px dashed var(--blue-accent);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .btn-test-fill {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cyan-light);
+      border: 1px solid var(--cyan-light);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-test-fill:hover {
+      background: var(--blue-accent);
+      color: #ffffff;
     }
 
     footer {
@@ -532,7 +580,7 @@
         <div class="seats-grid" id="seats-grid"></div>
       </div>
 
-      <!-- HU-22.10 / HU-22.11 / HU-22.12: Pasarela de Pago con Selección por Radios -->
+      <!-- Pasarela de Pago con Selección por Radio Buttons -->
       <div class="pago-seccion">
         <h3 style="font-size: 1.1rem; color: var(--cyan-light); margin-bottom: 0.8rem;">💳 Método de Pago</h3>
         
@@ -562,18 +610,46 @@
           </div>
         </fieldset>
 
-        <!-- Formulario e Previsualización de Tarjeta (Snippet Integrado) -->
+        <!-- Formulario y Previsualización de Tarjeta con Datos de Prueba -->
         <div id="pago-tarjeta-box" class="pago-metodo-box">
           
-          <!-- Elemento vista-tarjeta del fragmento proporcionado -->
-          <div id="vista-tarjeta" class="tarjeta-vista" data-marca="" aria-hidden="true">
-            <span class="vista-chip"></span>
-            <span class="vista-numero" id="vista-numero">•••• •••• •••• ••••</span>
-            <span class="vista-pie">
-              <span id="vista-titular">NOMBRE DEL TITULAR</span>
-              <span id="vista-venc">MM/AA</span>
-              <span class="vista-marca" id="vista-marca">VISA</span>
-            </span>
+          <div class="test-cards-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <strong style="font-size: 0.85rem; color: var(--cyan-light);">🧪 Tarjetas de Prueba (Entorno de Simulación):</strong>
+              <div style="display: flex; gap: 0.4rem;">
+                <button type="button" class="btn-test-fill" onclick="cargarTarjetaPrueba('visa')">⚡ Cargar Visa</button>
+                <button type="button" class="btn-test-fill" onclick="cargarTarjetaPrueba('mastercard')">⚡ Cargar Mastercard</button>
+              </div>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted);">
+              • Visa: <code>4557 9846 8789 7789</code> | Venc: <code>12/28</code> | CVV: <code>123</code><br>
+              • Mastercard: <code>5500 1234 5678 9010</code> | Venc: <code>10/29</code> | CVV: <code>456</code>
+            </p>
+          </div>
+
+          <!-- Elemento vista-tarjeta 3D -->
+          <div class="card-preview-container">
+            <div id="vista-tarjeta" class="tarjeta-vista">
+              <!-- Frente -->
+              <div class="tarjeta-cara frente">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div class="vista-chip"></div>
+                  <span class="vista-marca" id="vista-marca">VISA</span>
+                </div>
+                <div class="vista-numero" id="vista-numero">•••• •••• •••• ••••</div>
+                <div class="vista-pie">
+                  <span id="vista-titular">NOMBRE DEL TITULAR</span>
+                  <span id="vista-venc">MM/AA</span>
+                </div>
+              </div>
+
+              <!-- Dorso (Gira al enfocar CVV) -->
+              <div class="tarjeta-cara dorso">
+                <div class="banda-magnetica"></div>
+                <div style="padding: 0 1.5rem; font-size: 0.7rem; color: #94a3b8; text-align: right; margin-top: 8px;">CÓDIGO DE SEGURIDAD</div>
+                <div class="cvv-box-display" id="vista-cvv">•••</div>
+              </div>
+            </div>
           </div>
 
           <div class="form-group" style="margin-bottom: 0.8rem;">
@@ -583,30 +659,36 @@
 
           <div class="form-group" style="margin-bottom: 0.8rem;">
             <label for="tarjeta_titular">Nombre del titular</label>
-            <input type="text" id="tarjeta_titular" placeholder="EJ. JUAN PEREZ" oninput="actualizarTarjetaVista()">
+            <input type="text" id="tarjeta_titular" placeholder="EJ. JUAN CARLOS PEREZ" oninput="actualizarTarjetaVista()">
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
             <div class="form-group">
               <label for="tarjeta_exp">Vencimiento (MM/AA)</label>
-              <input type="text" id="tarjeta_exp" placeholder="MM/AA" maxlength="5" oninput="actualizarTarjetaVista()">
+              <input type="text" id="tarjeta_exp" placeholder="12/28" maxlength="5" oninput="actualizarTarjetaVista()">
             </div>
             <div class="form-group">
               <label for="tarjeta_cvv">CVV</label>
-              <input type="password" id="tarjeta_cvv" placeholder="123" maxlength="4">
+              <input type="password" id="tarjeta_cvv" placeholder="123" maxlength="4" oninput="actualizarTarjetaVista()">
             </div>
           </div>
         </div>
 
-        <!-- Campos para Billetera Electrónica -->
+        <!-- Campos para Billetera Electrónica con autofill -->
         <div id="pago-billetera-box" class="pago-metodo-box" style="display: none;">
+          <div class="test-cards-box" style="margin-bottom: 0.8rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.85rem; color: var(--cyan-light);">📱 Datos de Prueba Yape / Plin:</strong>
+              <button type="button" class="btn-test-fill" onclick="cargarBilleteraPrueba()">⚡ Cargar Yape</button>
+            </div>
+          </div>
           <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label for="billetera_celular">Número celular asociado (Yape / Plin / AndiPay)</label>
+            <label for="billetera_celular">Número celular asociado (Yape / Plin)</label>
             <input type="text" id="billetera_celular" maxlength="9" placeholder="987654321">
           </div>
           <div class="form-group">
-            <label for="billetera_token">Código de aprobación (6 dígitos)</label>
-            <input type="text" id="billetera_token" maxlength="6" placeholder="Ej. 849201">
+            <label for="billetera_token">Código de aprobación / Token (6 dígitos)</label>
+            <input type="text" id="billetera_token" maxlength="6" placeholder="Ej. 123456">
           </div>
         </div>
 
@@ -636,16 +718,37 @@
 
     let seleccionados = [];
 
-    // Actualizador dinámico de la vista previa de tarjeta
+    window.cargarTarjetaPrueba = function(tipo) {
+      if (tipo === 'visa') {
+        document.getElementById('tarjeta_numero').value = '4557 9846 8789 7789';
+        document.getElementById('tarjeta_titular').value = 'JUAN CARLOS PEREZ';
+        document.getElementById('tarjeta_exp').value = '12/28';
+        document.getElementById('tarjeta_cvv').value = '123';
+      } else if (tipo === 'mastercard') {
+        document.getElementById('tarjeta_numero').value = '5500 1234 5678 9010';
+        document.getElementById('tarjeta_titular').value = 'MARIA LOPEZ GARCIA';
+        document.getElementById('tarjeta_exp').value = '10/29';
+        document.getElementById('tarjeta_cvv').value = '456';
+      }
+      window.actualizarTarjetaVista();
+    };
+
+    window.cargarBilleteraPrueba = function() {
+      document.getElementById('billetera_celular').value = '987654321';
+      document.getElementById('billetera_token').value = '123456';
+    };
+
     window.actualizarTarjetaVista = function() {
       const inputNum = document.getElementById('tarjeta_numero');
       const inputTitular = document.getElementById('tarjeta_titular');
       const inputExp = document.getElementById('tarjeta_exp');
+      const inputCvv = document.getElementById('tarjeta_cvv');
 
       const vistaNum = document.getElementById('vista-numero');
       const vistaTitular = document.getElementById('vista-titular');
       const vistaVenc = document.getElementById('vista-venc');
       const vistaMarca = document.getElementById('vista-marca');
+      const vistaCvv = document.getElementById('vista-cvv');
 
       if (inputNum && vistaNum) {
         let val = inputNum.value.replace(/\D/g, '').substring(0, 16);
@@ -659,7 +762,7 @@
           if (val.startsWith('4')) vistaMarca.textContent = 'VISA';
           else if (val.startsWith('5')) vistaMarca.textContent = 'MASTERCARD';
           else if (val.startsWith('3')) vistaMarca.textContent = 'AMEX';
-          else vistaMarca.textContent = 'TARJETA';
+          else vistaMarca.textContent = 'VISA / MC';
         }
       }
 
@@ -674,6 +777,10 @@
         }
         inputExp.value = valExp;
         vistaVenc.textContent = valExp || 'MM/AA';
+      }
+
+      if (inputCvv && vistaCvv) {
+        vistaCvv.textContent = inputCvv.value.trim() || '•••';
       }
     };
 
@@ -785,6 +892,13 @@
             : ''}
           <button onclick="cerrarSesion()" class="btn-logout-red">Cerrar Sesión</button>
         `;
+      }
+
+      const inputCvv = document.getElementById('tarjeta_cvv');
+      const tarjetaVista = document.getElementById('vista-tarjeta');
+      if (inputCvv && tarjetaVista) {
+        inputCvv.addEventListener('focus', () => tarjetaVista.classList.add('flipped'));
+        inputCvv.addEventListener('blur', () => tarjetaVista.classList.remove('flipped'));
       }
 
       window.actualizarCotizacion();
