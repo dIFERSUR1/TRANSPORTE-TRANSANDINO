@@ -906,6 +906,7 @@
       await cargarAsientos();
     });
 
+    // Carga e integra asientos ocupados combinando API + LocalStorage
     async function cargarAsientos() {
       const grid = document.getElementById('seats-grid');
       const seccion = document.getElementById('seccion-asientos');
@@ -918,37 +919,44 @@
       seleccionados = [];
       window.actualizarResumen();
 
-      let ocupados = [];
+      let dbCompras = [];
+      let localCompras = [];
+
       try {
         const res = await fetch('/api/compras');
-        let compras = [];
         if (res.ok) {
-          compras = await res.json();
-        } else {
-          compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+          dbCompras = await res.json();
         }
-
-        compras.forEach(c => {
-          const cOrigen = (c.origen || '').trim().toLowerCase();
-          const cDestino = (c.destino || '').trim().toLowerCase();
-          const cFecha = c.fecha_viaje || c.fecha || '';
-          if (cOrigen === origen && cDestino === destino && cFecha.startsWith(fecha)) {
-            if (c.asiento) ocupados.push(parseInt(c.asiento));
-            if (c.num_asiento) ocupados.push(parseInt(c.num_asiento));
-          }
-        });
       } catch (err) {
-        const compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-        compras.forEach(c => {
-          const cOrigen = (c.origen || '').trim().toLowerCase();
-          const cDestino = (c.destino || '').trim().toLowerCase();
-          const cFecha = c.fecha_viaje || c.fecha || '';
+        console.warn('Servidor API no disponible al consultar asientos.');
+      }
+
+      try {
+        localCompras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      } catch (e) {
+        localCompras = [];
+      }
+
+      // Une ambas fuentes de compras sin descartar la memoria local
+      const todasLasCompras = [...(Array.isArray(dbCompras) ? dbCompras : []), ...(Array.isArray(localCompras) ? localCompras : [])];
+
+      let ocupados = [];
+      todasLasCompras.forEach(c => {
+        const cOrigen = (c.origen || '').trim().toLowerCase();
+        const cDestino = (c.destino || '').trim().toLowerCase();
+        const cFecha = c.fecha_viaje || c.fecha || '';
+        const cEstado = String(c.estado || '').toUpperCase();
+
+        if (cEstado !== 'CANCELADO' && cEstado !== 'ANULADO') {
           if (cOrigen === origen && cDestino === destino && cFecha.startsWith(fecha)) {
             if (c.asiento) ocupados.push(parseInt(c.asiento));
             if (c.num_asiento) ocupados.push(parseInt(c.num_asiento));
           }
-        });
-      }
+        }
+      });
+
+      // Filtra números duplicados
+      ocupados = [...new Set(ocupados)];
 
       grid.innerHTML = '';
       for (let i = 1; i <= 40; i++) {
@@ -968,7 +976,7 @@
       }
     }
 
-    // Procesa la reserva capturando la hora real y exacta del sistema al confirmar
+    // Procesa y guarda la reserva asignando ID único y sincronizando LocalStorage
     window.confirmarReserva = async function() {
       if (seleccionados.length === 0) {
         alert('Por favor, seleccione al menos un asiento.');
@@ -1007,7 +1015,6 @@
       const cot = window.calcularCotizacionUnitario();
       const userName = localStorage.getItem('userName') || localStorage.getItem('userEmail') || 'Cliente Web';
 
-      // Hora Real Exacta de Emisión
       const fechaAhora = new Date();
       const horaRealEmision = fechaAhora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
       const hoyISO = fechaAhora.toISOString();
@@ -1023,10 +1030,12 @@
 
       for (let i = 0; i < seleccionados.length; i++) {
         const asientoNum = seleccionados[i];
-        const randomId = Math.floor(100000 + Math.random() * 900000);
-        const codigoReserva = `TA-${randomId}`;
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        const codigoReserva = `TA-${randomNum}`;
+        const idUnico = Date.now() + i;
 
         const payload = {
+          id: idUnico,
           id_usuario: userName,
           pasajero: userName,
           registrado_por: userName,
@@ -1059,13 +1068,14 @@
         };
 
         try {
-          await fetch('/api/compras', {
+          const res = await fetch('/api/compras', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+          if (!res.ok) console.warn('Respuesta API no OK, respaldando en LocalStorage.');
         } catch (err) {
-          console.warn('Guardando cobro en LocalStorage...');
+          console.warn('Servidor no disponible, respaldando cobro en LocalStorage...');
         }
 
         nuevasCompras.push(payload);
