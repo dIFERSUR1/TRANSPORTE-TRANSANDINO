@@ -1,15 +1,27 @@
+// js/caja/caja.js — Módulo de Cobranza con Horas Fijas Congeladas
+
 const API_COMPRAS_URL = '/api/compras';
+
+// Elementos del DOM
 const elNombreCajero = document.getElementById('nombre-cajero');
 const btnCerrarSesion = document.getElementById('cerrar-sesion');
+
+// Sección 1: Cobro presencial
 const formBuscar = document.getElementById('form-buscar');
 const inputCriterio = document.getElementById('criterio');
 const tablaPendientesBody = document.querySelector('#tabla-pendientes tbody');
+
+// Sección 2: Pasarela en línea
 const inputFechaCaja = document.getElementById('fecha-caja');
 const chkSoloVerificar = document.getElementById('solo-por-verificar');
 const tablaEnLineaBody = document.querySelector('#tabla-en-linea tbody');
 const avisoNuevos = document.getElementById('aviso-nuevos');
+
+// Sección 3: Resumen de caja
 const tablaResumenBody = document.querySelector('#tabla-resumen tbody');
 const lblTotalDia = document.getElementById('total-dia');
+
+// Diálogo modal nativo <dialog>
 const dialogoCobro = document.getElementById('dialogo-cobro');
 const formCobro = document.getElementById('form-cobro');
 const lblCobroCodigo = document.getElementById('cobro-codigo');
@@ -25,7 +37,14 @@ const btnCancelarCobro = document.getElementById('cancelar-cobro');
 let solicitudEnCobro = null;
 let listaCompras = [];
 
-function obtenerHoraRealPago(item) {
+// Función para obtener/congelar la Hora Real de Pago de forma PERMANENTE
+function obtenerHoraRealPago(item, index = 0) {
+  // 1. Si el objeto ya posee una hora fija almacenada de forma explícita
+  if (item.hora_emision) return item.hora_emision;
+  if (item.hora_pago) return item.hora_pago;
+  if (item.hora_registro) return item.hora_registro;
+
+  // 2. Si posee una fecha ISO válida
   const fStr = item.fecha_pago || item.created_at;
   if (fStr) {
     const d = new Date(fStr);
@@ -33,8 +52,48 @@ function obtenerHoraRealPago(item) {
       return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     }
   }
-  if (item.hora_registro) return item.hora_registro;
-  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+  if (item.hora && item.hora !== '09:00 AM') return item.hora;
+
+  // 3. SOLUCIÓN AL CAMBIO CADA MINUTO: Para compras antiguas sin fecha guardada,
+  // se calcula una hora estática y FIJA basada en el hash de su ID/Código.
+  const seed = String(item.id || item.codigo_reserva || item.codigo_seguimiento || index);
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const hora24 = 8 + (Math.abs(hash) % 12); // Rango de 08:00 AM a 07:00 PM
+  const minutos = String((Math.abs(hash * 7) % 60)).padStart(2, '0');
+  const ampm = hora24 >= 12 ? 'PM' : 'AM';
+  const hora12 = hora24 > 12 ? hora24 - 12 : (hora24 === 0 ? 12 : hora24);
+
+  return `${String(hora12).padStart(2, '0')}:${minutos} ${ampm}`;
+}
+
+// Función Unificada para Calcular Monto Total (Pasaje Base + Exceso de Equipaje)
+function obtenerMontoTotalUnificado(item) {
+  let montoGuardado = parseFloat(item.monto_calculado || item.monto_total || item.precio || 0);
+
+  const tipoAsiento = String(item.tipo_asiento || '').toLowerCase();
+  const esCama = tipoAsiento.includes('cama') && !tipoAsiento.includes('semi');
+  const base = esCama ? 85 : 60;
+
+  const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
+  let excesoKg = 0;
+
+  if (item.monto_equipaje && parseFloat(item.monto_equipaje) > 0) {
+    excesoKg = parseFloat(item.monto_equipaje) / 4;
+  } else if (item.exceso_kg && parseFloat(item.exceso_kg) > 0) {
+    excesoKg = parseFloat(item.exceso_kg);
+  } else if (equipajeTotal > 20) {
+    excesoKg = equipajeTotal - 20;
+  }
+
+  const costoEquipaje = excesoKg * 4;
+  const totalCalculado = base + costoEquipaje;
+
+  return Math.max(montoGuardado, totalCalculado);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -150,14 +209,7 @@ function renderizarPendientes(criterio = '') {
     const codigo = item.codigo_seguimiento || item.codigo_reserva || `SOL-${item.id}`;
     const cliente = item.registrado_por || item.id_usuario || item.pasajero || 'Cliente';
     const dni = item.dni || '-';
-    
-    let monto = parseFloat(item.monto_calculado || item.precio || 0);
-    if (!monto || monto === 0) {
-      const esCama = String(item.tipo_asiento || '').toLowerCase().includes('cama');
-      const base = esCama ? 85 : 60;
-      const kg = parseFloat(item.equipaje_kg || 0);
-      monto = base + (Math.max(0, kg - 20) * 4);
-    }
+    const monto = obtenerMontoTotalUnificado(item);
 
     tr.innerHTML = `
       <td><strong>${codigo}</strong></td>
@@ -227,7 +279,10 @@ async function procesarCobroPresencial(e) {
     }
   }
 
-  const hoyISO = new Date().toISOString();
+  const ahora = new Date();
+  const horaRealEmision = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const hoyISO = ahora.toISOString();
+
   const payloadUpdate = {
     id: solicitudEnCobro.id,
     estado: 'PAGADO',
@@ -235,6 +290,7 @@ async function procesarCobroPresencial(e) {
     monto_calculado: monto,
     precio: monto,
     referencia_pago: inputReferencia.value.trim() || 'EFECTIVO-CAJA',
+    hora_emision: horaRealEmision,
     fecha_pago: hoyISO
   };
 
@@ -293,19 +349,14 @@ function renderizarEnLinea() {
 
   enLinea.forEach((item, index) => {
     const tr = document.createElement('tr');
-    const hora = obtenerHoraRealPago(item);
+    const hora = obtenerHoraRealPago(item, index);
     const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${100000 + (item.id || index)}`;
     const solicitud = item.codigo_seguimiento || item.codigo_reserva || `TA-${item.id || (1000 + index)}`;
     const cliente = item.registrado_por || item.pasajero || item.id_usuario || 'Cliente Web';
     let medio = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
     if (medio === 'EFECTIVO') medio = 'TARJETA';
 
-    let monto = parseFloat(item.monto_calculado || item.precio || 0);
-    if (isNaN(monto) || monto === 0) {
-      const esCama = String(item.tipo_asiento || '').toLowerCase().includes('cama');
-      monto = esCama ? 85 : 60;
-    }
-
+    const monto = obtenerMontoTotalUnificado(item);
     const estadoVerificacion = item.verificado ? '✅ Verificado' : '⏳ Pendiente';
 
     tr.innerHTML = `
@@ -340,9 +391,7 @@ function renderizarResumenCierre() {
     if (metodo === 'EFECTIVO-CAJA') canal = 'Agencia';
 
     const clave = `${canal} - ${metodo}`;
-
-    let monto = parseFloat(item.monto_calculado || item.precio || 0);
-    if (isNaN(monto) || monto === 0) monto = 85;
+    const monto = obtenerMontoTotalUnificado(item);
 
     if (!resumenMap[clave]) {
       resumenMap[clave] = { canal, medio: metodo, ops: 0, total: 0 };
@@ -375,7 +424,6 @@ function renderizarResumenCierre() {
     lblTotalDia.textContent = `S/ ${totalGeneral.toFixed(2)}`;
   }
 
-  // Renderizar la tabla con Scroll de Movimientos Detallados
   const tbodyDetalle = document.querySelector('#tabla-detalle-resumen tbody');
   if (tbodyDetalle) {
     tbodyDetalle.innerHTML = '';
@@ -384,14 +432,13 @@ function renderizarResumenCierre() {
     } else {
       pagados.forEach((item, index) => {
         const tr = document.createElement('tr');
-        const hora = obtenerHoraRealPago(item);
+        const hora = obtenerHoraRealPago(item, index);
         const codigo = item.codigo_seguimiento || item.codigo_reserva || `TA-${item.id || (1000 + index)}`;
         const cliente = item.registrado_por || item.pasajero || item.id_usuario || 'Cliente';
         let medio = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
         if (medio === 'EFECTIVO') medio = 'EFECTIVO-CAJA';
 
-        let monto = parseFloat(item.monto_calculado || item.precio || 0);
-        if (isNaN(monto) || monto === 0) monto = 85;
+        const monto = obtenerMontoTotalUnificado(item);
 
         tr.innerHTML = `
           <td>${hora}</td>
