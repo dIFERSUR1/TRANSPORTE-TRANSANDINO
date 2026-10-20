@@ -516,7 +516,7 @@
 
           <div class="form-group">
             <label for="fecha">Fecha de Viaje</label>
-            <input type="date" id="fecha" value="2026-10-20" required>
+            <input type="date" id="fecha" value="2026-10-31" required>
           </div>
         </div>
 
@@ -702,9 +702,11 @@
   <script>
     let seleccionados = [];
 
+    // Limpia cadenas de fecha descartando horas o formato ISO
     function normalizarFecha(str) {
       if (!str) return '';
       str = String(str).trim();
+      if (str.includes(' ')) str = str.split(' ')[0];
       if (str.includes('T')) str = str.split('T')[0];
       if (str.includes('/')) {
         const parts = str.split('/');
@@ -714,6 +716,16 @@
         }
       }
       return str;
+    }
+
+    // Extrae los números de asiento de textos como "N° 3 (semicama)", "37, 38, 39", etc.
+    function extraerNumerosAsiento(val) {
+      if (val === undefined || val === null) return [];
+      if (typeof val === 'number') return [val];
+      const str = String(val);
+      const matches = str.match(/\d+/g);
+      if (!matches) return [];
+      return matches.map(n => parseInt(n, 10)).filter(n => n >= 1 && n <= 40);
     }
 
     window.cargarTarjetaPrueba = function(tipo) {
@@ -911,139 +923,158 @@
       const grid = document.getElementById('seats-grid');
       const seccion = document.getElementById('seccion-asientos');
       const fechaSel = normalizarFecha(document.getElementById('fecha').value);
+      const origenSel = document.getElementById('origen').value;
+      const destinoSel = document.getElementById('destino').value;
 
       grid.innerHTML = '<p style="grid-column: span 4; text-align: center; color: var(--cyan-light);">Cargando asientos...</p>';
       seccion.style.display = 'block';
       seleccionados = [];
       window.actualizarResumen();
 
-      let dbCompras = [];
-      let localCompras = [];
+      let todasLasCompras = [];
 
+      // 1. Cargar desde la API / BD
       try {
         const res = await fetch('/api/compras');
-        if (res.ok) dbCompras = await res.json();
-      } catch (e) {}
+        if (res.ok) {
+          const dbCompras = await res.json();
+          if (Array.isArray(dbCompras)) todasLasCompras.push(...dbCompras);
+        }
+      } catch (e) {
+        console.warn('API backend no disponible.');
+      }
 
+      // 2. Cargar desde LocalStorage
       const keysPosibles = ['compras_pasajes', 'reservas', 'mis_reservas', 'compras', 'pasajes', 'reservaActual'];
       keysPosibles.forEach(k => {
         try {
           const val = JSON.parse(localStorage.getItem(k));
           if (Array.isArray(val)) {
-            val.forEach(item => { if (item && typeof item === 'object') localCompras.push(item); });
+            todasLasCompras.push(...val);
           } else if (val && typeof val === 'object') {
-            localCompras.push(val);
+            todasLasCompras.push(val);
           }
         } catch (e) {}
       });
 
-      const mapa = new Map();
-      if (Array.isArray(dbCompras)) {
-        dbCompras.forEach(item => {
-          const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '');
-          if (key) mapa.set(key, item);
-        });
-      }
-
-      localCompras.forEach(item => {
-        const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '');
-        if (key) {
-          const existente = mapa.get(key) || {};
-          mapa.set(key, { ...existente, ...item });
-        }
-      });
-
-      const todas = Array.from(mapa.values());
-
       const asientosOcupados = new Set();
-      todas.forEach(item => {
-        const fItem = normalizarFecha(item.fecha_viaje || item.fecha);
-        if (fItem === fechaSel) {
-          const numSeat = parseInt(item.num_asiento || item.asiento, 10);
-          if (!isNaN(numSeat)) asientosOcupados.add(numSeat);
+
+      // 3. Filtrar reservas que correspondan a la fecha y ruta seleccionadas
+      todasLasCompras.forEach(item => {
+        if (!item) return;
+
+        const itemFecha = normalizarFecha(item.fecha || item.fecha_viaje || item.fecha_hora);
+        
+        let itemOrigen = item.origen;
+        let itemDestino = item.destino;
+        if ((!itemOrigen || !itemDestino) && item.ruta) {
+          const partes = item.ruta.split(/->|-|a/).map(s => s.trim());
+          if (partes.length >= 2) {
+            itemOrigen = itemOrigen || partes[0];
+            itemDestino = itemDestino || partes[1];
+          }
+        }
+
+        const coincideFecha = !itemFecha || itemFecha === fechaSel;
+        const coincideOrigen = !itemOrigen || itemOrigen === origenSel;
+        const coincideDestino = !itemDestino || itemDestino === destinoSel;
+
+        if (coincideFecha && coincideOrigen && coincideDestino) {
+          // Extraer cualquier número presente en 'asiento', 'asientos', 'asiento_piso', etc.
+          const valAsiento = item.asiento !== undefined ? item.asiento : (item.asientos !== undefined ? item.asientos : item.asiento_piso);
+          const listaNumeros = extraerNumerosAsiento(valAsiento);
+          listaNumeros.forEach(num => asientosOcupados.add(num));
         }
       });
 
+      // 4. Dibujar los 40 asientos
       grid.innerHTML = '';
       for (let i = 1; i <= 40; i++) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.textContent = i;
-        btn.dataset.asiento = i;
+        btn.className = 'seat-btn';
 
         if (asientosOcupados.has(i)) {
-          btn.className = 'seat-btn ocupado';
+          btn.classList.add('ocupado');
           btn.disabled = true;
         } else {
-          btn.className = 'seat-btn disponible';
+          btn.classList.add('disponible');
           btn.onclick = () => window.toggleAsiento(i, btn);
         }
+
         grid.appendChild(btn);
       }
     }
 
     async function confirmarReserva() {
       if (seleccionados.length === 0) {
-        alert('Por favor seleccione al menos un asiento.');
+        alert('Por favor, selecciona al menos un asiento.');
         return;
       }
 
-      const radioSeleccionado = document.querySelector('input[name="metodo"]:checked');
-      const metodo = radioSeleccionado ? radioSeleccionado.value : 'tarjeta';
-      
       const origen = document.getElementById('origen').value;
       const destino = document.getElementById('destino').value;
-      const fechaSel = normalizarFecha(document.getElementById('fecha').value);
+      const fecha = normalizarFecha(document.getElementById('fecha').value);
       const tipoAsiento = document.getElementById('tipo_asiento').value;
       const equipajeKg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
+      
       const cot = window.calcularCotizacionUnitario();
+      const metodoRadio = document.querySelector('input[name="metodo"]:checked');
+      const metodoPago = metodoRadio ? metodoRadio.value : 'tarjeta';
+      const estadoReserva = (metodoPago === 'efectivo') ? 'PENDIENTE' : 'PAGADO';
+      
+      const codigoReserva = 'TA-' + Math.floor(100000 + Math.random() * 900000);
+      const usuarioEmail = localStorage.getItem('userEmail') || 'invitado@transandino.pe';
+      
+      const reservasNuevas = seleccionados.map(numAsiento => ({
+        codigo: codigoReserva,
+        origen: origen,
+        destino: destino,
+        fecha: fecha,
+        asiento: numAsiento,
+        tipo_asiento: tipoAsiento,
+        equipaje_kg: equipajeKg,
+        monto: cot.totalUnitario,
+        metodo_pago: metodoPago,
+        estado: estadoReserva,
+        email_usuario: usuarioEmail,
+        fecha_creacion: new Date().toISOString()
+      }));
 
-      const userName = localStorage.getItem('userName') || localStorage.getItem('userEmail') || 'Pasajero General';
-      const userDni = localStorage.getItem('userDni') || '12345678';
+      let guardadoEnBD = false;
 
-      const codigoGen = `TA-${Math.floor(100000 + Math.random() * 900000)}`;
-      const estadoPago = (metodo === 'efectivo') ? 'PENDIENTE' : 'PAGADO';
-      const metodoPagoStr = (metodo === 'tarjeta') ? 'TARJETA' : ((metodo === 'billetera') ? 'YAPE/PLIN' : 'EFECTIVO-CAJA');
+      try {
+        const res = await fetch('/api/compras', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reservasNuevas)
+        });
 
-      let comprasExistentes = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      if (!Array.isArray(comprasExistentes)) comprasExistentes = [];
-
-      for (const numSeat of seleccionados) {
-        const nuevaReserva = {
-          id: Date.now() + Math.floor(Math.random() * 1000),
-          codigo_reserva: codigoGen,
-          codigo_seguimiento: codigoGen,
-          pasajero: userName,
-          dni: userDni,
-          origen: origen,
-          destino: destino,
-          fecha_viaje: fechaSel,
-          fecha: fechaSel,
-          num_asiento: numSeat,
-          asiento: numSeat,
-          tipo_asiento: tipoAsiento,
-          equipaje_kg: equipajeKg,
-          monto_calculado: cot.totalUnitario,
-          precio: cot.totalUnitario,
-          estado: estadoPago,
-          metodo_pago: metodoPagoStr,
-          fecha_pago: new Date().toISOString()
-        };
-
-        comprasExistentes.push(nuevaReserva);
-
-        try {
-          await fetch('/api/compras', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevaReserva)
-          });
-        } catch (err) {}
+        if (res.ok) {
+          guardadoEnBD = true;
+        } else {
+          console.error('Error al guardar en BD:', res.status);
+        }
+      } catch (error) {
+        console.error('Error enviando reserva a BD:', error);
       }
 
-      localStorage.setItem('compras_pasajes', JSON.stringify(comprasExistentes));
+      try {
+        let comprasLocales = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+        if (!Array.isArray(comprasLocales)) comprasLocales = [];
+        comprasLocales.push(...reservasNuevas);
+        localStorage.setItem('compras_pasajes', JSON.stringify(comprasLocales));
+      } catch (e) {
+        console.error('Error al guardar en localStorage:', e);
+      }
+
+      let msj = `¡Reserva realizada con éxito!\nCódigo: ${codigoReserva}\nEstado: ${estadoReserva}`;
+      if (!guardadoEnBD) {
+        msj += '\n\n⚠️ Nota: No se pudo conectar con la base de datos remota. La reserva se guardó localmente en su navegador.';
+      }
       
-      alert(`¡Reserva realizada con éxito!\nCódigo: ${codigoGen}\nEstado: ${estadoPago}`);
+      alert(msj);
       await cargarAsientos();
     }
   </script>
