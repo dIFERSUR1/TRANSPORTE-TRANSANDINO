@@ -647,7 +647,6 @@
     let ID_CAJERO_ACTUAL = 101;
     let NOMBRE_CAJERO_ACTUAL = 'Cajero Agencia';
 
-    // Obtener el precio real de cada registro
     function obtenerMontoReal(item) {
       let montoDirecto = parseFloat(item.monto_calculado || item.monto_total || item.monto || item.precio_total || 0);
       
@@ -706,7 +705,6 @@
       return `${String(hora12).padStart(2, '0')}:${minutos} ${ampm}`;
     }
 
-    // COMBINA API + TODAS LAS CLAVES DE LOCALSTORAGE Y PRIORIZA LAS RECIÉN CREADAS ARRIBA
     async function obtenerTodasLasComprasUnificadas() {
       let dbCompras = [];
       let localCompras = [];
@@ -721,7 +719,6 @@
         console.warn('API no disponible, leyendo LocalStorage...');
       }
 
-      // Buscar reservas en todas las posibles claves de LocalStorage
       const keysPosibles = ['compras_pasajes', 'reservas', 'mis_reservas', 'compras', 'pasajes', 'reservaActual', 'tickets'];
       
       keysPosibles.forEach(k => {
@@ -730,52 +727,49 @@
           if (Array.isArray(val)) {
             val.forEach(item => {
               if (item && typeof item === 'object') {
-                localCompras.push({ ...item, _esLocal: true });
+                localCompras.push(item);
               }
             });
           } else if (val && typeof val === 'object') {
-            localCompras.push({ ...val, _esLocal: true });
+            localCompras.push(val);
           }
         } catch (e) {}
       });
 
       const mapa = new Map();
 
-      // 1. Agregar registros de la base de datos
+      // 1. Cargar registros de la base de datos
       dbCompras.forEach(item => {
-        const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || Math.random());
-        mapa.set(key, { ...item, _esLocal: false });
+        const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '');
+        if (key) mapa.set(key, item);
       });
 
-      // 2. Agregar o fusionar los de LocalStorage (reservas recién creadas)
+      // 2. Fusionar datos de LocalStorage preservando datos de asientos
       localCompras.forEach(item => {
-        const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || `local_${Math.random()}`);
-        const existente = mapa.get(key) || {};
-        mapa.set(key, { ...existente, ...item, _esLocal: true });
+        const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '');
+        if (key) {
+          const existente = mapa.get(key) || {};
+          mapa.set(key, { ...existente, ...item });
+        }
       });
 
       const lista = Array.from(mapa.values());
 
-      // ORDENAR: Las reservas locales/nuevas siempre aparecen PRIMERO (arriba de todo)
       lista.sort((a, b) => {
-        if (a._esLocal && !b._esLocal) return -1;
-        if (!a._esLocal && b._esLocal) return 1;
+        const estA = String(a.estado || '').toUpperCase();
+        const estB = String(b.estado || '').toUpperCase();
+        const esPendA = (estA === 'PENDIENTE' || estA === 'REGISTRADO');
+        const esPendB = (estB === 'PENDIENTE' || estB === 'REGISTRADO');
 
-        const getTimestamp = (item) => {
-          const f = item.created_at || item.fecha_registro || item.fecha_compra || item.fecha_pago || item.timestamp;
-          if (f) {
-            const t = new Date(f).getTime();
-            if (!isNaN(t) && t > 0) return t;
-          }
-          const digits = String(item.id || item.codigo_reserva || item.codigo || '').replace(/\D/g, '');
-          if (digits) {
-            const num = parseInt(digits, 10);
-            if (!isNaN(num)) return num;
-          }
-          return 0;
+        if (esPendA && !esPendB) return -1;
+        if (!esPendA && esPendB) return 1;
+
+        const getNum = (item) => {
+          const digits = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '').replace(/\D/g, '');
+          return parseInt(digits, 10) || 0;
         };
 
-        return getTimestamp(b) - getTimestamp(a);
+        return getNum(b) - getNum(a);
       });
 
       return lista;
@@ -942,7 +936,7 @@
           <td>${cliente}</td>
           <td>${dni}</td>
           <td style="color: #16a34a; font-weight: bold;">S/ ${monto.toFixed(2)}</td>
-          <td><button type="button" class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${cliente}', '', '', '${item.asiento || ''}', '${item.tipo_asiento || ''}', 0, ${monto}, 0)">💵 Cobrar</button></td>
+          <td><button type="button" class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${cliente}', '', '', '${item.asiento || item.num_asiento || ''}', '${item.tipo_asiento || ''}', 0, ${monto}, 0)">💵 Cobrar</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -1110,12 +1104,13 @@
         console.log('Actualizando cobro localmente...');
       }
 
-      actualizarCobroLocal(id, codigo, monto);
+      actualizarCobroLocal(id, codigo, monto, { pasajero, ruta, fecha, asiento, tipo, equipaje, excesoKg });
       mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg);
       await cargarTodoElModulo();
     }
 
-    function actualizarCobroLocal(id, codigo, monto) {
+    // GUARDA Y PRESERVA AMBAS PROPIEDADES DE ASIENTO (asiento y num_asiento)
+    function actualizarCobroLocal(id, codigo, monto, extra = {}) {
       const ahora = new Date();
       const horaRealEmision = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
       const hoyISO = ahora.toISOString();
@@ -1123,24 +1118,56 @@
       const keysPosibles = ['compras_pasajes', 'reservas', 'mis_reservas', 'compras', 'pasajes'];
       keysPosibles.forEach(k => {
         let compras = JSON.parse(localStorage.getItem(k)) || [];
-        if (Array.isArray(compras)) {
-          compras = compras.map(c => {
-            if (String(c.id) === String(id) || c.codigo_reserva === codigo || c.codigo_seguimiento === codigo || c.codigo === codigo) {
-              return {
-                ...c,
-                estado: 'PAGADO',
-                metodo_pago: 'EFECTIVO',
-                monto_calculado: monto,
-                precio: monto,
-                id_cajero: ID_CAJERO_ACTUAL,
-                hora_emision: horaRealEmision,
-                fecha_pago: hoyISO
-              };
-            }
-            return c;
+        if (!Array.isArray(compras)) compras = [];
+
+        let encontrado = false;
+        compras = compras.map(c => {
+          const matchId = id && String(c.id) === String(id);
+          const matchCod = c.codigo_reserva === codigo || c.codigo_seguimiento === codigo || c.codigo === codigo;
+          if (matchId || matchCod) {
+            encontrado = true;
+            return {
+              ...c,
+              estado: 'PAGADO',
+              metodo_pago: 'EFECTIVO-CAJA',
+              monto_calculado: monto,
+              precio: monto,
+              asiento: c.asiento || c.num_asiento || extra.asiento,
+              num_asiento: c.num_asiento || c.asiento || extra.asiento,
+              id_cajero: ID_CAJERO_ACTUAL,
+              hora_emision: horaRealEmision,
+              fecha_pago: hoyISO
+            };
+          }
+          return c;
+        });
+
+        if (!encontrado) {
+          const numSeat = extra.asiento || '';
+          compras.push({
+            id: id || codigo,
+            codigo_reserva: codigo,
+            codigo_seguimiento: codigo,
+            pasajero: extra.pasajero || 'Cliente',
+            ruta: extra.ruta || 'Ica ➔ Lima',
+            fecha_viaje: extra.fecha || '',
+            asiento: numSeat,
+            num_asiento: numSeat,
+            tipo_asiento: extra.tipo || 'semicama',
+            equipaje_kg: extra.equipaje || 0,
+            exceso_kg: extra.excesoKg || 0,
+            estado: 'PAGADO',
+            metodo_pago: 'EFECTIVO-CAJA',
+            monto_calculado: monto,
+            precio: monto,
+            id_cajero: ID_CAJERO_ACTUAL,
+            hora_emision: horaRealEmision,
+            fecha_pago: hoyISO,
+            created_at: hoyISO
           });
-          localStorage.setItem(k, JSON.stringify(compras));
         }
+
+        localStorage.setItem(k, JSON.stringify(compras));
       });
     }
 
