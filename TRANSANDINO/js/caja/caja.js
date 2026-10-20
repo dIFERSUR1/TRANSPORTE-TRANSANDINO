@@ -1,27 +1,15 @@
-// js/caja/caja.js — Módulo de Cobranza con Horas Fijas Congeladas
-
 const API_COMPRAS_URL = '/api/compras';
-
-// Elementos del DOM
 const elNombreCajero = document.getElementById('nombre-cajero');
 const btnCerrarSesion = document.getElementById('cerrar-sesion');
-
-// Sección 1: Cobro presencial
 const formBuscar = document.getElementById('form-buscar');
 const inputCriterio = document.getElementById('criterio');
 const tablaPendientesBody = document.querySelector('#tabla-pendientes tbody');
-
-// Sección 2: Pasarela en línea
 const inputFechaCaja = document.getElementById('fecha-caja');
 const chkSoloVerificar = document.getElementById('solo-por-verificar');
 const tablaEnLineaBody = document.querySelector('#tabla-en-linea tbody');
 const avisoNuevos = document.getElementById('aviso-nuevos');
-
-// Sección 3: Resumen de caja
 const tablaResumenBody = document.querySelector('#tabla-resumen tbody');
 const lblTotalDia = document.getElementById('total-dia');
-
-// Diálogo modal nativo <dialog>
 const dialogoCobro = document.getElementById('dialogo-cobro');
 const formCobro = document.getElementById('form-cobro');
 const lblCobroCodigo = document.getElementById('cobro-codigo');
@@ -37,9 +25,7 @@ const btnCancelarCobro = document.getElementById('cancelar-cobro');
 let solicitudEnCobro = null;
 let listaCompras = [];
 
-// Función para obtener/congelar la Hora Real de Pago de forma PERMANENTE
 function obtenerHoraRealPago(item, index = 0) {
-  // 1. Si el objeto ya posee una hora fija almacenada de forma explícita
   if (item.hora_emision) return item.hora_emision;
   if (item.hora_pago) return item.hora_pago;
   if (item.hora_registro) return item.hora_registro;
