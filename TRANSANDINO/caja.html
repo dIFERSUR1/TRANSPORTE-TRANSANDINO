@@ -214,7 +214,6 @@
       background: #c2410c;
     }
 
-    /* Contenedor de Tablas con Scroll Interno y Encabezado Fijo */
     .table-container {
       max-height: 320px;
       overflow-y: auto;
@@ -305,7 +304,6 @@
       background: #15803d;
     }
 
-    /* Estilos para Dialog y Modales */
     dialog {
       background: var(--card-bg);
       color: var(--text-color);
@@ -642,12 +640,46 @@
     <p>&copy; 2026 TransAndino Perú - Módulo de Cobranza en Agencia.</p>
   </footer>
 
-  <!-- Lógica Única Unificada de Módulo de Caja -->
+  <!-- Lógica de Módulo de Caja -->
   <script>
     const API_COMPRAS_URL = '/api/compras';
 
     let ID_CAJERO_ACTUAL = 101;
     let NOMBRE_CAJERO_ACTUAL = 'Cajero Agencia';
+
+    // LECTURA UNIFICADA DEL PRECIO REAL DE CADA REGISTRO
+    function obtenerMontoReal(item) {
+      // 1. Si trae un valor guardado directamente en sus campos habituales:
+      let montoDirecto = parseFloat(item.monto_calculado || item.monto_total || item.monto || item.precio_total || 0);
+      
+      // 2. Si el registro tiene precio base y equipaje, calcularlo de forma exacta:
+      const tipoAsiento = String(item.tipo_asiento || item.servicio || '').toLowerCase();
+      const esCama = tipoAsiento.includes('cama') && !tipoAsiento.includes('semi');
+      let precioBase = parseFloat(item.precio || item.monto_base || 0);
+      if (!precioBase || precioBase === 0) {
+        precioBase = esCama ? 85 : 60;
+      }
+
+      const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
+      let excesoKg = 0;
+      let costoEquipaje = 0;
+
+      if (item.monto_equipaje && parseFloat(item.monto_equipaje) > 0) {
+        costoEquipaje = parseFloat(item.monto_equipaje);
+      } else {
+        if (equipajeTotal > 20) {
+          excesoKg = equipajeTotal - 20;
+        } else if (item.exceso_kg && parseFloat(item.exceso_kg) > 0) {
+          excesoKg = parseFloat(item.exceso_kg);
+        }
+        costoEquipaje = excesoKg * 4;
+      }
+
+      let calculado = precioBase + costoEquipaje;
+
+      // Retornar el mayor entre el monto guardado y el calculado para no mostrar 0.00 jamás
+      return Math.max(montoDirecto, calculado);
+    }
 
     function obtenerHoraRealPago(item, index = 0) {
       if (item.hora_emision) return item.hora_emision;
@@ -678,16 +710,18 @@
       return `${String(hora12).padStart(2, '0')}:${minutos} ${ampm}`;
     }
 
-    // FUSIÓN DE DATOS: Junta la API y LocalStorage para mantener todo sincronizado y ordenado por fecha descendente
     async function obtenerTodasLasComprasUnificadas() {
       let dbCompras = [];
       let localCompras = [];
 
       try {
         const res = await fetch(API_COMPRAS_URL);
-        if (res.ok) dbCompras = await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) dbCompras = data;
+        }
       } catch (err) {
-        console.warn('API no disponible, usando almacenamiento local...');
+        console.warn('API no disponible, leyendo LocalStorage...');
       }
 
       try {
@@ -698,24 +732,19 @@
 
       const mapa = new Map();
 
-      if (Array.isArray(dbCompras)) {
-        dbCompras.forEach(item => {
-          const key = item.codigo_reserva || item.codigo_seguimiento || `id_${item.id}`;
-          mapa.set(key, item);
-        });
-      }
+      dbCompras.forEach(item => {
+        const key = item.codigo_reserva || item.codigo_seguimiento || `id_${item.id}`;
+        mapa.set(key, item);
+      });
 
-      if (Array.isArray(localCompras)) {
-        localCompras.forEach(item => {
-          const key = item.codigo_reserva || item.codigo_seguimiento || `id_${item.id}`;
-          const existente = mapa.get(key) || {};
-          mapa.set(key, { ...existente, ...item });
-        });
-      }
+      localCompras.forEach(item => {
+        const key = item.codigo_reserva || item.codigo_seguimiento || `id_${item.id}`;
+        const existente = mapa.get(key) || {};
+        mapa.set(key, { ...existente, ...item });
+      });
 
       const lista = Array.from(mapa.values());
 
-      // Ordenar para que los registros más recientes aparezcan al principio
       lista.sort((a, b) => {
         const timeA = a.created_at ? new Date(a.created_at).getTime() : (parseInt(a.id) || 0);
         const timeB = b.created_at ? new Date(b.created_at).getTime() : (parseInt(b.id) || 0);
@@ -806,34 +835,11 @@
         
         const asiento = item.num_asiento || item.asiento || '-';
         const tipoAsiento = item.tipo_asiento || 'semicama';
-        const esCama = String(tipoAsiento).toLowerCase().includes('cama') && !String(tipoAsiento).toLowerCase().includes('semi');
-
-        let precioBase = parseFloat(item.precio || item.monto_base || 0);
-        if (!precioBase || precioBase === 0) {
-          precioBase = esCama ? 85 : 60;
-        }
 
         const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
-        let excesoKg = 0;
-        let costoEquipaje = 0;
+        const excesoKg = Math.max(0, equipajeTotal - 20);
 
-        if (item.monto_equipaje && parseFloat(item.monto_equipaje) > 0) {
-          costoEquipaje = parseFloat(item.monto_equipaje);
-          excesoKg = costoEquipaje / 4;
-        } else {
-          if (equipajeTotal > 20) {
-            excesoKg = equipajeTotal - 20;
-          } else if (item.exceso_kg && parseFloat(item.exceso_kg) > 0) {
-            excesoKg = parseFloat(item.exceso_kg);
-          }
-          costoEquipaje = excesoKg * 4;
-        }
-
-        let monto = precioBase + costoEquipaje;
-
-        if (item.monto_calculado && parseFloat(item.monto_calculado) > monto) {
-          monto = parseFloat(item.monto_calculado);
-        }
+        const monto = obtenerMontoReal(item);
 
         const estado = String(item.estado || 'PENDIENTE').toUpperCase();
         const badgeClass = (estado === 'PAGADO' || estado === 'ATENDIDO' || estado === 'EMITIDO') ? 'badge-paid' : 'badge-pending';
@@ -902,7 +908,7 @@
         const cliente = item.registrado_por || item.id_usuario || item.pasajero || 'Cliente';
         const dni = item.dni || '-';
 
-        let monto = parseFloat(item.monto_calculado || item.precio || 60);
+        const monto = obtenerMontoReal(item);
 
         tr.innerHTML = `
           <td><strong>${codigo}</strong></td>
@@ -958,7 +964,7 @@
         let medio = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
         if (medio === 'EFECTIVO') medio = 'TARJETA';
 
-        const monto = parseFloat(item.monto_calculado || item.precio || 60);
+        const monto = obtenerMontoReal(item);
         const estadoVerificacion = item.verificado ? '✅ Verificado' : '⏳ Pendiente';
 
         tr.innerHTML = `
@@ -998,18 +1004,7 @@
 
       let totalRecaudado = 0;
       pagadasFinal.forEach(item => {
-        let monto = parseFloat(item.monto_calculado || item.precio || 0);
-
-        if (isNaN(monto) || monto === 0) {
-          const tipo = String(item.tipo_asiento || '').toLowerCase();
-          const esCama = tipo.includes('cama') && !tipo.includes('semi');
-          const base = esCama ? 85 : 60;
-          const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
-          const exceso = Math.max(0, equipajeTotal - 20);
-          monto = base + (exceso * 4);
-        }
-
-        totalRecaudado += monto;
+        totalRecaudado += obtenerMontoReal(item);
       });
 
       const elTotalDia = document.getElementById('total-dia');
@@ -1043,7 +1038,7 @@
             let medio = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
             if (medio === 'EFECTIVO') medio = 'EFECTIVO-CAJA';
 
-            const monto = parseFloat(item.monto_calculado || item.precio || 60);
+            const monto = obtenerMontoReal(item);
 
             tr.innerHTML = `
               <td>${hora}</td>
