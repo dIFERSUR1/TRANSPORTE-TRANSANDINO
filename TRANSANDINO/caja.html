@@ -214,15 +214,39 @@
       background: #c2410c;
     }
 
+    /* Contenedor de Tablas con Scroll Interno y Encabezado Fijo */
     .table-container {
+      max-height: 320px;
+      overflow-y: auto;
       overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-top: 0.5rem;
+    }
+
+    .table-container::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+      background: #070f1e;
+      border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+      background: var(--blue-accent);
+      border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+      background: var(--cyan-light);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      margin-top: 0.5rem;
     }
 
     caption {
@@ -230,17 +254,22 @@
       color: var(--text-muted);
       font-size: 0.85rem;
       margin-bottom: 0.5rem;
+      padding: 0.5rem;
     }
 
     th, td {
-      padding: 1rem;
+      padding: 0.9rem 1rem;
       border-bottom: 1px solid var(--border-color);
       font-size: 0.9rem;
     }
 
     th {
+      position: sticky;
+      top: 0;
       background: #070f1e;
       color: var(--cyan-light);
+      z-index: 10;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
     }
 
     .badge-pending {
@@ -649,18 +678,15 @@
         todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
       }
 
-      // Obtener la fecha seleccionada en la pantalla
       const inputFecha = document.getElementById('fecha-caja');
       const hoyStr = new Date().toISOString().split('T')[0];
       const fechaFiltro = (inputFecha && inputFecha.value) ? inputFecha.value : hoyStr;
 
-      // 1. Filtrar registros que tengan estado PAGADO, ATENDIDO o EMITIDO
       const pagadas = todas.filter(item => {
         const est = String(item.estado || '').toUpperCase();
         return est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO';
       });
 
-      // 2. Si un registro tiene fecha de pago explícita se compara; de lo contrario se incluye como pagado
       const pagadasFinal = pagadas.filter(item => {
         if (item.fecha_pago) {
           const fPago = typeof item.fecha_pago === 'string' ? item.fecha_pago.split('T')[0] : '';
@@ -669,7 +695,6 @@
         return true;
       });
 
-      // 3. Sumar el total recaudado
       let totalRecaudado = 0;
       pagadasFinal.forEach(item => {
         let monto = parseFloat(item.monto_calculado || item.precio || 0);
@@ -686,13 +711,11 @@
         totalRecaudado += monto;
       });
 
-      // 4. Renderizar el total acumulado en pantalla
       const elTotalDia = document.getElementById('total-dia');
       if (elTotalDia) {
         elTotalDia.textContent = `S/ ${totalRecaudado.toFixed(2)}`;
       }
 
-      // 5. Renderizar en la tabla de cierre de caja
       const tbodyResumen = document.querySelector('#tabla-resumen tbody');
       if (tbodyResumen) {
         tbodyResumen.innerHTML = `
