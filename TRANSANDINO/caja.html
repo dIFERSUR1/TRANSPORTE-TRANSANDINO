@@ -431,12 +431,12 @@
       </div>
     </div>
 
-    <!-- Buscador -->
+    <!-- Buscador ILIKE -->
     <div class="card">
       <h3 style="color: var(--cyan-light); margin-bottom: 0.8rem; font-size: 1rem;">🔎 Buscar Reserva Pendiente</h3>
       <form onsubmit="buscarReservaILIKE(event)">
         <div class="search-box">
-          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. TA-404160) o Pasajero / DNI...">
+          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. RES-849201) o DNI / Nombre del Pasajero...">
           <button type="submit" class="btn-search">🔍 Buscar Reserva</button>
         </div>
       </form>
@@ -678,7 +678,7 @@
       return `${String(hora12).padStart(2, '0')}:${minutos} ${ampm}`;
     }
 
-    // FUSIÓN OBLIGATORIA: Junta API + LocalStorage y Ordena por timestamp de creación (NUEVOS PRIMERO)
+    // FUSIÓN DE DATOS: Junta la API y LocalStorage para mantener todo sincronizado y ordenado por fecha descendente
     async function obtenerTodasLasComprasUnificadas() {
       let dbCompras = [];
       let localCompras = [];
@@ -715,7 +715,7 @@
 
       const lista = Array.from(mapa.values());
 
-      // Ordenar DESCENDENTE por fecha/hora de creación para que las compras nuevas aparezcan ARRIBA
+      // Ordenar para que los registros más recientes aparezcan al principio
       lista.sort((a, b) => {
         const timeA = a.created_at ? new Date(a.created_at).getTime() : (parseInt(a.id) || 0);
         const timeB = b.created_at ? new Date(b.created_at).getTime() : (parseInt(b.id) || 0);
