@@ -248,7 +248,7 @@
 
     .seat-btn.disponible { background-color: #16a34a; color: white; }
     .seat-btn.seleccionado { background-color: var(--orange-accent); color: white; }
-    .seat-btn.ocupado { background-color: #ef4444 !important; color: white !important; cursor: not-allowed !important; opacity: 0.8; }
+    .seat-btn.ocupado { background-color: #ef4444 !important; color: white !important; cursor: not-allowed !important; opacity: 0.85; }
 
     .checkout-bar {
       display: flex;
@@ -276,7 +276,6 @@
       cursor: not-allowed;
     }
 
-    /* Estilos del Cotizador en Vivo y Pasarela de Pago */
     .cotizacion-box {
       background: rgba(56, 189, 248, 0.06);
       border: 1px dashed var(--cyan-light);
@@ -331,7 +330,6 @@
       margin-top: 1rem;
     }
 
-    /* Estilos de la Tarjeta con Animación Giro 3D */
     .card-preview-container {
       display: flex;
       justify-content: center;
@@ -428,7 +426,6 @@
       color: var(--cyan-light);
     }
 
-    /* Caja de Datos de Prueba */
     .test-cards-box {
       background: rgba(2, 132, 199, 0.08);
       border: 1px dashed var(--blue-accent);
@@ -519,11 +516,10 @@
 
           <div class="form-group">
             <label for="fecha">Fecha de Viaje</label>
-            <input type="date" id="fecha" value="2026-10-03" required>
+            <input type="date" id="fecha" value="2026-10-20" required>
           </div>
         </div>
 
-        <!-- RF-22.09: Campos del Cotizador en Vivo -->
         <div class="form-grid-2">
           <div class="form-group">
             <label for="tipo_asiento">Tipo de Asiento / Piso</label>
@@ -539,7 +535,6 @@
           </div>
         </div>
 
-        <!-- RF-22.09: Resumen de Cotización Dinámica -->
         <div class="cotizacion-box">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <div>
@@ -580,7 +575,6 @@
         <div class="seats-grid" id="seats-grid"></div>
       </div>
 
-      <!-- Pasarela de Pago con Selección por Radio Buttons -->
       <div class="pago-seccion">
         <h3 style="font-size: 1.1rem; color: var(--cyan-light); margin-bottom: 0.8rem;">💳 Método de Pago</h3>
         
@@ -610,9 +604,7 @@
           </div>
         </fieldset>
 
-        <!-- Formulario y Previsualización de Tarjeta con Datos de Prueba -->
         <div id="pago-tarjeta-box" class="pago-metodo-box">
-          
           <div class="test-cards-box">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
               <strong style="font-size: 0.85rem; color: var(--cyan-light);">🧪 Tarjetas de Prueba (Entorno de Simulación):</strong>
@@ -627,10 +619,8 @@
             </p>
           </div>
 
-          <!-- Elemento vista-tarjeta 3D -->
           <div class="card-preview-container">
             <div id="vista-tarjeta" class="tarjeta-vista">
-              <!-- Frente -->
               <div class="tarjeta-cara frente">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div class="vista-chip"></div>
@@ -643,7 +633,6 @@
                 </div>
               </div>
 
-              <!-- Dorso (Gira al enfocar CVV) -->
               <div class="tarjeta-cara dorso">
                 <div class="banda-magnetica"></div>
                 <div style="padding: 0 1.5rem; font-size: 0.7rem; color: #94a3b8; text-align: right; margin-top: 8px;">CÓDIGO DE SEGURIDAD</div>
@@ -674,7 +663,6 @@
           </div>
         </div>
 
-        <!-- Campos para Billetera Electrónica con autofill -->
         <div id="pago-billetera-box" class="pago-metodo-box" style="display: none;">
           <div class="test-cards-box" style="margin-bottom: 0.8rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -692,7 +680,6 @@
           </div>
         </div>
 
-        <!-- Mensaje Pago Presencial -->
         <div id="pago-caja-box" class="pago-metodo-box" style="display: none; color: #f59e0b; font-size: 0.9rem;">
           ℹ️ Se generará un código de reserva con estado <strong>PENDIENTE</strong> para abonar en la agencia en <code>caja.html</code>.
         </div>
@@ -712,8 +699,22 @@
     © 2026 TransAndino Perú - Desarrollado por Julius Axl Nickolai Perez Huamani.
   </footer>
 
-  <script type="module">
+  <script>
     let seleccionados = [];
+
+    function normalizarFecha(str) {
+      if (!str) return '';
+      str = String(str).trim();
+      if (str.includes('T')) str = str.split('T')[0];
+      if (str.includes('/')) {
+        const parts = str.split('/');
+        if (parts.length === 3) {
+          if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+          return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+      return str;
+    }
 
     window.cargarTarjetaPrueba = function(tipo) {
       if (tipo === 'visa') {
@@ -906,13 +907,10 @@
       await cargarAsientos();
     });
 
-    // Carga e integra asientos ocupados combinando API + LocalStorage
     async function cargarAsientos() {
       const grid = document.getElementById('seats-grid');
       const seccion = document.getElementById('seccion-asientos');
-      const origen = document.getElementById('origen').value.trim().toLowerCase();
-      const destino = document.getElementById('destino').value.trim().toLowerCase();
-      const fecha = document.getElementById('fecha').value;
+      const fechaSel = normalizarFecha(document.getElementById('fecha').value);
 
       grid.innerHTML = '<p style="grid-column: span 4; text-align: center; color: var(--cyan-light);">Cargando asientos...</p>';
       seccion.style.display = 'block';
@@ -924,178 +922,130 @@
 
       try {
         const res = await fetch('/api/compras');
-        if (res.ok) {
-          dbCompras = await res.json();
-        }
-      } catch (err) {
-        console.warn('Servidor API no disponible al consultar asientos.');
-      }
+        if (res.ok) dbCompras = await res.json();
+      } catch (e) {}
 
-      try {
-        localCompras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      } catch (e) {
-        localCompras = [];
-      }
-
-      // Une ambas fuentes de compras sin descartar la memoria local
-      const todasLasCompras = [...(Array.isArray(dbCompras) ? dbCompras : []), ...(Array.isArray(localCompras) ? localCompras : [])];
-
-      let ocupados = [];
-      todasLasCompras.forEach(c => {
-        const cOrigen = (c.origen || '').trim().toLowerCase();
-        const cDestino = (c.destino || '').trim().toLowerCase();
-        const cFecha = c.fecha_viaje || c.fecha || '';
-        const cEstado = String(c.estado || '').toUpperCase();
-
-        if (cEstado !== 'CANCELADO' && cEstado !== 'ANULADO') {
-          if (cOrigen === origen && cDestino === destino && cFecha.startsWith(fecha)) {
-            if (c.asiento) ocupados.push(parseInt(c.asiento));
-            if (c.num_asiento) ocupados.push(parseInt(c.num_asiento));
+      const keysPosibles = ['compras_pasajes', 'reservas', 'mis_reservas', 'compras', 'pasajes', 'reservaActual'];
+      keysPosibles.forEach(k => {
+        try {
+          const val = JSON.parse(localStorage.getItem(k));
+          if (Array.isArray(val)) {
+            val.forEach(item => { if (item && typeof item === 'object') localCompras.push(item); });
+          } else if (val && typeof val === 'object') {
+            localCompras.push(val);
           }
+        } catch (e) {}
+      });
+
+      const mapa = new Map();
+      if (Array.isArray(dbCompras)) {
+        dbCompras.forEach(item => {
+          const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '');
+          if (key) mapa.set(key, item);
+        });
+      }
+
+      localCompras.forEach(item => {
+        const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '');
+        if (key) {
+          const existente = mapa.get(key) || {};
+          mapa.set(key, { ...existente, ...item });
         }
       });
 
-      // Filtra números duplicados
-      ocupados = [...new Set(ocupados)];
+      const todas = Array.from(mapa.values());
+
+      const asientosOcupados = new Set();
+      todas.forEach(item => {
+        const fItem = normalizarFecha(item.fecha_viaje || item.fecha);
+        if (fItem === fechaSel) {
+          const numSeat = parseInt(item.num_asiento || item.asiento, 10);
+          if (!isNaN(numSeat)) asientosOcupados.add(numSeat);
+        }
+      });
 
       grid.innerHTML = '';
       for (let i = 1; i <= 40; i++) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.textContent = i;
-        btn.className = 'seat-btn';
-        
-        if (ocupados.includes(i)) {
-          btn.classList.add('ocupado');
+        btn.dataset.asiento = i;
+
+        if (asientosOcupados.has(i)) {
+          btn.className = 'seat-btn ocupado';
           btn.disabled = true;
         } else {
-          btn.classList.add('disponible');
-          btn.addEventListener('click', () => window.toggleAsiento(i, btn));
+          btn.className = 'seat-btn disponible';
+          btn.onclick = () => window.toggleAsiento(i, btn);
         }
         grid.appendChild(btn);
       }
     }
 
-    // Procesa y guarda la reserva asignando ID único y sincronizando LocalStorage
-    window.confirmarReserva = async function() {
+    async function confirmarReserva() {
       if (seleccionados.length === 0) {
-        alert('Por favor, seleccione al menos un asiento.');
+        alert('Por favor seleccione al menos un asiento.');
         return;
       }
 
       const radioSeleccionado = document.querySelector('input[name="metodo"]:checked');
       const metodo = radioSeleccionado ? radioSeleccionado.value : 'tarjeta';
-
-      if (metodo === 'tarjeta') {
-        const num = document.getElementById('tarjeta_numero').value.replace(/\s+/g, '');
-        const tit = document.getElementById('tarjeta_titular').value.trim();
-        const exp = document.getElementById('tarjeta_exp').value.trim();
-        const cvv = document.getElementById('tarjeta_cvv').value.trim();
-
-        if (num.length < 15 || !tit || !exp || cvv.length < 3) {
-          alert('Por favor ingrese todos los datos de la tarjeta correctamente.');
-          return;
-        }
-      } else if (metodo === 'billetera') {
-        const cel = document.getElementById('billetera_celular').value.trim();
-        const tok = document.getElementById('billetera_token').value.trim();
-
-        if (cel.length < 9 || tok.length < 6) {
-          alert('Por favor ingrese su número celular de 9 dígitos y código token de 6 dígitos.');
-          return;
-        }
-      }
-
+      
       const origen = document.getElementById('origen').value;
       const destino = document.getElementById('destino').value;
-      const fecha_viaje = document.getElementById('fecha').value;
-      const tipo_asiento = document.getElementById('tipo_asiento').value;
-      const equipaje_kg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
-
+      const fechaSel = normalizarFecha(document.getElementById('fecha').value);
+      const tipoAsiento = document.getElementById('tipo_asiento').value;
+      const equipajeKg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
       const cot = window.calcularCotizacionUnitario();
-      const userName = localStorage.getItem('userName') || localStorage.getItem('userEmail') || 'Cliente Web';
 
-      const fechaAhora = new Date();
-      const horaRealEmision = fechaAhora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-      const hoyISO = fechaAhora.toISOString();
+      const userName = localStorage.getItem('userName') || localStorage.getItem('userEmail') || 'Pasajero General';
+      const userDni = localStorage.getItem('userDni') || '12345678';
 
-      const estadoCompra = (metodo === 'efectivo') ? 'PENDIENTE' : 'PAGADO';
-      const metodoPagoFinal = (metodo === 'tarjeta') ? 'TARJETA' : ((metodo === 'billetera') ? 'YAPE/PLIN' : 'RESERVA-CAJA');
+      const codigoGen = `TA-${Math.floor(100000 + Math.random() * 900000)}`;
+      const estadoPago = (metodo === 'efectivo') ? 'PENDIENTE' : 'PAGADO';
+      const metodoPagoStr = (metodo === 'tarjeta') ? 'TARJETA' : ((metodo === 'billetera') ? 'YAPE/PLIN' : 'EFECTIVO-CAJA');
 
-      const btnReservar = document.getElementById('btn-reservar');
-      btnReservar.disabled = true;
-      btnReservar.textContent = 'Procesando...';
+      let comprasExistentes = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      if (!Array.isArray(comprasExistentes)) comprasExistentes = [];
 
-      let nuevasCompras = [];
-
-      for (let i = 0; i < seleccionados.length; i++) {
-        const asientoNum = seleccionados[i];
-        const randomNum = Math.floor(100000 + Math.random() * 900000);
-        const codigoReserva = `TA-${randomNum}`;
-        const idUnico = Date.now() + i;
-
-        const payload = {
-          id: idUnico,
-          id_usuario: userName,
+      for (const numSeat of seleccionados) {
+        const nuevaReserva = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          codigo_reserva: codigoGen,
+          codigo_seguimiento: codigoGen,
           pasajero: userName,
-          registrado_por: userName,
-          codigo_reserva: codigoReserva,
-          codigo_seguimiento: codigoReserva,
+          dni: userDni,
           origen: origen,
           destino: destino,
-          fecha: fecha_viaje,
-          fecha_viaje: fecha_viaje,
-          hora: horaRealEmision,
-          hora_viaje: horaRealEmision,
-          hora_emision: horaRealEmision,
-          hora_registro: horaRealEmision,
-          asiento: String(asientoNum),
-          num_asiento: asientoNum,
-          tipo_asiento: tipo_asiento,
-          equipaje_kg: equipaje_kg,
-          equipaje: equipaje_kg,
-          peso: equipaje_kg,
-          monto_equipaje: cot.montoExceso,
+          fecha_viaje: fechaSel,
+          fecha: fechaSel,
+          num_asiento: numSeat,
+          asiento: numSeat,
+          tipo_asiento: tipoAsiento,
+          equipaje_kg: equipajeKg,
           monto_calculado: cot.totalUnitario,
           precio: cot.totalUnitario,
-          metodo_pago: metodoPagoFinal,
-          estado: estadoCompra,
-          verificado: (estadoCompra === 'PAGADO'),
-          id_transaccion: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
-          codigo_autorizacion: `AUTH-${Math.floor(100000 + Math.random() * 900000)}`,
-          fecha_pago: (estadoCompra === 'PAGADO') ? hoyISO : null,
-          created_at: hoyISO
+          estado: estadoPago,
+          metodo_pago: metodoPagoStr,
+          fecha_pago: new Date().toISOString()
         };
 
+        comprasExistentes.push(nuevaReserva);
+
         try {
-          const res = await fetch('/api/compras', {
+          await fetch('/api/compras', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(nuevaReserva)
           });
-          if (!res.ok) console.warn('Respuesta API no OK, respaldando en LocalStorage.');
-        } catch (err) {
-          console.warn('Servidor no disponible, respaldando cobro en LocalStorage...');
-        }
-
-        nuevasCompras.push(payload);
+        } catch (err) {}
       }
 
-      let localExistentes = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      localStorage.setItem('compras_pasajes', JSON.stringify([...localExistentes, ...nuevasCompras]));
-
-      btnReservar.disabled = false;
-      btnReservar.textContent = 'Confirmar y Pagar';
-
-      if (metodo === 'efectivo') {
-        alert(`¡Reserva generada con éxito a las ${horaRealEmision}! Presente su código de reserva en caja.`);
-      } else {
-        alert(`¡Pago y emisión completados con éxito a las ${horaRealEmision}!`);
-      }
-
-      window.location.reload();
-    };
+      localStorage.setItem('compras_pasajes', JSON.stringify(comprasExistentes));
+      
+      alert(`¡Reserva realizada con éxito!\nCódigo: ${codigoGen}\nEstado: ${estadoPago}`);
+      await cargarAsientos();
+    }
   </script>
-
 </body>
 </html>
