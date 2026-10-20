@@ -1,3 +1,4 @@
+// js/caja/caja.js — Módulo de Cobranza con Hora Real de Pago
 
 const API_COMPRAS_URL = '/api/compras';
 
@@ -35,6 +36,21 @@ const btnCancelarCobro = document.getElementById('cancelar-cobro');
 
 let solicitudEnCobro = null;
 let listaCompras = [];
+
+// Helper para extraer la Hora Real de Registro/Pago en formato 12 horas (HH:MM AM/PM)
+function obtenerHoraRealPago(item) {
+  const fStr = item.fecha_pago || item.created_at;
+  if (fStr) {
+    const d = new Date(fStr);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+  }
+  if (item.hora_registro) return item.hora_registro;
+  
+  // Hora local actual si es un registro nuevo
+  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   const userObj = JSON.parse(localStorage.getItem('user')) || {};
@@ -95,7 +111,7 @@ async function cargarDatos() {
     const res = await fetch(API_COMPRAS_URL);
     if (res.ok) dbCompras = await res.json();
   } catch (err) {
-    console.warn('Cargando desde datos locales...');
+    console.warn('Cargando datos locales...');
   }
 
   try {
@@ -226,7 +242,7 @@ async function procesarCobroPresencial(e) {
     }
   }
 
-  const hoyISO = new Date().toISOString().split('T')[0];
+  const hoyISO = new Date().toISOString();
   const payloadUpdate = {
     id: solicitudEnCobro.id,
     estado: 'PAGADO',
@@ -261,7 +277,7 @@ async function procesarCobroPresencial(e) {
   renderizarModuloCaja();
 }
 
-// Renderizado de Pagos por Pasarela (Sin bloqueo estricto de fecha)
+// Renderizado de Pagos por Pasarela (Hora exacta de transacción)
 function renderizarEnLinea() {
   if (!tablaEnLineaBody) return;
   tablaEnLineaBody.innerHTML = '';
@@ -272,7 +288,6 @@ function renderizarEnLinea() {
     const est = String(item.estado || '').toUpperCase();
     const metodo = String(item.metodo_pago || item.metodo || item.referencia_pago || '').toUpperCase();
 
-    // Filtra todas las compras realizadas en línea (PAGADO/ATENDIDO) que no sean cobro presencial en caja
     const esOnline = (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO') && metodo !== 'EFECTIVO-CAJA';
 
     if (!esOnline) return false;
@@ -295,14 +310,8 @@ function renderizarEnLinea() {
   enLinea.forEach((item, index) => {
     const tr = document.createElement('tr');
     
-    let hora = '07:08 PM';
-    if (item.fecha_pago) {
-      try {
-        hora = new Date(item.fecha_pago).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      } catch(e) {}
-    } else if (item.hora || item.hora_viaje) {
-      hora = item.hora || item.hora_viaje;
-    }
+    // Obtener la hora real en que se hizo el pago
+    const hora = obtenerHoraRealPago(item);
 
     const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${100000 + (item.id || index)}`;
     const solicitud = item.codigo_seguimiento || item.codigo_reserva || `TA-${item.id || (1000 + index)}`;
