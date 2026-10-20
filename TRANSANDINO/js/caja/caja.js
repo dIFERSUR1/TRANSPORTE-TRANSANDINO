@@ -1,27 +1,16 @@
-// js/caja/caja.js — Módulo de Cobranza y Cierre de Caja Optimizado
 
 const API_COMPRAS_URL = '/api/compras';
-
-// Elementos del DOM
 const elNombreCajero = document.getElementById('nombre-cajero');
 const btnCerrarSesion = document.getElementById('cerrar-sesion');
-
-// Sección 1: Cobro presencial
 const formBuscar = document.getElementById('form-buscar');
 const inputCriterio = document.getElementById('criterio');
 const tablaPendientesBody = document.querySelector('#tabla-pendientes tbody');
-
-// Sección 2: Pasarela en línea
 const inputFechaCaja = document.getElementById('fecha-caja');
 const chkSoloVerificar = document.getElementById('solo-por-verificar');
 const tablaEnLineaBody = document.querySelector('#tabla-en-linea tbody');
 const avisoNuevos = document.getElementById('aviso-nuevos');
-
-// Sección 3: Resumen de caja
 const tablaResumenBody = document.querySelector('#tabla-resumen tbody');
 const lblTotalDia = document.getElementById('total-dia');
-
-// Diálogo modal nativo <dialog>
 const dialogoCobro = document.getElementById('dialogo-cobro');
 const formCobro = document.getElementById('form-cobro');
 const lblCobroCodigo = document.getElementById('cobro-codigo');
@@ -33,9 +22,21 @@ const outputVuelto = document.getElementById('vuelto');
 const boxCampoReferencia = document.getElementById('campo-referencia');
 const inputReferencia = document.getElementById('referencia');
 const btnCancelarCobro = document.getElementById('cancelar-cobro');
-
 let solicitudEnCobro = null;
 let listaCompras = [];
+function obtenerFechaLocal(fechaStr) {
+  if (!fechaStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(fechaStr))) return String(fechaStr);
+  
+  const d = new Date(fechaStr);
+  if (isNaN(d.getTime())) {
+    return String(fechaStr).split('T')[0];
+  }
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   const userObj = JSON.parse(localStorage.getItem('user')) || {};
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const nombreCajero = userObj.nombre || (emailObj ? emailObj.split('@')[0] : 'Cajero Agencia');
   if (elNombreCajero) elNombreCajero.textContent = nombreCajero;
 
-  const hoyStr = new Date().toISOString().split('T')[0];
+  const hoyStr = obtenerFechaLocal(new Date());
   if (inputFechaCaja) {
     inputFechaCaja.value = hoyStr;
     inputFechaCaja.addEventListener('change', renderizarModuloCaja);
@@ -89,17 +90,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function cargarDatos() {
+  let dbCompras = [];
+  let localCompras = [];
+
   try {
     const res = await fetch(API_COMPRAS_URL);
     if (res.ok) {
-      listaCompras = await res.json();
-    } else {
-      listaCompras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      dbCompras = await res.json();
     }
   } catch (err) {
-    listaCompras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+    console.warn('Cargando únicamente desde almacenamiento local...');
   }
 
+  try {
+    localCompras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+  } catch (e) {}
+
+  // Fusión inteligente: combina registros de la API y de LocalStorage para no perder nada
+  const mapa = new Map();
+  [...dbCompras, ...localCompras].forEach(item => {
+    const key = item.id ? `id_${item.id}` : `res_${item.codigo_reserva || item.codigo_seguimiento}_${item.asiento || item.num_asiento}`;
+    const existente = mapa.get(key) || {};
+    mapa.set(key, { ...existente, ...item });
+  });
+
+  listaCompras = Array.from(mapa.values());
   renderizarModuloCaja();
 }
 
@@ -216,7 +231,7 @@ async function procesarCobroPresencial(e) {
     }
   }
 
-  const hoyISO = new Date().toISOString().split('T')[0];
+  const hoyISO = obtenerFechaLocal(new Date());
   const payloadUpdate = {
     id: solicitudEnCobro.id,
     estado: 'PAGADO',
@@ -251,25 +266,42 @@ async function procesarCobroPresencial(e) {
   renderizarModuloCaja();
 }
 
-// Renderizado de Pagos por Pasarela (Compatibilidad flexible de fecha)
+// Renderizado de Pagos por Pasarela (Corregido con hora local)
 function renderizarEnLinea() {
   if (!tablaEnLineaBody) return;
   tablaEnLineaBody.innerHTML = '';
 
-  const fechaFiltro = inputFechaCaja ? inputFechaCaja.value : new Date().toISOString().split('T')[0];
+  const fechaFiltro = inputFechaCaja ? inputFechaCaja.value : obtenerFechaLocal(new Date());
   const soloVerificar = chkSoloVerificar ? chkSoloVerificar.checked : false;
 
   const enLinea = listaCompras.filter(item => {
-    const metodo = String(item.metodo_pago || '').toUpperCase();
-    const esOnline = (metodo === 'TARJETA' || metodo === 'BILLETERA' || item.id_transaccion || item.codigo_autorizacion);
+    const metodo = String(item.metodo_pago || item.metodo || item.forma_pago || '').toUpperCase();
+    const esOnline = (
+      metodo === 'TARJETA' || 
+      metodo === 'BILLETERA' || 
+      metodo === 'POS' || 
+      metodo === 'ANDIPAY' || 
+      metodo === 'PAGOMOVIL' || 
+      Boolean(item.id_transaccion) || 
+      Boolean(item.codigo_autorizacion)
+    );
+
     if (!esOnline) return false;
 
-    // Obtener la fecha relevante
-    const hoyISO = new Date().toISOString().split('T')[0];
-    const fechaRaw = item.fecha_pago || item.created_at || hoyISO;
-    const fechaItem = typeof fechaRaw === 'string' ? fechaRaw.split('T')[0] : hoyISO;
+    // Obtener las fechas asociadas
+    const fechaPagoLocal = obtenerFechaLocal(item.fecha_pago);
+    const fechaCreatedLocal = obtenerFechaLocal(item.created_at);
+    const fechaViajeLocal = obtenerFechaLocal(item.fecha_viaje || item.fecha);
 
-    if (fechaItem !== fechaFiltro) return false;
+    // Coincidir si alguna de las fechas corresponde al filtro seleccionado
+    const coincideFecha = (
+      fechaPagoLocal === fechaFiltro || 
+      fechaCreatedLocal === fechaFiltro || 
+      fechaViajeLocal === fechaFiltro ||
+      !fechaFiltro
+    );
+
+    if (!coincideFecha) return false;
     if (soloVerificar && item.verificado) return false;
 
     return true;
@@ -288,11 +320,11 @@ function renderizarEnLinea() {
 
   enLinea.forEach(item => {
     const tr = document.createElement('tr');
-    const hora = item.fecha_pago ? new Date(item.fecha_pago).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Ahora';
-    const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${item.id || '001'}`;
+    const hora = item.fecha_pago ? new Date(item.fecha_pago).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '07:00 PM';
+    const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${item.id || Math.floor(100000 + Math.random() * 900000)}`;
     const solicitud = item.codigo_seguimiento || item.codigo_reserva || `SOL-${item.id || '001'}`;
-    const cliente = item.registrado_por || item.id_usuario || 'Cliente Web';
-    const medio = item.metodo_pago || 'TARJETA';
+    const cliente = item.registrado_por || item.pasajero || item.id_usuario || 'Cliente Web';
+    const medio = item.metodo_pago || item.metodo || 'TARJETA';
     const monto = parseFloat(item.monto_calculado || item.precio || 0);
 
     const estadoVerificacion = item.verificado ? '✅ Verificado' : '⏳ Pendiente';
@@ -316,7 +348,7 @@ function renderizarResumenCierre() {
   if (!tablaResumenBody) return;
   tablaResumenBody.innerHTML = '';
 
-  const fechaFiltro = inputFechaCaja ? inputFechaCaja.value : new Date().toISOString().split('T')[0];
+  const fechaFiltro = inputFechaCaja ? inputFechaCaja.value : obtenerFechaLocal(new Date());
 
   const pagadosFecha = listaCompras.filter(item => {
     const est = String(item.estado || '').toUpperCase();
@@ -326,9 +358,9 @@ function renderizarResumenCierre() {
   const resumenMap = {};
 
   pagadosFecha.forEach(item => {
-    const metodo = String(item.metodo_pago || 'EFECTIVO').toUpperCase();
+    const metodo = String(item.metodo_pago || item.metodo || 'EFECTIVO').toUpperCase();
     let canal = 'Agencia';
-    if (metodo === 'TARJETA' || metodo === 'BILLETERA') canal = 'Web / Pasarela';
+    if (metodo === 'TARJETA' || metodo === 'BILLETERA' || metodo === 'POS' || metodo === 'ANDIPAY') canal = 'Web / Pasarela';
 
     const clave = `${canal} - ${metodo}`;
 
