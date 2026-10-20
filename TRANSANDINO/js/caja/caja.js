@@ -1,16 +1,27 @@
+// js/caja/caja.js — Módulo de Cobranza con Detección Automática de Pasarela
 
 const API_COMPRAS_URL = '/api/compras';
+
+// Elementos del DOM
 const elNombreCajero = document.getElementById('nombre-cajero');
 const btnCerrarSesion = document.getElementById('cerrar-sesion');
+
+// Sección 1: Cobro presencial
 const formBuscar = document.getElementById('form-buscar');
 const inputCriterio = document.getElementById('criterio');
 const tablaPendientesBody = document.querySelector('#tabla-pendientes tbody');
+
+// Sección 2: Pasarela en línea
 const inputFechaCaja = document.getElementById('fecha-caja');
 const chkSoloVerificar = document.getElementById('solo-por-verificar');
 const tablaEnLineaBody = document.querySelector('#tabla-en-linea tbody');
 const avisoNuevos = document.getElementById('aviso-nuevos');
+
+// Sección 3: Resumen de caja
 const tablaResumenBody = document.querySelector('#tabla-resumen tbody');
 const lblTotalDia = document.getElementById('total-dia');
+
+// Diálogo modal nativo <dialog>
 const dialogoCobro = document.getElementById('dialogo-cobro');
 const formCobro = document.getElementById('form-cobro');
 const lblCobroCodigo = document.getElementById('cobro-codigo');
@@ -22,20 +33,19 @@ const outputVuelto = document.getElementById('vuelto');
 const boxCampoReferencia = document.getElementById('campo-referencia');
 const inputReferencia = document.getElementById('referencia');
 const btnCancelarCobro = document.getElementById('cancelar-cobro');
+
 let solicitudEnCobro = null;
 let listaCompras = [];
-function obtenerFechaLocal(fechaStr) {
-  if (!fechaStr) return '';
-  if (/^\d{4}-\d{2}-\d{2}$/.test(String(fechaStr))) return String(fechaStr);
-  
-  const d = new Date(fechaStr);
-  if (isNaN(d.getTime())) {
-    return String(fechaStr).split('T')[0];
-  }
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
+
+function obtenerFechaFormato(f) {
+  if (!f) return '';
+  if (typeof f === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(f)) return f;
+  const d = new Date(f);
+  if (isNaN(d.getTime())) return String(f).split('T')[0];
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return `${y}-${m}-${day}`;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -44,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const nombreCajero = userObj.nombre || (emailObj ? emailObj.split('@')[0] : 'Cajero Agencia');
   if (elNombreCajero) elNombreCajero.textContent = nombreCajero;
 
-  const hoyStr = obtenerFechaLocal(new Date());
+  const hoyStr = obtenerFechaFormato(new Date());
   if (inputFechaCaja) {
     inputFechaCaja.value = hoyStr;
     inputFechaCaja.addEventListener('change', renderizarModuloCaja);
@@ -95,18 +105,15 @@ async function cargarDatos() {
 
   try {
     const res = await fetch(API_COMPRAS_URL);
-    if (res.ok) {
-      dbCompras = await res.json();
-    }
+    if (res.ok) dbCompras = await res.json();
   } catch (err) {
-    console.warn('Cargando únicamente desde almacenamiento local...');
+    console.warn('Error fetching API, usando local data...');
   }
 
   try {
     localCompras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
   } catch (e) {}
 
-  // Fusión inteligente: combina registros de la API y de LocalStorage para no perder nada
   const mapa = new Map();
   [...dbCompras, ...localCompras].forEach(item => {
     const key = item.id ? `id_${item.id}` : `res_${item.codigo_reserva || item.codigo_seguimiento}_${item.asiento || item.num_asiento}`;
@@ -231,11 +238,11 @@ async function procesarCobroPresencial(e) {
     }
   }
 
-  const hoyISO = obtenerFechaLocal(new Date());
+  const hoyISO = obtenerFechaFormato(new Date());
   const payloadUpdate = {
     id: solicitudEnCobro.id,
     estado: 'PAGADO',
-    metodo_pago: metodo.toUpperCase(),
+    metodo_pago: 'EFECTIVO-CAJA',
     monto_calculado: monto,
     precio: monto,
     referencia_pago: inputReferencia.value.trim() || 'EFECTIVO-CAJA',
@@ -266,42 +273,29 @@ async function procesarCobroPresencial(e) {
   renderizarModuloCaja();
 }
 
-// Renderizado de Pagos por Pasarela (Corregido con hora local)
+// Renderizado de Pagos por Pasarela (Detección flexible de PAGADO en línea)
 function renderizarEnLinea() {
   if (!tablaEnLineaBody) return;
   tablaEnLineaBody.innerHTML = '';
 
-  const fechaFiltro = inputFechaCaja ? inputFechaCaja.value : obtenerFechaLocal(new Date());
+  const fechaFiltro = inputFechaCaja ? inputFechaCaja.value : '';
   const soloVerificar = chkSoloVerificar ? chkSoloVerificar.checked : false;
 
   const enLinea = listaCompras.filter(item => {
-    const metodo = String(item.metodo_pago || item.metodo || item.forma_pago || '').toUpperCase();
-    const esOnline = (
-      metodo === 'TARJETA' || 
-      metodo === 'BILLETERA' || 
-      metodo === 'POS' || 
-      metodo === 'ANDIPAY' || 
-      metodo === 'PAGOMOVIL' || 
-      Boolean(item.id_transaccion) || 
-      Boolean(item.codigo_autorizacion)
-    );
+    const est = String(item.estado || '').toUpperCase();
+    const metodo = String(item.metodo_pago || item.metodo || '').toUpperCase();
+
+    // Si está PAGADO y NO fue cobrado presencialmente en caja con EFECTIVO
+    const esOnline = (est === 'PAGADO' || est === 'ATENDIDO') && metodo !== 'EFECTIVO-CAJA';
 
     if (!esOnline) return false;
 
-    // Obtener las fechas asociadas
-    const fechaPagoLocal = obtenerFechaLocal(item.fecha_pago);
-    const fechaCreatedLocal = obtenerFechaLocal(item.created_at);
-    const fechaViajeLocal = obtenerFechaLocal(item.fecha_viaje || item.fecha);
+    // Comparar con filtro de fecha si se especificó
+    if (fechaFiltro) {
+      const fPago = obtenerFechaFormato(item.fecha_pago || item.created_at || item.fecha_viaje || item.fecha);
+      if (fPago && fPago !== fechaFiltro) return false;
+    }
 
-    // Coincidir si alguna de las fechas corresponde al filtro seleccionado
-    const coincideFecha = (
-      fechaPagoLocal === fechaFiltro || 
-      fechaCreatedLocal === fechaFiltro || 
-      fechaViajeLocal === fechaFiltro ||
-      !fechaFiltro
-    );
-
-    if (!coincideFecha) return false;
     if (soloVerificar && item.verificado) return false;
 
     return true;
@@ -318,14 +312,14 @@ function renderizarEnLinea() {
     return;
   }
 
-  enLinea.forEach(item => {
+  enLinea.forEach((item, index) => {
     const tr = document.createElement('tr');
     const hora = item.fecha_pago ? new Date(item.fecha_pago).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '07:00 PM';
-    const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${item.id || Math.floor(100000 + Math.random() * 900000)}`;
-    const solicitud = item.codigo_seguimiento || item.codigo_reserva || `SOL-${item.id || '001'}`;
+    const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${100000 + index}`;
+    const solicitud = item.codigo_seguimiento || item.codigo_reserva || `TA-${item.id || (1000 + index)}`;
     const cliente = item.registrado_por || item.pasajero || item.id_usuario || 'Cliente Web';
     const medio = item.metodo_pago || item.metodo || 'TARJETA';
-    const monto = parseFloat(item.monto_calculado || item.precio || 0);
+    const monto = parseFloat(item.monto_calculado || item.precio || 85);
 
     const estadoVerificacion = item.verificado ? '✅ Verificado' : '⏳ Pendiente';
 
@@ -348,24 +342,22 @@ function renderizarResumenCierre() {
   if (!tablaResumenBody) return;
   tablaResumenBody.innerHTML = '';
 
-  const fechaFiltro = inputFechaCaja ? inputFechaCaja.value : obtenerFechaLocal(new Date());
-
-  const pagadosFecha = listaCompras.filter(item => {
+  const pagados = listaCompras.filter(item => {
     const est = String(item.estado || '').toUpperCase();
     return (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO');
   });
 
   const resumenMap = {};
 
-  pagadosFecha.forEach(item => {
-    const metodo = String(item.metodo_pago || item.metodo || 'EFECTIVO').toUpperCase();
-    let canal = 'Agencia';
-    if (metodo === 'TARJETA' || metodo === 'BILLETERA' || metodo === 'POS' || metodo === 'ANDIPAY') canal = 'Web / Pasarela';
+  pagados.forEach(item => {
+    const metodo = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
+    let canal = 'Web / Pasarela';
+    if (metodo === 'EFECTIVO-CAJA' || metodo === 'EFECTIVO') canal = 'Agencia';
 
     const clave = `${canal} - ${metodo}`;
 
     let monto = parseFloat(item.monto_calculado || item.precio || 0);
-    if (isNaN(monto) || monto === 0) monto = 60;
+    if (isNaN(monto) || monto === 0) monto = 85;
 
     if (!resumenMap[clave]) {
       resumenMap[clave] = { canal, medio: metodo, ops: 0, total: 0 };
@@ -379,7 +371,7 @@ function renderizarResumenCierre() {
   const filas = Object.values(resumenMap);
 
   if (filas.length === 0) {
-    tablaResumenBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 1rem;">No hay cobranzas registradas para la fecha seleccionada.</td></tr>';
+    tablaResumenBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 1rem;">No hay cobranzas registradas.</td></tr>';
   } else {
     filas.forEach(row => {
       totalGeneral += row.total;
