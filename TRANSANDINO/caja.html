@@ -649,7 +649,7 @@
     let ID_CAJERO_ACTUAL = 101;
     let NOMBRE_CAJERO_ACTUAL = 'Cajero Agencia';
 
-    // Función Unificada Determinista para obtener/congelar la Hora Real de Transacción
+    // Función Unificada para obtener/congelar la Hora Real de Transacción
     function obtenerHoraRealPago(item, index = 0) {
       if (item.hora_emision) return item.hora_emision;
       if (item.hora_pago) return item.hora_pago;
@@ -665,7 +665,6 @@
 
       if (item.hora && item.hora !== '09:00 AM') return item.hora;
 
-      // Hash estático para compras antiguas sin hora guardada
       const seed = String(item.id || item.codigo_reserva || item.codigo_seguimiento || index);
       let hash = 0;
       for (let i = 0; i < seed.length; i++) {
@@ -678,6 +677,47 @@
       const hora12 = hora24 > 12 ? hora24 - 12 : (hora24 === 0 ? 12 : hora24);
 
       return `${String(hora12).padStart(2, '0')}:${minutos} ${ampm}`;
+    }
+
+    // FUSIÓN UNIFICADA: Combina API + LocalStorage y Ordena (Nuevas Reservas Primero)
+    async function obtenerTodasLasComprasUnificadas() {
+      let dbCompras = [];
+      let localCompras = [];
+
+      try {
+        const res = await fetch(API_COMPRAS_URL);
+        if (res.ok) dbCompras = await res.json();
+      } catch (err) {
+        console.warn('API no disponible, leyendo LocalStorage...');
+      }
+
+      try {
+        localCompras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
+      } catch (e) {
+        localCompras = [];
+      }
+
+      const mapa = new Map();
+      [...(Array.isArray(dbCompras) ? dbCompras : []), ...(Array.isArray(localCompras) ? localCompras : [])].forEach(item => {
+        const key = item.id ? `id_${item.id}` : `res_${item.codigo_reserva || item.codigo_seguimiento}_${item.asiento || item.num_asiento}`;
+        const existente = mapa.get(key) || {};
+        mapa.set(key, { ...existente, ...item });
+      });
+
+      const lista = Array.from(mapa.values());
+
+      // Ordenar DESCENDENTE (Nuevas reservas creadas aparecen ARRIBA)
+      lista.sort((a, b) => {
+        const idA = parseInt(a.id || 0);
+        const idB = parseInt(b.id || 0);
+        if (idA && idB && idA !== idB) return idB - idA;
+        
+        const fechaA = new Date(a.created_at || a.fecha_pago || a.fecha_viaje || 0).getTime();
+        const fechaB = new Date(b.created_at || b.fecha_pago || b.fecha_viaje || 0).getTime();
+        return fechaB - fechaA;
+      });
+
+      return lista;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -711,26 +751,12 @@
     });
 
     async function cargarInicialYResumen() {
-      await buscarReservaILIKE(null, true);
+      await buscarReservaILIKE(null);
       await actualizarCierreDeCaja();
     }
 
     async function actualizarCierreDeCaja() {
-      let todas = [];
-      try {
-        const res = await fetch(API_COMPRAS_URL);
-        if (res.ok) {
-          todas = await res.json();
-        } else {
-          todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-        }
-      } catch (err) {
-        todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      }
-
-      if (!Array.isArray(todas)) {
-        todas = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      }
+      const todas = await obtenerTodasLasComprasUnificadas();
 
       const inputFecha = document.getElementById('fecha-caja');
       const hoyStr = new Date().toISOString().split('T')[0];
@@ -783,54 +809,26 @@
       }
     }
 
-    async function buscarReservaILIKE(e, esCargaInicial = false) {
+    async function buscarReservaILIKE(e) {
       if (e) e.preventDefault();
       const input = document.getElementById('txt-busqueda');
-      const query = input ? input.value.trim() : '';
+      const query = input ? input.value.trim().toLowerCase() : '';
 
       const tbody = document.getElementById('tabla-reservas-tbody');
       tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--cyan-light);">🔎 Buscando reservas...</td></tr>';
 
-      let resultados = [];
-
-      try {
-        const url = query ? `${API_COMPRAS_URL}?q=${encodeURIComponent(query)}` : API_COMPRAS_URL;
-        const res = await fetch(url);
-        if (res.ok) {
-          resultados = await res.json();
-        } else {
-          resultados = buscarEnLocalStorage(query);
-        }
-      } catch (err) {
-        console.log('Servidor no disponible, realizando búsqueda local...');
-        resultados = buscarEnLocalStorage(query);
-      }
-
-      if (!Array.isArray(resultados) || resultados.length === 0) {
-        resultados = buscarEnLocalStorage(query);
-      }
+      let resultados = await obtenerTodasLasComprasUnificadas();
 
       if (query) {
-        const q = query.toLowerCase();
         resultados = resultados.filter(item => {
           const codigo = String(item.codigo_reserva || item.codigo_seguimiento || item.id || '').toLowerCase();
-          const usuario = String(item.id_usuario || item.usuario_id || item.pasajero || '').toLowerCase();
-          return codigo.includes(q) || usuario.includes(q);
+          const usuario = String(item.id_usuario || item.usuario_id || item.pasajero || item.registrado_por || '').toLowerCase();
+          const dni = String(item.dni || '').toLowerCase();
+          return codigo.includes(query) || usuario.includes(query) || dni.includes(query);
         });
       }
 
       renderizarResultados(resultados);
-    }
-
-    function buscarEnLocalStorage(query) {
-      const q = (query || '').toLowerCase();
-      const compras = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-      if (!q) return compras;
-      return compras.filter(item => {
-        const codigo = String(item.codigo_reserva || item.codigo_seguimiento || item.id || '').toLowerCase();
-        const usuario = String(item.id_usuario || item.usuario_id || item.pasajero || '').toLowerCase();
-        return codigo.includes(q) || usuario.includes(q);
-      });
     }
 
     function renderizarResultados(lista) {
@@ -838,20 +836,19 @@
       tbody.innerHTML = '';
 
       if (!lista || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #ef4444; padding: 2rem;">No se encontraron reservas con el criterio ingresado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #ef4444; padding: 2rem;">No se encontraron reservas registradas.</td></tr>';
         return;
       }
 
       lista.forEach((item, index) => {
         const tr = document.createElement('tr');
         const codigo = item.codigo_reserva || item.codigo_seguimiento || `RES-${item.id || index + 1}`;
-        const pasajero = item.id_usuario || item.usuario_id || item.pasajero || 'Cliente';
+        const pasajero = item.id_usuario || item.usuario_id || item.pasajero || item.registrado_por || 'Cliente';
         const ruta = `${item.origen || 'Ica'} ➔ ${item.destino || 'Lima'}`;
         
         const fechaRaw = item.fecha_viaje || item.fecha || '';
         const fecha = fechaRaw ? fechaRaw.split('T')[0] : 'N/A';
 
-        // Obtener la Hora Fija y Determinista calculada por la función unificada
         const hora = obtenerHoraRealPago(item, index);
         
         const asiento = item.num_asiento || item.asiento || '-';
@@ -875,8 +872,6 @@
             excesoKg = equipajeTotal - 20;
           } else if (item.exceso_kg && parseFloat(item.exceso_kg) > 0) {
             excesoKg = parseFloat(item.exceso_kg);
-          } else if (item.equipaje_exceso && parseFloat(item.equipaje_exceso) > 0) {
-            excesoKg = parseFloat(item.equipaje_exceso);
           }
           costoEquipaje = excesoKg * 4;
         }
@@ -888,7 +883,7 @@
         }
 
         const estado = String(item.estado || 'PENDIENTE').toUpperCase();
-        const badgeClass = (estado === 'PAGADO' || estado === 'ATENDIDO') ? 'badge-paid' : 'badge-pending';
+        const badgeClass = (estado === 'PAGADO' || estado === 'ATENDIDO' || estado === 'EMITIDO') ? 'badge-paid' : 'badge-pending';
         
         let botonAccion = '';
         if (estado === 'PENDIENTE' || estado === 'REGISTRADO') {
@@ -935,13 +930,11 @@
           fecha_pago: hoyISO
         };
 
-        const res = await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(id || codigo)}`, {
+        await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(id || codigo)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
-        if (!res.ok) throw new Error('Fallo servidor');
       } catch (err) {
         console.log('Actualizando cobro localmente...');
       }
@@ -1009,7 +1002,7 @@
     }
   </script>
 
-  <!-- Inclusión de Script Módulo JS de Caja -->
+  <!-- Módulo secundario opcional -->
   <script type="module" src="js/caja/caja.js"></script>
 
 </body>
