@@ -1,27 +1,15 @@
-// js/caja/caja.js — Módulo de Cobranza con Hora Real de Pago
-
 const API_COMPRAS_URL = '/api/compras';
-
-// Elementos del DOM
 const elNombreCajero = document.getElementById('nombre-cajero');
 const btnCerrarSesion = document.getElementById('cerrar-sesion');
-
-// Sección 1: Cobro presencial
 const formBuscar = document.getElementById('form-buscar');
 const inputCriterio = document.getElementById('criterio');
 const tablaPendientesBody = document.querySelector('#tabla-pendientes tbody');
-
-// Sección 2: Pasarela en línea
 const inputFechaCaja = document.getElementById('fecha-caja');
 const chkSoloVerificar = document.getElementById('solo-por-verificar');
 const tablaEnLineaBody = document.querySelector('#tabla-en-linea tbody');
 const avisoNuevos = document.getElementById('aviso-nuevos');
-
-// Sección 3: Resumen de caja
 const tablaResumenBody = document.querySelector('#tabla-resumen tbody');
 const lblTotalDia = document.getElementById('total-dia');
-
-// Diálogo modal nativo <dialog>
 const dialogoCobro = document.getElementById('dialogo-cobro');
 const formCobro = document.getElementById('form-cobro');
 const lblCobroCodigo = document.getElementById('cobro-codigo');
@@ -37,7 +25,6 @@ const btnCancelarCobro = document.getElementById('cancelar-cobro');
 let solicitudEnCobro = null;
 let listaCompras = [];
 
-// Helper para extraer la Hora Real de Registro/Pago en formato 12 horas (HH:MM AM/PM)
 function obtenerHoraRealPago(item) {
   const fStr = item.fecha_pago || item.created_at;
   if (fStr) {
@@ -47,8 +34,6 @@ function obtenerHoraRealPago(item) {
     }
   }
   if (item.hora_registro) return item.hora_registro;
-  
-  // Hora local actual si es un registro nuevo
   return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
@@ -277,7 +262,6 @@ async function procesarCobroPresencial(e) {
   renderizarModuloCaja();
 }
 
-// Renderizado de Pagos por Pasarela (Hora exacta de transacción)
 function renderizarEnLinea() {
   if (!tablaEnLineaBody) return;
   tablaEnLineaBody.innerHTML = '';
@@ -309,10 +293,7 @@ function renderizarEnLinea() {
 
   enLinea.forEach((item, index) => {
     const tr = document.createElement('tr');
-    
-    // Obtener la hora real en que se hizo el pago
     const hora = obtenerHoraRealPago(item);
-
     const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${100000 + (item.id || index)}`;
     const solicitud = item.codigo_seguimiento || item.codigo_reserva || `TA-${item.id || (1000 + index)}`;
     const cliente = item.registrado_por || item.pasajero || item.id_usuario || 'Cliente Web';
@@ -392,5 +373,35 @@ function renderizarResumenCierre() {
 
   if (lblTotalDia) {
     lblTotalDia.textContent = `S/ ${totalGeneral.toFixed(2)}`;
+  }
+
+  // Renderizar la tabla con Scroll de Movimientos Detallados
+  const tbodyDetalle = document.querySelector('#tabla-detalle-resumen tbody');
+  if (tbodyDetalle) {
+    tbodyDetalle.innerHTML = '';
+    if (pagados.length === 0) {
+      tbodyDetalle.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 1rem;">Sin movimientos cobrados para mostrar.</td></tr>';
+    } else {
+      pagados.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        const hora = obtenerHoraRealPago(item);
+        const codigo = item.codigo_seguimiento || item.codigo_reserva || `TA-${item.id || (1000 + index)}`;
+        const cliente = item.registrado_por || item.pasajero || item.id_usuario || 'Cliente';
+        let medio = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
+        if (medio === 'EFECTIVO') medio = 'EFECTIVO-CAJA';
+
+        let monto = parseFloat(item.monto_calculado || item.precio || 0);
+        if (isNaN(monto) || monto === 0) monto = 85;
+
+        tr.innerHTML = `
+          <td>${hora}</td>
+          <td><strong style="color: var(--cyan-light);">${codigo}</strong></td>
+          <td>${cliente}</td>
+          <td>${medio}</td>
+          <td style="color: #16a34a; font-weight: bold;">S/ ${monto.toFixed(2)}</td>
+        `;
+        tbodyDetalle.appendChild(tr);
+      });
+    }
   }
 }
