@@ -702,7 +702,6 @@
   <script>
     let seleccionados = [];
 
-    // Limpia cadenas de fecha descartando horas o formato ISO
     function normalizarFecha(str) {
       if (!str) return '';
       str = String(str).trim();
@@ -718,7 +717,6 @@
       return str;
     }
 
-    // Extrae los números de asiento de textos como "N° 3 (semicama)", "37, 38, 39", etc.
     function extraerNumerosAsiento(val) {
       if (val === undefined || val === null) return [];
       if (typeof val === 'number') return [val];
@@ -933,7 +931,6 @@
 
       let todasLasCompras = [];
 
-      // 1. Cargar desde la API / BD
       try {
         const res = await fetch('/api/compras');
         if (res.ok) {
@@ -944,7 +941,6 @@
         console.warn('API backend no disponible.');
       }
 
-      // 2. Cargar desde LocalStorage
       const keysPosibles = ['compras_pasajes', 'reservas', 'mis_reservas', 'compras', 'pasajes', 'reservaActual'];
       keysPosibles.forEach(k => {
         try {
@@ -959,7 +955,6 @@
 
       const asientosOcupados = new Set();
 
-      // 3. Filtrar reservas que correspondan a la fecha y ruta seleccionadas
       todasLasCompras.forEach(item => {
         if (!item) return;
 
@@ -980,14 +975,12 @@
         const coincideDestino = !itemDestino || itemDestino === destinoSel;
 
         if (coincideFecha && coincideOrigen && coincideDestino) {
-          // Extraer cualquier número presente en 'asiento', 'asientos', 'asiento_piso', etc.
           const valAsiento = item.asiento !== undefined ? item.asiento : (item.asientos !== undefined ? item.asientos : item.asiento_piso);
           const listaNumeros = extraerNumerosAsiento(valAsiento);
           listaNumeros.forEach(num => asientosOcupados.add(num));
         }
       });
 
-      // 4. Dibujar los 40 asientos
       grid.innerHTML = '';
       for (let i = 1; i <= 40; i++) {
         const btn = document.createElement('button');
@@ -1044,22 +1037,23 @@
 
       let guardadoEnBD = false;
 
+      // Envío de cada reserva por separado para garantizar la compatibilidad con el backend
       try {
-        const res = await fetch('/api/compras', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(reservasNuevas)
-        });
+        const envios = reservasNuevas.map(reserva => 
+          fetch('/api/compras', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reserva)
+          }).catch(() => null)
+        );
 
-        if (res.ok) {
-          guardadoEnBD = true;
-        } else {
-          console.error('Error al guardar en BD:', res.status);
-        }
+        const respuestas = await Promise.all(envios);
+        guardadoEnBD = respuestas.some(res => res && res.ok);
       } catch (error) {
         console.error('Error enviando reserva a BD:', error);
       }
 
+      // Guardar también en el almacenamiento local como respaldo
       try {
         let comprasLocales = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
         if (!Array.isArray(comprasLocales)) comprasLocales = [];
