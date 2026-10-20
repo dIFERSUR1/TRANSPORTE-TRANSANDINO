@@ -1,4 +1,3 @@
-// js/caja/caja.js — Módulo de Cobranza (Filtro Corregido para Pasarela)
 
 const API_COMPRAS_URL = '/api/compras';
 
