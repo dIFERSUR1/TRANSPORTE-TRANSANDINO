@@ -78,15 +78,15 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Usuario ID</th>
+              <th>ID / Código</th>
+              <th>Pasajero</th>
               <th>Atendido por / Turno</th>
               <th>Origen</th>
               <th>Destino</th>
               <th>Fecha</th>
               <th>Hora</th>
               <th>Asiento</th>
-              <th>Precio (S/)</th>
+              <th>Monto Total (S/)</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -123,7 +123,7 @@
     <!-- SECCIÓN 3: Gestión de Asientos -->
     <section id="tab-asientos" class="tab-content">
       <div class="controls">
-        <span style="color: #94a3b8;">Estado y Asignación de Asientos</span>
+        <span style="color: #94a3b8;">Estado y Asignación de Asientos (Bus de 40 Pasajeros)</span>
         <button class="btn-action btn-update" onclick="cargarAsientos(true)">🔄 Recargar Tabla</button>
       </div>
 
@@ -132,7 +132,7 @@
           <thead>
             <tr>
               <th>N° Asiento</th>
-              <th>Pasajero (ID)</th>
+              <th>Pasajero</th>
               <th>Ruta</th>
               <th>Estado Asiento</th>
               <th>Acción Empleado</th>
@@ -220,52 +220,54 @@
       if (targetBtn) targetBtn.classList.add('active');
     }
 
-    function generar40AsientosDefault() {
-      return Array.from({ length: 40 }, (_, i) => ({
-        id: i + 1,
-        usuario_id: `PAS-${String(i + 1).padStart(3, '0')}`,
-        asiento: `${i + 1}`,
-        num_asiento: `${i + 1}`,
-        origen: 'Ica',
-        destino: 'Lima',
-        precio: 50,
-        estado: 'disponible',
-        fecha_viaje: '2026-10-15',
-        hora_viaje: '09:00 AM',
-        empleado_atendio: currentUserEmail || 'Empleado'
-      }));
+    function extraerNumerosAsiento(val) {
+      if (val === undefined || val === null) return [];
+      if (Array.isArray(val)) return val.map(Number);
+      if (typeof val === 'number') return [val];
+      const str = String(val);
+      const matches = str.match(/\d+/g);
+      if (!matches) return [];
+      return matches.map(n => parseInt(n, 10)).filter(n => n >= 1 && n <= 40);
     }
 
     async function obtenerDatosPasajes(forzarRefresco = false) {
       if (!forzarRefresco && pasajesData.length > 0) return pasajesData;
 
-      const localData = JSON.parse(localStorage.getItem('compras_pasajes')) || 
-                        JSON.parse(localStorage.getItem('asientos_bus'));
+      let localCompras = [];
+      const keysPosibles = ['reservas', 'compras_pasajes', 'asientos_bus', 'mis_reservas', 'compras', 'pasajes'];
+
+      keysPosibles.forEach(k => {
+        try {
+          const val = JSON.parse(localStorage.getItem(k));
+          if (Array.isArray(val)) {
+            val.forEach(item => {
+              if (item && typeof item === 'object') localCompras.push(item);
+            });
+          } else if (val && typeof val === 'object') {
+            localCompras.push(val);
+          }
+        } catch (e) {}
+      });
 
       try {
         const res = await fetch(API_URL);
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            pasajesData = data;
-            localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-            localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
-            return pasajesData;
+            data.forEach(d => localCompras.push(d));
           }
         }
       } catch (err) {
-        console.log('API no disponible o en modo local, usando datos persistidos.');
+        console.log('API no disponible, leyendo almacenamiento local.');
       }
 
-      if (localData && localData.length > 0) {
-        pasajesData = localData;
-        return pasajesData;
-      }
+      const mapa = new Map();
+      localCompras.forEach((item, index) => {
+        const key = String(item.codigoReserva || item.codigo_reserva || item.codigo || item.id || `ITEM-${index}`);
+        mapa.set(key, item);
+      });
 
-      pasajesData = generar40AsientosDefault();
-      localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
-
+      pasajesData = Array.from(mapa.values());
       return pasajesData;
     }
 
@@ -273,7 +275,7 @@
       const est = String(estadoTexto || '').toLowerCase().trim();
       if (est === 'disponible') return '#38bdf8'; 
       if (est === 'registrado') return '#22c55e'; 
-      if (est === 'atendido') return '#a855f7';   
+      if (est === 'atendido' || est === 'emitido' || est === 'pagado') return '#a855f7';   
       if (est === 'cancelado') return '#ef4444';  
       return '#38bdf8';
     }
@@ -283,39 +285,38 @@
       if (!tbody) return;
       tbody.innerHTML = '';
 
-      if (!Array.isArray(pasajesData) || pasajesData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay asientos cargados.</td></tr>';
-        return;
-      }
+      for (let i = 1; i <= 40; i++) {
+        const reserva = pasajesData.find(item => {
+          const numAsientos = extraerNumerosAsiento(item.asientos || item.asiento || item.num_asiento);
+          return numAsientos.includes(i);
+        });
 
-      pasajesData.forEach((item, index) => {
         const tr = document.createElement('tr');
-        const dbId = item.id || item.id_pasaje || '';
-        const nroAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || (index + 1);
-        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || 'Sin Asignar';
-        const orig = item.origen || 'Ica';
-        const dest = item.destino || 'Lima';
+        const dbId = reserva ? (reserva.codigoReserva || reserva.codigo || reserva.id || '') : '';
+        const pasajero = reserva ? (reserva.pasajero || reserva.cliente || reserva.usuario_id || 'Pasajero') : 'Sin Asignar';
+        const orig = reserva ? (reserva.origen || 'Ica') : 'Ica';
+        const dest = reserva ? (reserva.destino || 'Lima') : 'Lima';
         const ruta = `${orig} ➔ ${dest}`;
-        const estado = (item.estado || item['Estado Asiento'] || 'disponible').toLowerCase();
+        const estado = (reserva ? (reserva.estado || 'registrado') : 'disponible').toLowerCase();
 
         tr.innerHTML = `
-          <td><strong>Asiento N° ${nroAsiento}</strong></td>
-          <td>${usuarioId}</td>
+          <td><strong>Asiento N° ${i}</strong></td>
+          <td><strong>${pasajero}</strong></td>
           <td>${ruta}</td>
           <td>
-            <select onchange="cambiarEstadoAsientoDirecto('${dbId}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.3rem; border-radius:4px; cursor:pointer;">
+            <select onchange="cambiarEstadoAsientoDirecto('${dbId}', this.value, ${i})" style="background:#070f1e; color:${obtenerColorEstado(estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.3rem; border-radius:4px; cursor:pointer;">
               <option value="disponible" ${estado === 'disponible' ? 'selected' : ''}>disponible</option>
               <option value="registrado" ${estado === 'registrado' ? 'selected' : ''}>registrado</option>
-              <option value="atendido" ${estado === 'atendido' ? 'selected' : ''}>atendido</option>
+              <option value="atendido" ${estado === 'atendido' || estado === 'emitido' ? 'selected' : ''}>atendido</option>
               <option value="cancelado" ${estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
             </select>
           </td>
           <td>
-            <button class="btn-action btn-update" onclick="modificarNumeroAsiento('${dbId}', '${nroAsiento}', ${index})">✏ Cambiar N° Asiento</button>
+            <button class="btn-action btn-update" onclick="modificarNumeroAsiento('${dbId}', '${i}', ${i - 1})">✏ Cambiar N° Asiento</button>
           </td>
         `;
         tbody.appendChild(tr);
-      });
+      }
     }
 
     function renderizarPasajesEnDOM() {
@@ -330,19 +331,20 @@
 
       pasajesData.forEach((item, index) => {
         const tr = document.createElement('tr');
-        const dbId = item.id || item.id_pasaje || '';
-        const numAsiento = item.asiento || item.num_asiento || item['N° Asiento'] || (index + 1);
-        const usuarioId = item.usuario_id || item.id_usuario || item.pasajero || 'PAS-001';
-        const fecha = item.fecha_viaje ? item.fecha_viaje.split('T')[0] : (item.fecha || '2026-10-15');
-        const hora = item.hora_viaje || item.hora || '09:00 AM';
+        const dbId = item.codigoReserva || item.codigo_reserva || item.codigo || item.id || `RES-${index + 1}`;
+        const numAsiento = item.asiento || (item.asientos ? item.asientos.join(', ') : (index + 1));
+        const pasajero = item.pasajero || item.cliente || item.usuario_id || 'Cliente';
+        const fecha = item.fecha ? item.fecha.split('T')[0] : (item.fecha_viaje ? item.fecha_viaje.split('T')[0] : '2026-10-31');
+        const hora = item.hora_viaje || item.hora || '08:00 AM';
 
-        const empleado = item.empleado_atendio || item.atendido_por || 'Empleado';
+        const empleado = item.empleado_atendio || item.cajero || 'Empleado';
         const turno = item.turno || (new Date().getHours() < 13 ? 'Mañana' : 'Tarde');
         const iconoTurno = turno.toLowerCase().includes('mañana') ? '☀️' : '🌙';
+        const montoTotal = item.monto || item.precio || 50;
 
         tr.innerHTML = `
-          <td>#${dbId || (index + 1)}</td>
-          <td><strong>ID: ${usuarioId}</strong></td>
+          <td><strong>${dbId}</strong></td>
+          <td><strong>${pasajero}</strong></td>
           <td>
             <span style="color:#ea580c; font-weight:bold;">👤 ${empleado}</span><br>
             <small style="color:#cbd5e1;">${iconoTurno} ${turno}</small>
@@ -352,17 +354,17 @@
           <td>${fecha}</td>
           <td>${hora}</td>
           <td>${numAsiento}</td>
-          <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(item.precio || 50).toFixed(2)}</td>
+          <td style="color:#22c55e; font-weight:bold;">S/ ${parseFloat(montoTotal).toFixed(2)}</td>
           <td>
             <select onchange="cambiarEstado('${dbId}', this.value, ${index})" style="background:#070f1e; color:${obtenerColorEstado(item.estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.2rem; border-radius:4px;">
-              <option value="disponible" ${item.estado === 'disponible' ? 'selected' : ''}>disponible</option>
-              <option value="registrado" ${item.estado === 'registrado' ? 'selected' : ''}>registrado</option>
-              <option value="atendido" ${item.estado === 'atendido' ? 'selected' : ''}>atendido</option>
-              <option value="cancelado" ${item.estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
+              <option value="disponible" ${String(item.estado).toLowerCase() === 'disponible' ? 'selected' : ''}>disponible</option>
+              <option value="registrado" ${String(item.estado).toLowerCase() === 'registrado' ? 'selected' : ''}>registrado</option>
+              <option value="atendido" ${String(item.estado).toLowerCase() === 'atendido' || String(item.estado).toLowerCase() === 'emitido' ? 'selected' : ''}>atendido</option>
+              <option value="cancelado" ${String(item.estado).toLowerCase() === 'cancelado' ? 'selected' : ''}>cancelado</option>
             </select>
           </td>
           <td>
-            <button class="btn-action btn-update" onclick="editarPrecio('${dbId}', ${item.precio || 50}, ${index})">Editar Precio</button>
+            <button class="btn-action btn-update" onclick="editarPrecio('${dbId}', ${montoTotal}, ${index})">Editar Precio</button>
             <button class="btn-action btn-delete" onclick="eliminarRegistro('${dbId}', ${index})">Eliminar</button>
           </td>
         `;
@@ -380,33 +382,22 @@
       renderizarAsientosEnDOM();
     }
 
-    async function cambiarEstadoAsientoDirecto(id, nuevoEstado, indexFila) {
-      await actualizarServidorOLocal(id, { estado: nuevoEstado, ['Estado Asiento']: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
+    async function cambiarEstadoAsientoDirecto(id, nuevoEstado, nroAsiento) {
+      if (id) {
+        await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail });
+      }
       renderizarAsientosEnDOM();
       if (currentUserRole === 'admin') renderizarPasajesEnDOM();
     }
 
     async function modificarNumeroAsiento(id, nroAsientoActual, indexFila) {
-      const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva actual:`, nroAsientoActual);
-      if (nuevoNumero !== null && nuevoNumero.trim() !== '' && nuevoNumero.trim() !== String(nroAsientoActual)) {
+      const nuevoNumero = prompt(`Ingrese el nuevo número de asiento para la reserva:`, nroAsientoActual);
+      if (nuevoNumero !== null && nuevoNumero.trim() !== '') {
         const asientoLimpio = nuevoNumero.trim();
-        
-        await actualizarServidorOLocal(id, { 
-          asiento: asientoLimpio, 
-          num_asiento: asientoLimpio, 
-          'N° Asiento': asientoLimpio, 
-          empleado_atendio: currentUserEmail 
-        }, indexFila);
-
-        if (pasajesData[indexFila]) {
-          pasajesData[indexFila].asiento = asientoLimpio;
-          pasajesData[indexFila].num_asiento = asientoLimpio;
-          pasajesData[indexFila]['N° Asiento'] = asientoLimpio;
-          pasajesData[indexFila].empleado_atendio = currentUserEmail;
+        if (id) {
+          await actualizarServidorOLocal(id, { asiento: `N° ${asientoLimpio}`, num_asiento: asientoLimpio });
         }
-
-        renderizarAsientosEnDOM();
-        if (currentUserRole === 'admin') renderizarPasajesEnDOM();
+        cargarAsientos(true);
       }
     }
 
@@ -439,11 +430,6 @@
 
       tbody.innerHTML = '';
 
-      if (!Array.isArray(empleadosData) || empleadosData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:1.5rem;">No hay empleados registrados.</td></tr>';
-        return;
-      }
-
       empleadosData.forEach((emp, index) => {
         const tr = document.createElement('tr');
         const empId = emp.id || (index + 1);
@@ -468,23 +454,9 @@
 
       if (nuevoTurno && nuevoTurno.trim() !== '') {
         const turnoLimpio = nuevoTurno.trim();
-
-        if (id && id !== 'undefined') {
-          try {
-            await fetch(API_EMPLEADOS_URL, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id, turno: turnoLimpio })
-            });
-          } catch (e) {
-            console.log('Actualizado localmente.');
-          }
-        }
-
         empleadosData[index].turno = turnoLimpio;
         localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
         cargarEmpleados();
-        if (currentUserRole === 'admin') renderizarPasajesEnDOM();
         alert(`Turno de ${emp.nombre} actualizado a: ${turnoLimpio}`);
       }
     }
@@ -496,28 +468,12 @@
 
       if (nombre && correo) {
         const nuevoEmp = {
+          id: Date.now(),
           nombre: nombre.trim(),
           correo: correo.trim(),
           rol: 'Empleado',
           turno: turno ? turno.trim() : 'Mañana (08:00 AM - 02:00 PM)'
         };
-
-        try {
-          const res = await fetch(API_EMPLEADOS_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevoEmp)
-          });
-
-          if (res.ok) {
-            const dataGuardada = await res.json();
-            if (dataGuardada && dataGuardada.id) {
-              nuevoEmp.id = dataGuardada.id;
-            }
-          }
-        } catch (err) {
-          nuevoEmp.id = Date.now();
-        }
 
         empleadosData.push(nuevoEmp);
         localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
@@ -529,50 +485,41 @@
       const emp = empleadosData[index];
       if (!confirm(`¿Seguro que deseas desactivar a ${emp.nombre}?`)) return;
 
-      if (id && id !== 'undefined') {
-        try {
-          await fetch(`${API_EMPLEADOS_URL}?id=${id}`, { method: 'DELETE' });
-        } catch (e) {
-          console.log('Eliminado localmente.');
-        }
-      }
-
       empleadosData.splice(index, 1);
       localStorage.setItem('lista_empleados', JSON.stringify(empleadosData));
       cargarEmpleados();
     }
 
-    async function actualizarServidorOLocal(id, nuevoObjeto, indexFila) {
-      let targetRecord = pasajesData[indexFila] || pasajesData.find(p => (p.id && String(p.id) === String(id)) || (p.id_pasaje && String(p.id_pasaje) === String(id)));
+    async function actualizarServidorOLocal(id, nuevoObjeto) {
+      const keysPosibles = ['reservas', 'compras_pasajes', 'asientos_bus'];
 
-      if (targetRecord) {
-        Object.assign(targetRecord, nuevoObjeto);
-      }
-
-      localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
-
-      const recordId = id || (targetRecord && (targetRecord.id || targetRecord.id_pasaje) ? (targetRecord.id || targetRecord.id_pasaje) : null);
-
-      if (recordId && String(recordId) !== '' && String(recordId) !== 'undefined') {
+      keysPosibles.forEach(k => {
         try {
-          const payload = { id: recordId, ...nuevoObjeto };
-          const response = await fetch(`${API_URL}?id=${recordId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          
-          return response.ok;
-        } catch (err) {
-          return false;
+          let lista = JSON.parse(localStorage.getItem(k));
+          if (Array.isArray(lista)) {
+            lista = lista.map(item => {
+              const cod = String(item.codigoReserva || item.codigo_reserva || item.codigo || item.id || '');
+              if (cod === String(id)) {
+                return { ...item, ...nuevoObjeto };
+              }
+              return item;
+            });
+            localStorage.setItem(k, JSON.stringify(lista));
+          }
+        } catch (e) {}
+      });
+
+      pasajesData = pasajesData.map(item => {
+        const cod = String(item.codigoReserva || item.codigo_reserva || item.codigo || item.id || '');
+        if (cod === String(id)) {
+          return { ...item, ...nuevoObjeto };
         }
-      }
-      return true;
+        return item;
+      });
     }
 
     async function cambiarEstado(id, nuevoEstado, indexFila) {
-      await actualizarServidorOLocal(id, { estado: nuevoEstado, ['Estado Asiento']: nuevoEstado, empleado_atendio: currentUserEmail }, indexFila);
+      await actualizarServidorOLocal(id, { estado: nuevoEstado, empleado_atendio: currentUserEmail });
       renderizarAsientosEnDOM();
       if (currentUserRole === 'admin') renderizarPasajesEnDOM();
     }
@@ -584,81 +531,61 @@
       }
       const nuevoPrecio = prompt('Ingrese el nuevo precio (S/):', precioActual);
       if (nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
-        await actualizarServidorOLocal(id, { precio: parseFloat(nuevoPrecio) }, indexFila);
-        renderizarPasajesEnDOM();
+        await actualizarServidorOLocal(id, { monto: parseFloat(nuevoPrecio), precio: parseFloat(nuevoPrecio) });
+        cargarPasajes(true);
       }
     }
 
     async function crearNuevoRegistro() {
+      const pasajero = prompt('Nombre del Pasajero:', 'Juan Pérez');
       const orig = prompt('Origen:', 'Ica');
       const dest = prompt('Destino:', 'Lima');
-      const precio = prompt('Precio (S/):', '50');
+      const precio = prompt('Precio (S/):', '60');
       const asiento = prompt('Número de asiento:', '1');
 
       if (orig && dest && precio) {
+        const codGen = 'TA-' + Math.floor(100000 + Math.random() * 900000);
         const nuevoItem = {
-          id: Date.now(),
-          usuario_id: `PAS-${String(pasajesData.length + 1).padStart(3, '0')}`,
-          empleado_atendio: currentUserEmail || 'Admin',
-          turno: new Date().getHours() < 13 ? 'Mañana' : 'Tarde',
+          codigoReserva: codGen,
+          codigo: codGen,
+          pasajero: pasajero || 'Pasajero',
           origen: orig,
           destino: dest,
+          ruta: `${orig} → ${dest}`,
           precio: parseFloat(precio),
-          asiento: String(asiento || '1'),
-          num_asiento: String(asiento || '1'),
-          'N° Asiento': String(asiento || '1'),
+          monto: parseFloat(precio),
+          asiento: `N° ${asiento}`,
+          asientos: [parseInt(asiento, 10)],
           estado: 'registrado',
-          fecha_viaje: '2026-10-15',
-          hora_viaje: '09:00 AM'
+          fecha: '2026-10-31',
+          hora: '08:00 AM'
         };
 
-        try {
-          const res = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevoItem)
-          });
-          
-          if (res.ok) {
-            const dataGuardada = await res.json();
-            if (dataGuardada && (dataGuardada.id || dataGuardada.id_pasaje)) {
-              nuevoItem.id = dataGuardada.id || dataGuardada.id_pasaje;
-            }
-          }
-        } catch (err) {
-          console.log('Guardado en storage local.');
-        }
+        const reservasActuales = JSON.parse(localStorage.getItem('reservas')) || [];
+        reservasActuales.push(nuevoItem);
+        localStorage.setItem('reservas', JSON.stringify(reservasActuales));
 
-        pasajesData.push(nuevoItem);
-        localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-        localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
-
-        renderizarPasajesEnDOM();
-        renderizarAsientosEnDOM();
+        cargarPasajes(true);
+        cargarAsientos(true);
       }
     }
 
     async function eliminarRegistro(id, indexFila) {
       if (!confirm('¿Deseas eliminar este registro?')) return;
 
-      if (indexFila !== undefined && pasajesData[indexFila]) {
-        pasajesData.splice(indexFila, 1);
-      } else if (id) {
-        pasajesData = pasajesData.filter(p => String(p.id || p.id_pasaje) !== String(id));
-      }
-      localStorage.setItem('compras_pasajes', JSON.stringify(pasajesData));
-      localStorage.setItem('asientos_bus', JSON.stringify(pasajesData));
-
-      renderizarPasajesEnDOM();
-      renderizarAsientosEnDOM();
-
-      if (id) {
+      const keysPosibles = ['reservas', 'compras_pasajes', 'asientos_bus'];
+      keysPosibles.forEach(k => {
         try {
-          await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
-        } catch (e) {
-          console.log('Error al eliminar en servidor:', e);
-        }
-      }
+          let lista = JSON.parse(localStorage.getItem(k));
+          if (Array.isArray(lista)) {
+            lista = lista.filter(item => String(item.codigoReserva || item.codigo_reserva || item.codigo || item.id) !== String(id));
+            localStorage.setItem(k, JSON.stringify(lista));
+          }
+        } catch (e) {}
+      });
+
+      cargarPasajes(true);
+      cargarAsientos(true);
     }
 
     function cerrarSesion() {
