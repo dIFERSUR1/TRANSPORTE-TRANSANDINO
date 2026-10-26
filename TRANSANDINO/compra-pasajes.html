@@ -681,7 +681,7 @@
         </div>
 
         <div id="pago-caja-box" class="pago-metodo-box" style="display: none; color: #f59e0b; font-size: 0.9rem;">
-          ℹ️ Se generará un código de reserva con estado <strong>PENDIENTE</strong> para abonar en la agencia en <code>caja.html</code>.
+          ℹ️ Se generará un código de reserva con estado <strong>REGISTRADO</strong> para abonar en la agencia en <code>caja.html</code>.
         </div>
       </div>
 
@@ -929,55 +929,15 @@
       seleccionados = [];
       window.actualizarResumen();
 
-      let todasLasCompras = [];
+      const reservasExistentes = JSON.parse(localStorage.getItem('reservas')) || [];
+      const ocupados = [];
 
-      try {
-        const res = await fetch('/api/compras');
-        if (res.ok) {
-          const dbCompras = await res.json();
-          if (Array.isArray(dbCompras)) todasLasCompras.push(...dbCompras);
-        }
-      } catch (e) {
-        console.warn('API backend no disponible.');
-      }
-
-      const keysPosibles = ['compras_pasajes', 'reservas', 'mis_reservas', 'compras', 'pasajes', 'reservaActual'];
-      keysPosibles.forEach(k => {
-        try {
-          const val = JSON.parse(localStorage.getItem(k));
-          if (Array.isArray(val)) {
-            todasLasCompras.push(...val);
-          } else if (val && typeof val === 'object') {
-            todasLasCompras.push(val);
-          }
-        } catch (e) {}
-      });
-
-      const asientosOcupados = new Set();
-
-      todasLasCompras.forEach(item => {
-        if (!item) return;
-
-        const itemFecha = normalizarFecha(item.fecha || item.fecha_viaje || item.fecha_hora);
-        
-        let itemOrigen = item.origen;
-        let itemDestino = item.destino;
-        if ((!itemOrigen || !itemDestino) && item.ruta) {
-          const partes = item.ruta.split(/->|-|a/).map(s => s.trim());
-          if (partes.length >= 2) {
-            itemOrigen = itemOrigen || partes[0];
-            itemDestino = itemDestino || partes[1];
-          }
-        }
-
-        const coincideFecha = !itemFecha || itemFecha === fechaSel;
-        const coincideOrigen = !itemOrigen || itemOrigen === origenSel;
-        const coincideDestino = !itemDestino || itemDestino === destinoSel;
-
-        if (coincideFecha && coincideOrigen && coincideDestino) {
-          const valAsiento = item.asiento !== undefined ? item.asiento : (item.asientos !== undefined ? item.asientos : item.asiento_piso);
-          const listaNumeros = extraerNumerosAsiento(valAsiento);
-          listaNumeros.forEach(num => asientosOcupados.add(num));
+      reservasExistentes.forEach(res => {
+        const mismaRuta = (res.origen === origenSel && res.destino === destinoSel);
+        const mismaFecha = (normalizarFecha(res.fecha) === fechaSel);
+        if (mismaRuta && mismaFecha) {
+          const numAsientos = extraerNumerosAsiento(res.asiento);
+          ocupados.push(...numAsientos);
         }
       });
 
@@ -985,22 +945,19 @@
       for (let i = 1; i <= 40; i++) {
         const btn = document.createElement('button');
         btn.type = 'button';
+        btn.className = 'seat-btn ' + (ocupados.includes(i) ? 'ocupado' : 'disponible');
         btn.textContent = i;
-        btn.className = 'seat-btn';
 
-        if (asientosOcupados.has(i)) {
-          btn.classList.add('ocupado');
+        if (ocupados.includes(i)) {
           btn.disabled = true;
         } else {
-          btn.classList.add('disponible');
           btn.onclick = () => window.toggleAsiento(i, btn);
         }
-
         grid.appendChild(btn);
       }
     }
 
-    async function confirmarReserva() {
+    window.confirmarReserva = function() {
       if (seleccionados.length === 0) {
         alert('Por favor, selecciona al menos un asiento.');
         return;
@@ -1008,69 +965,48 @@
 
       const origen = document.getElementById('origen').value;
       const destino = document.getElementById('destino').value;
-      const fecha = normalizarFecha(document.getElementById('fecha').value);
+      const fecha = document.getElementById('fecha').value;
       const tipoAsiento = document.getElementById('tipo_asiento').value;
-      const equipajeKg = parseFloat(document.getElementById('equipaje_kg').value) || 0;
-      
+      const equipajeKg = document.getElementById('equipaje_kg').value || '0';
       const cot = window.calcularCotizacionUnitario();
+      const montoTotalCalculado = (seleccionados.length * cot.totalUnitario).toFixed(2);
+
       const metodoRadio = document.querySelector('input[name="metodo"]:checked');
-      const metodoPago = metodoRadio ? metodoRadio.value : 'tarjeta';
-      const estadoReserva = (metodoPago === 'efectivo') ? 'PENDIENTE' : 'PAGADO';
-      
-      const codigoReserva = 'TA-' + Math.floor(100000 + Math.random() * 900000);
-      const usuarioEmail = localStorage.getItem('userEmail') || 'invitado@transandino.pe';
-      
-      const reservasNuevas = seleccionados.map(numAsiento => ({
-        codigo: codigoReserva,
+      const metodo = metodoRadio ? metodoRadio.value : 'tarjeta';
+
+      const codigoGenerado = 'TA-' + Math.floor(100000 + Math.random() * 900000);
+
+      const nuevaReserva = {
+        codigoReserva: codigoGenerado,
+        codigo: codigoGenerado,
+        pasajero: localStorage.getItem('userName') || 'Pasajero 1',
+        dni: '1',
         origen: origen,
         destino: destino,
+        ruta: `${origen} → ${destino}`,
         fecha: fecha,
-        asiento: numAsiento,
-        tipo_asiento: tipoAsiento,
-        equipaje_kg: equipajeKg,
-        monto: cot.totalUnitario,
-        metodo_pago: metodoPago,
-        estado: estadoReserva,
-        email_usuario: usuarioEmail,
-        fecha_creacion: new Date().toISOString()
-      }));
+        fechaHora: `${fecha} (08:00 AM)`,
+        asiento: `N° ${seleccionados.join(', ')} (${tipoAsiento})`,
+        asientos: seleccionados,
+        tipoAsiento: tipoAsiento,
+        equipaje: `${equipajeKg} kg`,
+        montoTotal: `S/ ${montoTotalCalculado}`,
+        monto: parseFloat(montoTotalCalculado),
+        estado: 'REGISTRADO',
+        metodoPago: metodo,
+        fechaRegistro: new Date().toISOString()
+      };
 
-      let guardadoEnBD = false;
+      const reservasActuales = JSON.parse(localStorage.getItem('reservas')) || [];
+      reservasActuales.push(nuevaReserva);
+      localStorage.setItem('reservas', JSON.stringify(reservasActuales));
 
-      // Envío de cada reserva por separado para garantizar la compatibilidad con el backend
-      try {
-        const envios = reservasNuevas.map(reserva => 
-          fetch('/api/compras', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reserva)
-          }).catch(() => null)
-        );
+      alert(`¡Reserva registrada con éxito!\nCódigo de Reserva: ${codigoGenerado}`);
 
-        const respuestas = await Promise.all(envios);
-        guardadoEnBD = respuestas.some(res => res && res.ok);
-      } catch (error) {
-        console.error('Error enviando reserva a BD:', error);
-      }
-
-      // Guardar también en el almacenamiento local como respaldo
-      try {
-        let comprasLocales = JSON.parse(localStorage.getItem('compras_pasajes')) || [];
-        if (!Array.isArray(comprasLocales)) comprasLocales = [];
-        comprasLocales.push(...reservasNuevas);
-        localStorage.setItem('compras_pasajes', JSON.stringify(comprasLocales));
-      } catch (e) {
-        console.error('Error al guardar en localStorage:', e);
-      }
-
-      let msj = `¡Reserva realizada con éxito!\nCódigo: ${codigoReserva}\nEstado: ${estadoReserva}`;
-      if (!guardadoEnBD) {
-        msj += '\n\n⚠️ Nota: No se pudo conectar con la base de datos remota. La reserva se guardó localmente en su navegador.';
-      }
-      
-      alert(msj);
-      await cargarAsientos();
-    }
+      seleccionados = [];
+      window.actualizarResumen();
+      cargarAsientos();
+    };
   </script>
 </body>
 </html>
