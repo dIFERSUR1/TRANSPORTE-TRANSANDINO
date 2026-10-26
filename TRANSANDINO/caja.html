@@ -429,12 +429,12 @@
       </div>
     </div>
 
-    <!-- Buscador ILIKE -->
+    <!-- Buscador -->
     <div class="card">
       <h3 style="color: var(--cyan-light); margin-bottom: 0.8rem; font-size: 1rem;">🔎 Buscar Reserva Pendiente</h3>
       <form onsubmit="buscarReservaILIKE(event)">
         <div class="search-box">
-          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. RES-849201) o DNI / Nombre del Pasajero...">
+          <input type="text" id="txt-busqueda" placeholder="Ingrese Código de Reserva (Ej. TA-681627) o DNI / Nombre del Pasajero...">
           <button type="submit" class="btn-search">🔍 Buscar Reserva</button>
         </div>
       </form>
@@ -529,7 +529,6 @@
     <section aria-labelledby="t-resumen">
       <h2 id="t-resumen">Resumen del día (cierre de caja)</h2>
       
-      <!-- Resumen Agrupado por Medio de Pago -->
       <div class="table-container" style="max-height: none; margin-bottom: 1.2rem;">
         <table id="tabla-resumen">
           <thead>
@@ -551,7 +550,6 @@
         </table>
       </div>
 
-      <!-- Tabla con Scroll de Movimientos Detallados -->
       <h3 style="color: var(--cyan-light); font-size: 0.95rem; margin-top: 1rem; margin-bottom: 0.4rem;">📜 Detalle Individual de Movimientos que suman la Recaudación:</h3>
       <div class="table-container" style="max-height: 250px;">
         <table id="tabla-detalle-resumen">
@@ -625,7 +623,7 @@
         <div><span>TIPO SERVICIO:</span><span id="t-tipo">Semicama (2º piso)</span></div>
         <div><span>EQUIPAJE EXCESO:</span><span id="t-equipaje">0.0 kg</span></div>
         <div><span>MONTO COBRADO:</span><strong id="t-monto" style="font-size: 1.1rem; color: #16a34a;">S/ 60.00</strong></div>
-        <div><span>FORMA DE PAGO:</span><span>EFECTIVO EN CAJA</span></div>
+        <div><span>FORMA DE PAGO:</span><span id="t-forma-pago">EFECTIVO EN CAJA</span></div>
         <div><span>CAJERO EMISOR:</span><span id="t-cajero">Cajero #101</span></div>
       </div>
       <div class="ticket-footer">
@@ -646,11 +644,12 @@
 
     let ID_CAJERO_ACTUAL = 101;
     let NOMBRE_CAJERO_ACTUAL = 'Cajero Agencia';
+    let reservaSeleccionadaParaCobro = null;
 
     function obtenerMontoReal(item) {
       let montoDirecto = parseFloat(item.monto_calculado || item.monto_total || item.monto || item.precio_total || 0);
       
-      const tipoAsiento = String(item.tipo_asiento || item.servicio || '').toLowerCase();
+      const tipoAsiento = String(item.tipo_asiento || item.tipoAsiento || item.servicio || '').toLowerCase();
       const esCama = tipoAsiento.includes('cama') && !tipoAsiento.includes('semi');
       let precioBase = parseFloat(item.precio || item.monto_base || 0);
       if (!precioBase || precioBase === 0) {
@@ -681,7 +680,7 @@
       if (item.hora_pago) return item.hora_pago;
       if (item.hora_registro) return item.hora_registro;
 
-      const fStr = item.fecha_pago || item.created_at;
+      const fStr = item.fecha_pago || item.fechaRegistro || item.created_at;
       if (fStr) {
         const d = new Date(fStr);
         if (!isNaN(d.getTime())) {
@@ -691,7 +690,7 @@
 
       if (item.hora && item.hora !== '09:00 AM') return item.hora;
 
-      const seed = String(item.id || item.codigo_reserva || item.codigo_seguimiento || index);
+      const seed = String(item.id || item.codigo_reserva || item.codigoReserva || item.codigo || index);
       let hash = 0;
       for (let i = 0; i < seed.length; i++) {
         hash = seed.charCodeAt(i) + ((hash << 5) - hash);
@@ -719,7 +718,7 @@
         console.warn('API no disponible, leyendo LocalStorage...');
       }
 
-      const keysPosibles = ['compras_pasajes', 'reservas', 'mis_reservas', 'compras', 'pasajes', 'reservaActual', 'tickets'];
+      const keysPosibles = ['reservas', 'compras_pasajes', 'mis_reservas', 'compras', 'pasajes', 'reservaActual', 'tickets'];
       
       keysPosibles.forEach(k => {
         try {
@@ -738,15 +737,13 @@
 
       const mapa = new Map();
 
-      // 1. Cargar registros de la base de datos
       dbCompras.forEach(item => {
-        const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '');
+        const key = String(item.codigo_reserva || item.codigoReserva || item.codigo_seguimiento || item.codigo || item.id || '');
         if (key) mapa.set(key, item);
       });
 
-      // 2. Fusionar datos de LocalStorage preservando datos de asientos
       localCompras.forEach(item => {
-        const key = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '');
+        const key = String(item.codigo_reserva || item.codigoReserva || item.codigo_seguimiento || item.codigo || item.id || '');
         if (key) {
           const existente = mapa.get(key) || {};
           mapa.set(key, { ...existente, ...item });
@@ -765,7 +762,7 @@
         if (!esPendA && esPendB) return 1;
 
         const getNum = (item) => {
-          const digits = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '').replace(/\D/g, '');
+          const digits = String(item.codigo_reserva || item.codigoReserva || item.codigo || item.id || '').replace(/\D/g, '');
           return parseInt(digits, 10) || 0;
         };
 
@@ -824,7 +821,7 @@
 
       if (query) {
         resultados = resultados.filter(item => {
-          const codigo = String(item.codigo_reserva || item.codigo_seguimiento || item.codigo || item.id || '').toLowerCase();
+          const codigo = String(item.codigo_reserva || item.codigoReserva || item.codigo_seguimiento || item.codigo || item.id || '').toLowerCase();
           const usuario = String(item.pasajero || item.cliente || item.id_usuario || item.usuario_id || item.registrado_por || '').toLowerCase();
           const dni = String(item.dni || '').toLowerCase();
           return codigo.includes(query) || usuario.includes(query) || dni.includes(query);
@@ -845,9 +842,9 @@
 
       lista.forEach((item, index) => {
         const tr = document.createElement('tr');
-        const codigo = item.codigo_reserva || item.codigo_seguimiento || item.codigo || `RES-${item.id || index + 1}`;
-        const pasajero = item.pasajero || item.cliente || item.id_usuario || item.usuario_id || item.registrado_por || 'Cliente';
-        const ruta = (item.origen && item.destino) ? `${item.origen} ➔ ${item.destino}` : 'Ica ➔ Lima';
+        const codigo = item.codigo_reserva || item.codigoReserva || item.codigo_seguimiento || item.codigo || `TA-${item.id || index + 1}`;
+        const pasajero = item.pasajero || item.cliente || item.registrado_por || 'Cliente';
+        const ruta = item.ruta || ((item.origen && item.destino) ? `${item.origen} ➔ ${item.destino}` : 'Ica ➔ Lima');
         
         const fechaRaw = item.fecha_viaje || item.fecha || '';
         const fecha = fechaRaw ? fechaRaw.split('T')[0] : 'N/A';
@@ -855,7 +852,7 @@
         const hora = obtenerHoraRealPago(item, index);
         
         const asiento = item.num_asiento || item.asiento || '-';
-        const tipoAsiento = item.tipo_asiento || item.servicio || 'semicama';
+        const tipoAsiento = item.tipo_asiento || item.tipoAsiento || item.servicio || 'semicama';
 
         const equipajeTotal = parseFloat(item.equipaje_kg || item.equipaje || item.peso || 0);
         const excesoKg = Math.max(0, equipajeTotal - 20);
@@ -879,7 +876,7 @@
           <td><strong>${pasajero}</strong></td>
           <td>${ruta}</td>
           <td>${fecha} (${hora})</td>
-          <td>N° ${asiento} (${tipoAsiento})</td>
+          <td>${asiento} (${tipoAsiento})</td>
           <td>${txtEquipajeTabla}</td>
           <td style="color: var(--green-accent); font-weight: bold;">S/ ${monto.toFixed(2)}</td>
           <td><span class="${badgeClass}">${estado}</span></td>
@@ -910,8 +907,8 @@
 
         if (!q) return true;
 
-        const cod = String(item.codigo_seguimiento || item.codigo_reserva || item.codigo || item.id || '').toLowerCase();
-        const cliente = String(item.pasajero || item.cliente || item.registrado_por || item.id_usuario || '').toLowerCase();
+        const cod = String(item.codigo_seguimiento || item.codigo_reserva || item.codigoReserva || item.codigo || item.id || '').toLowerCase();
+        const cliente = String(item.pasajero || item.cliente || item.registrado_por || '').toLowerCase();
         const dni = String(item.dni || '').toLowerCase();
 
         return cod.includes(q) || cliente.includes(q) || dni.includes(q);
@@ -925,8 +922,8 @@
 
       pendientes.forEach(item => {
         const tr = document.createElement('tr');
-        const codigo = item.codigo_seguimiento || item.codigo_reserva || item.codigo || `SOL-${item.id}`;
-        const cliente = item.pasajero || item.cliente || item.registrado_por || item.id_usuario || 'Cliente';
+        const codigo = item.codigo_reserva || item.codigoReserva || item.codigo || `SOL-${item.id}`;
+        const cliente = item.pasajero || item.cliente || item.registrado_por || 'Cliente';
         const dni = item.dni || '-';
 
         const monto = obtenerMontoReal(item);
@@ -936,7 +933,7 @@
           <td>${cliente}</td>
           <td>${dni}</td>
           <td style="color: #16a34a; font-weight: bold;">S/ ${monto.toFixed(2)}</td>
-          <td><button type="button" class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${cliente}', '', '', '${item.asiento || item.num_asiento || ''}', '${item.tipo_asiento || ''}', 0, ${monto}, 0)">💵 Cobrar</button></td>
+          <td><button type="button" class="btn-cobrar" onclick="cobrarEnCaja('${item.id || ''}', '${codigo}', '${cliente}', '', '', '${item.asiento || ''}', '${item.tipo_asiento || ''}', 0, ${monto}, 0)">💵 Cobrar</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -953,9 +950,9 @@
 
       const enLinea = todas.filter(item => {
         const est = String(item.estado || '').toUpperCase();
-        const metodo = String(item.metodo_pago || item.metodo || item.referencia_pago || '').toUpperCase();
+        const metodo = String(item.metodo_pago || item.metodoPago || item.metodo || '').toUpperCase();
 
-        const esOnline = (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO') && metodo !== 'EFECTIVO-CAJA';
+        const esOnline = (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO') && metodo !== 'EFECTIVO' && metodo !== 'EFECTIVO-CAJA';
 
         if (!esOnline) return false;
         if (soloVerificar && item.verificado) return false;
@@ -979,223 +976,222 @@
       enLinea.forEach((item, index) => {
         const tr = document.createElement('tr');
         const hora = obtenerHoraRealPago(item, index);
-        const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${100000 + (item.id || index)}`;
-        const solicitud = item.codigo_seguimiento || item.codigo_reserva || item.codigo || `TA-${item.id || (1000 + index)}`;
-        const cliente = item.pasajero || item.cliente || item.registrado_por || item.id_usuario || 'Cliente Web';
-        let medio = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
-        if (medio === 'EFECTIVO') medio = 'TARJETA';
-
+        const operacion = item.id_transaccion || item.codigo_autorizacion || `TXN-${100000 + index}`;
+        const solicitud = item.codigo_reserva || item.codigoReserva || item.codigo || `-`;
+        const cliente = item.pasajero || item.cliente || 'Cliente';
+        const medio = (item.metodo_pago || item.metodoPago || item.metodo || 'Tarjeta').toUpperCase();
         const monto = obtenerMontoReal(item);
-        const estadoVerificacion = item.verificado ? '✅ Verificado' : '⏳ Pendiente';
 
         tr.innerHTML = `
           <td>${hora}</td>
-          <td><small style="font-family: monospace;">${operacion}</small></td>
+          <td>${operacion}</td>
           <td><strong>${solicitud}</strong></td>
           <td>${cliente}</td>
           <td>${medio}</td>
           <td style="color: #16a34a; font-weight: bold;">S/ ${monto.toFixed(2)}</td>
-          <td><span style="background: #16a34a; color:#fff; padding:0.2rem 0.5rem; border-radius:10px; font-size:0.75rem;">${item.estado || 'PAGADO'}</span></td>
-          <td>${estadoVerificacion}</td>
+          <td><span class="badge-paid">APROBADO</span></td>
+          <td><span style="color: var(--cyan-light);">VERIFICADO</span></td>
         `;
-
         tbody.appendChild(tr);
       });
     }
 
-    async function actualizarCierreDeCaja() {
-      const todas = await obtenerTodasLasComprasUnificadas();
-
-      const inputFecha = document.getElementById('fecha-caja');
-      const hoyStr = new Date().toISOString().split('T')[0];
-      const fechaFiltro = (inputFecha && inputFecha.value) ? inputFecha.value : hoyStr;
-
-      const pagadas = todas.filter(item => {
-        const est = String(item.estado || '').toUpperCase();
-        return est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO';
-      });
-
-      const pagadasFinal = pagadas.filter(item => {
-        if (item.fecha_pago) {
-          const fPago = typeof item.fecha_pago === 'string' ? item.fecha_pago.split('T')[0] : '';
-          return fPago === fechaFiltro;
-        }
-        return true;
-      });
-
-      let totalRecaudado = 0;
-      pagadasFinal.forEach(item => {
-        totalRecaudado += obtenerMontoReal(item);
-      });
-
-      const elTotalDia = document.getElementById('total-dia');
-      if (elTotalDia) {
-        elTotalDia.textContent = `S/ ${totalRecaudado.toFixed(2)}`;
-      }
-
-      const tbodyResumen = document.querySelector('#tabla-resumen tbody');
-      if (tbodyResumen) {
-        tbodyResumen.innerHTML = `
-          <tr>
-            <td>Agencia / Web</td>
-            <td>Efectivo / Tarjeta / Pasarela</td>
-            <td>${pagadasFinal.length} operaciones</td>
-            <td style="color: var(--green-accent); font-weight: bold;">S/ ${totalRecaudado.toFixed(2)}</td>
-          </tr>
-        `;
-      }
-
-      const tbodyDetalle = document.querySelector('#tabla-detalle-resumen tbody');
-      if (tbodyDetalle) {
-        tbodyDetalle.innerHTML = '';
-        if (pagadasFinal.length === 0) {
-          tbodyDetalle.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 1rem;">Sin movimientos cobrados para mostrar.</td></tr>';
-        } else {
-          pagadasFinal.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            const hora = obtenerHoraRealPago(item, index);
-            const codigo = item.codigo_seguimiento || item.codigo_reserva || item.codigo || `TA-${item.id || (1000 + index)}`;
-            const cliente = item.pasajero || item.cliente || item.registrado_por || item.id_usuario || 'Cliente';
-            let medio = String(item.metodo_pago || item.metodo || 'TARJETA').toUpperCase();
-            if (medio === 'EFECTIVO') medio = 'EFECTIVO-CAJA';
-
-            const monto = obtenerMontoReal(item);
-
-            tr.innerHTML = `
-              <td>${hora}</td>
-              <td><strong style="color: var(--cyan-light);">${codigo}</strong></td>
-              <td>${cliente}</td>
-              <td>${medio}</td>
-              <td style="color: #16a34a; font-weight: bold;">S/ ${monto.toFixed(2)}</td>
-            `;
-            tbodyDetalle.appendChild(tr);
-          });
-        }
+    function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipoAsiento, equipajeTotal, monto, excesoKg) {
+      reservaSeleccionadaParaCobro = { id, codigo, pasajero, ruta, fecha, asiento, tipoAsiento, equipajeTotal, monto, excesoKg };
+      
+      const dlg = document.getElementById('dialogo-cobro');
+      document.getElementById('cobro-codigo').textContent = codigo;
+      document.getElementById('cobro-total').textContent = `S/ ${monto.toFixed(2)}`;
+      document.getElementById('monto-recibido').value = monto.toFixed(2);
+      document.getElementById('vuelto').textContent = 'S/ 0.00';
+      
+      if (dlg.showModal) {
+        dlg.showModal();
+      } else {
+        dlg.setAttribute('open', 'true');
       }
     }
 
-    async function cobrarEnCaja(id, codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg) {
-      if (!confirm(`¿Confirmar cobro presencial en EFECTIVO por S/ ${parseFloat(monto).toFixed(2)} para la reserva ${codigo}?`)) {
-        return;
+    function cerrarDialogoCobro() {
+      const dlg = document.getElementById('dialogo-cobro');
+      if (dlg.close) {
+        dlg.close();
+      } else {
+        dlg.removeAttribute('open');
       }
-
-      const ahora = new Date();
-      const horaRealEmision = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-      const hoyISO = ahora.toISOString();
-
-      try {
-        const payload = {
-          id: id || codigo,
-          codigo_reserva: codigo,
-          id_cajero: ID_CAJERO_ACTUAL,
-          metodo_pago: 'EFECTIVO',
-          monto_calculado: monto,
-          estado: 'PAGADO',
-          hora_emision: horaRealEmision,
-          fecha_pago: hoyISO
-        };
-
-        await fetch(`${API_COMPRAS_URL}?id=${encodeURIComponent(id || codigo)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      } catch (err) {
-        console.log('Actualizando cobro localmente...');
-      }
-
-      actualizarCobroLocal(id, codigo, monto, { pasajero, ruta, fecha, asiento, tipo, equipaje, excesoKg });
-      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg);
-      await cargarTodoElModulo();
     }
 
-    // GUARDA Y PRESERVA AMBAS PROPIEDADES DE ASIENTO (asiento y num_asiento)
-    function actualizarCobroLocal(id, codigo, monto, extra = {}) {
-      const ahora = new Date();
-      const horaRealEmision = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-      const hoyISO = ahora.toISOString();
+    document.getElementById('cancelar-cobro')?.addEventListener('click', cerrarDialogoCobro);
 
-      const keysPosibles = ['compras_pasajes', 'reservas', 'mis_reservas', 'compras', 'pasajes'];
+    document.getElementById('monto-recibido')?.addEventListener('input', (e) => {
+      if (!reservaSeleccionadaParaCobro) return;
+      const rec = parseFloat(e.target.value) || 0;
+      const diff = rec - reservaSeleccionadaParaCobro.monto;
+      document.getElementById('vuelto').textContent = `S/ ${Math.max(0, diff).toFixed(2)}`;
+    });
+
+    document.getElementById('metodo-caja')?.addEventListener('change', (e) => {
+      const val = e.target.value;
+      const campoRecibido = document.getElementById('campo-recibido');
+      const campoRef = document.getElementById('campo-referencia');
+      if (val === 'efectivo') {
+        campoRecibido.hidden = false;
+        campoRef.hidden = true;
+      } else {
+        campoRecibido.hidden = true;
+        campoRef.hidden = false;
+      }
+    });
+
+    document.getElementById('form-cobro')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!reservaSeleccionadaParaCobro) return;
+
+      const metodo = document.getElementById('metodo-caja').value;
+      const itemCobro = reservaSeleccionadaParaCobro;
+
+      // Actualizar estado en LocalStorage
+      const keysPosibles = ['reservas', 'compras_pasajes', 'mis_reservas', 'compras', 'pasajes'];
       keysPosibles.forEach(k => {
-        let compras = JSON.parse(localStorage.getItem(k)) || [];
-        if (!Array.isArray(compras)) compras = [];
-
-        let encontrado = false;
-        compras = compras.map(c => {
-          const matchId = id && String(c.id) === String(id);
-          const matchCod = c.codigo_reserva === codigo || c.codigo_seguimiento === codigo || c.codigo === codigo;
-          if (matchId || matchCod) {
-            encontrado = true;
-            return {
-              ...c,
-              estado: 'PAGADO',
-              metodo_pago: 'EFECTIVO-CAJA',
-              monto_calculado: monto,
-              precio: monto,
-              asiento: c.asiento || c.num_asiento || extra.asiento,
-              num_asiento: c.num_asiento || c.asiento || extra.asiento,
-              id_cajero: ID_CAJERO_ACTUAL,
-              hora_emision: horaRealEmision,
-              fecha_pago: hoyISO
-            };
+        try {
+          let lista = JSON.parse(localStorage.getItem(k));
+          if (Array.isArray(lista)) {
+            let modificado = false;
+            lista = lista.map(res => {
+              const codRes = String(res.codigo_reserva || res.codigoReserva || res.codigo || res.id || '');
+              if (codRes === itemCobro.codigo || String(res.id) === String(itemCobro.id)) {
+                modificado = true;
+                return {
+                  ...res,
+                  estado: 'EMITIDO',
+                  metodo_pago: metodo.toUpperCase(),
+                  metodoPago: metodo,
+                  cajero: NOMBRE_CAJERO_ACTUAL,
+                  fecha_pago: new Date().toISOString(),
+                  hora_pago: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                };
+              }
+              return res;
+            });
+            if (modificado) {
+              localStorage.setItem(k, JSON.stringify(lista));
+            }
           }
-          return c;
-        });
-
-        if (!encontrado) {
-          const numSeat = extra.asiento || '';
-          compras.push({
-            id: id || codigo,
-            codigo_reserva: codigo,
-            codigo_seguimiento: codigo,
-            pasajero: extra.pasajero || 'Cliente',
-            ruta: extra.ruta || 'Ica ➔ Lima',
-            fecha_viaje: extra.fecha || '',
-            asiento: numSeat,
-            num_asiento: numSeat,
-            tipo_asiento: extra.tipo || 'semicama',
-            equipaje_kg: extra.equipaje || 0,
-            exceso_kg: extra.excesoKg || 0,
-            estado: 'PAGADO',
-            metodo_pago: 'EFECTIVO-CAJA',
-            monto_calculado: monto,
-            precio: monto,
-            id_cajero: ID_CAJERO_ACTUAL,
-            hora_emision: horaRealEmision,
-            fecha_pago: hoyISO,
-            created_at: hoyISO
-          });
-        }
-
-        localStorage.setItem(k, JSON.stringify(compras));
+        } catch (err) {}
       });
-    }
 
-    function mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg = 0) {
+      cerrarDialogoCobro();
+      await cargarTodoElModulo();
+
+      // Abrir Modal del Ticket
+      mostrarTicketModal(itemCobro.codigo, itemCobro.pasajero, itemCobro.ruta, itemCobro.fecha, itemCobro.asiento, itemCobro.tipoAsiento, itemCobro.equipajeTotal, itemCobro.monto, metodo);
+    });
+
+    function mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipoAsiento, equipajeTotal, monto, metodo) {
       document.getElementById('t-codigo').textContent = codigo;
-      document.getElementById('t-pasajero').textContent = pasajero;
-      document.getElementById('t-ruta').textContent = ruta;
-      document.getElementById('t-fecha').textContent = fecha;
-      document.getElementById('t-asiento').textContent = `N° ${asiento}`;
-      document.getElementById('t-tipo').textContent = tipo;
-      
-      const exKg = parseFloat(excesoKg || 0);
-      const txtEquipaje = exKg > 0 ? `${exKg} kg (+S/ ${(exKg * 4).toFixed(2)})` : `${equipaje} kg (Sin recargo)`;
-      document.getElementById('t-equipaje').textContent = txtEquipaje;
-      
+      document.getElementById('t-pasajero').textContent = pasajero || 'Cliente';
+      document.getElementById('t-ruta').textContent = ruta || 'Ica -> Lima';
+      document.getElementById('t-fecha').textContent = fecha || 'N/A';
+      document.getElementById('t-asiento').textContent = asiento || '-';
+      document.getElementById('t-tipo').textContent = tipoAsiento || 'Semicama';
+      document.getElementById('t-equipaje').textContent = equipajeTotal ? `${equipajeTotal} kg` : '0 kg';
       document.getElementById('t-monto').textContent = `S/ ${parseFloat(monto).toFixed(2)}`;
-      document.getElementById('t-cajero').textContent = `${NOMBRE_CAJERO_ACTUAL} (#${ID_CAJERO_ACTUAL})`;
+      document.getElementById('t-forma-pago').textContent = String(metodo).toUpperCase();
+      document.getElementById('t-cajero').textContent = `Cajero #${ID_CAJERO_ACTUAL} (${NOMBRE_CAJERO_ACTUAL})`;
       document.getElementById('t-fecha-emision').textContent = new Date().toLocaleString();
 
       document.getElementById('modal-ticket').style.display = 'flex';
     }
 
-    function reimprimirBoleto(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg) {
-      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipo, equipaje, monto, excesoKg);
+    function reimprimirBoleto(codigo, pasajero, ruta, fecha, asiento, tipoAsiento, equipajeTotal, monto, excesoKg) {
+      mostrarTicketModal(codigo, pasajero, ruta, fecha, asiento, tipoAsiento, equipajeTotal, monto, 'EFECTIVO EN CAJA');
     }
 
     function cerrarModalTicket() {
       document.getElementById('modal-ticket').style.display = 'none';
+    }
+
+    async function actualizarCierreDeCaja() {
+      const todas = await obtenerTodasLasComprasUnificadas();
+      const fechaSel = document.getElementById('fecha-caja')?.value || new Date().toISOString().split('T')[0];
+
+      const cobradas = todas.filter(item => {
+        const est = String(item.estado || '').toUpperCase();
+        return (est === 'PAGADO' || est === 'ATENDIDO' || est === 'EMITIDO');
+      });
+
+      // Resumen por medio
+      const mapaMedios = {};
+      let totalGeneral = 0;
+
+      cobradas.forEach(item => {
+        const m = obtenerMontoReal(item);
+        const medio = String(item.metodo_pago || item.metodoPago || item.metodo || 'EFECTIVO').toUpperCase();
+        if (!mapaMedios[medio]) {
+          mapaMedios[medio] = { ops: 0, total: 0 };
+        }
+        mapaMedios[medio].ops += 1;
+        mapaMedios[medio].total += m;
+        totalGeneral += m;
+      });
+
+      const tbodyResumen = document.querySelector('#tabla-resumen tbody');
+      if (tbodyResumen) {
+        tbodyResumen.innerHTML = '';
+        const mediosKeys = Object.keys(mapaMedios);
+        if (mediosKeys.length === 0) {
+          tbodyResumen.innerHTML = `
+            <tr>
+              <td>Agencia / Web</td>
+              <td>Sin cobros registrados</td>
+              <td>0 operaciones</td>
+              <td style="color: var(--green-accent); font-weight: bold;">S/ 0.00</td>
+            </tr>`;
+        } else {
+          mediosKeys.forEach(med => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>Agencia / Web</td>
+              <td>${med}</td>
+              <td>${mapaMedios[med].ops} operaciones</td>
+              <td style="color: var(--green-accent); font-weight: bold;">S/ ${mapaMedios[med].total.toFixed(2)}</td>
+            `;
+            tbodyResumen.appendChild(tr);
+          });
+        }
+      }
+
+      // Detalle individual
+      const tbodyDetalle = document.querySelector('#tabla-detalle-resumen tbody');
+      if (tbodyDetalle) {
+        tbodyDetalle.innerHTML = '';
+        if (cobradas.length === 0) {
+          tbodyDetalle.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1rem;">No hay movimientos registrados para esta fecha.</td></tr>';
+        } else {
+          cobradas.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            const hora = obtenerHoraRealPago(item, index);
+            const cod = item.codigo_reserva || item.codigoReserva || item.codigo || `RES-${item.id}`;
+            const cliente = item.pasajero || item.cliente || 'Cliente';
+            const medio = String(item.metodo_pago || item.metodoPago || item.metodo || 'Efectivo').toUpperCase();
+            const monto = obtenerMontoReal(item);
+
+            tr.innerHTML = `
+              <td>${hora}</td>
+              <td><strong style="color: var(--cyan-light);">${cod}</strong></td>
+              <td>${cliente}</td>
+              <td>${medio}</td>
+              <td style="color: var(--green-accent); font-weight: bold;">S/ ${monto.toFixed(2)}</td>
+            `;
+            tbodyDetalle.appendChild(tr);
+          });
+        }
+      }
+
+      const totalDiaEl = document.getElementById('total-dia');
+      if (totalDiaEl) {
+        totalDiaEl.textContent = `S/ ${totalGeneral.toFixed(2)}`;
+      }
     }
 
     function cerrarSesion() {
@@ -1203,6 +1199,5 @@
       window.location.href = '/login.html';
     }
   </script>
-
 </body>
 </html>
