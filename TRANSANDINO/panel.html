@@ -83,7 +83,7 @@
               <th>Atendido por / Turno</th>
               <th>Origen</th>
               <th>Destino</th>
-              <th>Fecha</th>
+              <th>Fecha Viaje</th>
               <th>Hora</th>
               <th>Asiento</th>
               <th>Monto Total (S/)</th>
@@ -122,8 +122,20 @@
 
     <!-- SECCIÓN 3: Gestión de Asientos -->
     <section id="tab-asientos" class="tab-content">
-      <div class="controls">
-        <span style="color: #94a3b8;">Estado y Asignación de Asientos (Bus de 40 Pasajeros)</span>
+      <div class="controls" style="flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+          <label style="color: #38bdf8; font-size: 0.9rem; font-weight: bold;">📅 Fecha de Viaje:</label>
+          <input type="date" id="filtro-fecha-asientos" value="2026-10-31" onchange="renderizarAsientosEnDOM()" style="background: #070f1e; color: #fff; border: 1px solid #1e293b; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: bold;">
+
+          <label style="color: #38bdf8; font-size: 0.9rem; font-weight: bold;">🚌 Ruta:</label>
+          <select id="filtro-ruta-asientos" onchange="renderizarAsientosEnDOM()" style="background: #070f1e; color: #fff; border: 1px solid #1e293b; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: bold;">
+            <option value="Ica -> Lima" selected>Ica → Lima</option>
+            <option value="Lima -> Ica">Lima → Ica</option>
+            <option value="Huancayo -> Lima">Huancayo → Lima</option>
+            <option value="Arequipa -> Lima">Arequipa → Lima</option>
+            <option value="Cusco -> Lima">Cusco → Lima</option>
+          </select>
+        </div>
         <button class="btn-action btn-update" onclick="cargarAsientos(true)">🔄 Recargar Tabla</button>
       </div>
 
@@ -134,6 +146,7 @@
               <th>N° Asiento</th>
               <th>Pasajero</th>
               <th>Ruta</th>
+              <th>Fecha Viaje</th>
               <th>Estado Asiento</th>
               <th>Acción Empleado</th>
             </tr>
@@ -156,6 +169,21 @@
     let currentUserEmail = '';
     let pasajesData = [];
     let empleadosData = [];
+
+    function normalizarFecha(str) {
+      if (!str) return '';
+      str = String(str).trim();
+      if (str.includes(' ')) str = str.split(' ')[0];
+      if (str.includes('T')) str = str.split('T')[0];
+      if (str.includes('/')) {
+        const parts = str.split('/');
+        if (parts.length === 3) {
+          if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+          return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+      return str;
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       if (verificarSesion()) {
@@ -285,29 +313,43 @@
       if (!tbody) return;
       tbody.innerHTML = '';
 
+      const fechaFiltro = normalizarFecha(document.getElementById('filtro-fecha-asientos')?.value || '2026-10-31');
+      const rutaFiltro = document.getElementById('filtro-ruta-asientos')?.value || 'Ica -> Lima';
+      const origenFiltro = rutaFiltro.split('->')[0].trim().toLowerCase();
+      const destinoFiltro = rutaFiltro.split('->')[1].trim().toLowerCase();
+
       for (let i = 1; i <= 40; i++) {
         const reserva = pasajesData.find(item => {
           const numAsientos = extraerNumerosAsiento(item.asientos || item.asiento || item.num_asiento);
-          return numAsientos.includes(i);
+          const coincideAsiento = numAsientos.includes(i);
+          
+          const itemFecha = normalizarFecha(item.fecha || item.fecha_viaje);
+          const coincideFecha = !fechaFiltro || itemFecha === fechaFiltro;
+          
+          const itemOrigen = String(item.origen || '').toLowerCase();
+          const itemDestino = String(item.destino || '').toLowerCase();
+          const coincideRuta = (itemOrigen.includes(origenFiltro) && itemDestino.includes(destinoFiltro)) ||
+                                (String(item.ruta || '').toLowerCase().includes(origenFiltro));
+
+          return coincideAsiento && coincideFecha && coincideRuta;
         });
 
         const tr = document.createElement('tr');
-        const dbId = reserva ? (reserva.codigoReserva || reserva.codigo || reserva.id || '') : '';
-        const pasajero = reserva ? (reserva.pasajero || reserva.cliente || reserva.usuario_id || 'Pasajero') : 'Sin Asignar';
-        const orig = reserva ? (reserva.origen || 'Ica') : 'Ica';
-        const dest = reserva ? (reserva.destino || 'Lima') : 'Lima';
-        const ruta = `${orig} ➔ ${dest}`;
+        const dbId = reserva ? (reserva.codigoReserva || reserva.codigo_reserva || reserva.codigo || reserva.id || '') : '';
+        const pasajero = reserva ? (reserva.pasajero || reserva.cliente || 'Pasajero') : 'Sin Asignar';
+        const fechaText = reserva ? normalizarFecha(reserva.fecha || reserva.fecha_viaje) : fechaFiltro;
         const estado = (reserva ? (reserva.estado || 'registrado') : 'disponible').toLowerCase();
 
         tr.innerHTML = `
           <td><strong>Asiento N° ${i}</strong></td>
           <td><strong>${pasajero}</strong></td>
-          <td>${ruta}</td>
+          <td>${rutaFiltro.replace('->', '➔')}</td>
+          <td>${fechaText}</td>
           <td>
             <select onchange="cambiarEstadoAsientoDirecto('${dbId}', this.value, ${i})" style="background:#070f1e; color:${obtenerColorEstado(estado)}; font-weight:bold; border:1px solid #1e293b; padding:0.3rem; border-radius:4px; cursor:pointer;">
               <option value="disponible" ${estado === 'disponible' ? 'selected' : ''}>disponible</option>
               <option value="registrado" ${estado === 'registrado' ? 'selected' : ''}>registrado</option>
-              <option value="atendido" ${estado === 'atendido' || estado === 'emitido' ? 'selected' : ''}>atendido</option>
+              <option value="atendido" ${estado === 'atendido' || estado === 'emitido' || estado === 'pagado' ? 'selected' : ''}>atendido</option>
               <option value="cancelado" ${estado === 'cancelado' ? 'selected' : ''}>cancelado</option>
             </select>
           </td>
@@ -334,7 +376,7 @@
         const dbId = item.codigoReserva || item.codigo_reserva || item.codigo || item.id || `RES-${index + 1}`;
         const numAsiento = item.asiento || (item.asientos ? item.asientos.join(', ') : (index + 1));
         const pasajero = item.pasajero || item.cliente || item.usuario_id || 'Cliente';
-        const fecha = item.fecha ? item.fecha.split('T')[0] : (item.fecha_viaje ? item.fecha_viaje.split('T')[0] : '2026-10-31');
+        const fecha = item.fecha ? normalizarFecha(item.fecha) : (item.fecha_viaje ? normalizarFecha(item.fecha_viaje) : '2026-10-31');
         const hora = item.hora_viaje || item.hora || '08:00 AM';
 
         const empleado = item.empleado_atendio || item.cajero || 'Empleado';
